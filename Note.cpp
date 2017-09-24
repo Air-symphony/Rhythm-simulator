@@ -58,12 +58,12 @@ private:
 	double default1_4 = 0;
 	double rh1_1, rh1_4, rh1_8, rh1_16;
 public:
-	Rhythm(int bpm) {
+	Rhythm(float bpm) {
 		default1_4 = rh1_1 = rh1_4 = rh1_8 = rh1_16 = 0;
 		double rh_per_time = 1.0 / (bpm / 60.0);
 		default1_4 = rh_per_time * 60.0;
 	}
-	Rhythm(int bpm, int speed) {
+	Rhythm(float bpm, int speed) {
 		default1_4 = rh1_1 = rh1_4 = rh1_8 = rh1_16 = 0;
 		double rh_per_time = 1.0 / (bpm / 60.0);
 		default1_4 = rh_per_time * 60.0;

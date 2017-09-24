@@ -1,45 +1,7 @@
 #include "Graphics.cpp"
 #include "Note.cpp"
+#include "ReadNoteFile.cpp"
 #include "InputKey.cpp"
-
-/*楽曲データリスト
-idに対応する.txtを読み込み、譜面や楽曲データを返却する
-未実証
-*/
-class MusicList {
-public:
-	int sound, bpm, notecount;
-
-	MusicList() {
-		sound = bpm = notecount = NULL;
-	}
-	void setMusicList(int id) {
-		if (id == 1) {
-			int FileHandle;
-			char String[256];
-
-			try {
-				FileHandle = FileRead_open("C:\\Users\\admin\\Desktop\\ui\\sample.txt");
-				if (FileHandle == 0) {
-					throw "Not File";
-				}
-				// 一行読む
-				FileRead_gets(String, 256, FileHandle);
-
-				while (String != NULL) {
-					FileRead_gets(String, 256, FileHandle);
-				}
-			}
-			catch (char* text) {
-				clsDx();
-				printfDx(text);
-			}
-			//sound = NULL;
-			bpm = 138;
-			notecount = 466;
-		}
-	}
-};
 
 /*楽曲データ
 BGM,BPM,Noteなどを管理
@@ -85,7 +47,7 @@ public:
 	GameScreen(Display _display, int id) {
 		display = _display;
 		ring.setGraph(LoadGraph("C:\\Users\\admin\\Desktop\\ui\\ring.png"));
-		//music.setMusic(id);
+		music.setMusic(id);
 		Start();
 	}
 
@@ -93,7 +55,17 @@ public:
 		while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
 			ClearDrawScreen();
 			clsDx();
-			printfDx("Game Screen");
+			printfDx("Game Screen\n");
+			char c[256];
+			//文字列の結合
+			sprintf_s(c, 256, "title = %s\n", music.title);
+			printfDx(c); 
+			/*char b[256];
+			sprintf_s(b, 256, "background = %s\n", music.background_name);
+			printfDx(b); 
+			char a[256];
+			sprintf_s(a, 256, "songfile = %s\n", music.sound_name);
+			printfDx(a);*/
 			DrawScreen();
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 			if (input.PushOneframe(KEY_INPUT_RETURN))
