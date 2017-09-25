@@ -58,18 +58,19 @@ private:
 	double default1_4 = 0;
 	double rh1_1, rh1_4, rh1_8, rh1_16;
 public:
-	Rhythm(float bpm) {
+	Rhythm() {
 		default1_4 = rh1_1 = rh1_4 = rh1_8 = rh1_16 = 0;
+	}
+	void SetRhythm(float bpm) {
 		double rh_per_time = 1.0 / (bpm / 60.0);
 		default1_4 = rh_per_time * 60.0;
 	}
-	Rhythm(float bpm, int speed) {
-		default1_4 = rh1_1 = rh1_4 = rh1_8 = rh1_16 = 0;
+	void SetRhythm(float bpm, int speed) {
 		double rh_per_time = 1.0 / (bpm / 60.0);
 		default1_4 = rh_per_time * 60.0;
-		setSpeed(speed);
+		SetSpeed(speed);
 	}
-	void setSpeed(int speed) {
+	void SetSpeed(int speed) {
 		rh1_4 = default1_4 * (double)speed;
 		rh1_8 = rh1_4 / 2.0;
 		rh1_16 = rh1_4 / 4.0;
