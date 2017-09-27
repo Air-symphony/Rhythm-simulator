@@ -84,16 +84,28 @@ public:
 			if (strcmp(next, "#0") == 0) {
 				next = strtok_s(NULL, ":", &ctx);
 				next = strtok_s(NULL, ":", &ctx);
-				int i = 0;
-				DrawFormatString(0, y, GetColor(255, 255, 255), "%s", next);
-				while (false) {
-					char char_bpm[256];
-					sprintf_s(char_bpm, 256, "%s", next);
-					note[i] = (int)atof(char_bpm);
-					i++;
-					if (strcmp(next, ":") == 0) {
+				//DrawFormatString(0, y, GetColor(255, 255, 255), "%s", next);
+				char _char[256];
+				sprintf_s(_char, 256, "%s", next);
+				int x = 0;
+				for (int i = 0; i < 256; i++) {
+					if (strcmp(&_char[i], "") == 0) {
 						break;
 					}
+					DrawFormatString(x, y, GetColor(255, 255, 255), "%c, ", _char[i]);
+					x += 16;
+				}
+				y += 16;
+				x = 0;
+				next = strtok_s(NULL, ":", &ctx);
+				char _chars[256];
+				sprintf_s(_chars, 256, "%s", next);
+				for (int i = 0; i < 256; i++) {
+					if (strcmp(&_chars[i], "") == 0) {
+						break;
+					}
+					DrawFormatString(x, y, GetColor(255, 255, 255), "%c, ", _chars[i]);
+					x += 16;
 				}
 				//DrawFormatString(0, y, GetColor(255, 255, 255), "%s", i);
 				y += 16;
