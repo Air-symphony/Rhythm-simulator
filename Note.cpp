@@ -1,22 +1,31 @@
 /*Noteデータ
-int id, type;//0,1,2,3,4
-	bool flag;
-	int first_x;//出てくる場所
-	int x; // 1, 2, 3, 4, 5
-	int y;
+int id, type; 1,2,3,4
+bool flag; //true = 表示、false = 非表示
+int first_x, end_x; 1,2,3,4,5
+int y; 描画用
+int bar_number, time;//何小節目、表示開始の時間
 */
 class Note {
 private:
 	int id, type;
 	bool flag;
-	int first_x;
-	int x, y;
+	int first_x, end_x;
+	int y;
+	int bar_number, time;
 public:
+	/*id = type = first_x = end_x = bar_number = -1;
+		y = 0;*/
 	Note() {
-		id = type = x = -1;
+		id = type = first_x = end_x = bar_number = -1;
+		y = time = 0; flag = false;
 	}
+	/*id = _id;
+		type = first_x = end_x = bar_number = -1;
+		y = 0;*/
 	Note(int _id) {
 		id = _id;
+		type = first_x = end_x = bar_number = -1;
+		y = time = 0; flag = false;
 	}
 	void setID(int _id) {
 		id = _id;
@@ -24,23 +33,57 @@ public:
 	void setType(int _type) {
 		type = _type;
 	}
-	void setX(int _x) {
-		x = _x;
+	void setend_x(int _end_x) {
+		end_x = _end_x;
+	}
+	void setfirst_x(int _first_x) {
+		first_x = _first_x;
+	}
+	void setX(int _first_x, int _end_x) {
+		setend_x(_end_x);
+		setfirst_x(_first_x);
+	}
+	void setbar_number(int _bar_number) {
+		bar_number = _bar_number;
+	}
+	/*
+	int id, int noteの種類
+	*/
+	void setNote(int _id, int _type) {
+		setID(id); setType(type);
+	}
+	/*
+	int id, int noteの種類, int 出だし位置, int 終わり位置, int 何小節目
+	*/
+	void setNote(int id, int type, int _first_x, int _end_x, int _bar_number) {
+		setID(id); setType(type); setX(_first_x, _end_x); setbar_number(_bar_number);
+	}
+	void setflag(bool _flag) {
+		flag = _flag;
+	}
+	int getID() {
+		return id;
+	}
+	int getType() {
+		return type;
+	}
+	int getend_x() {
+		return end_x;
+	}
+	int getfirst_x() {
+		return first_x;
+	}
+	int getbar_number() {
+		return bar_number;
+	}
+	bool getflag() {
+		return flag;
 	}
 	void setY(int _y) {
 		y = _y;
 	}
-	void setXY(int x, int y) {
-		setX(x); setY(y);
-	}
-	void setNote(int _id, int _type) {
-		setID(id); setType(type);
-	}
-	void setNote(int id, int type, int x, int y) {
-		setID(id); setType(type); setXY(x, y);
-	}
-	void Setflag(bool _flag) {
-		flag = _flag;
+	int getY() {
+		return y;
 	}
 	void Move(int speed) {
 		y -= speed;

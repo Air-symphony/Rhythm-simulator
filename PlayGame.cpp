@@ -1,4 +1,4 @@
-#include "ReadNoteFile.cpp"
+#include "FileReader.cpp"
 #include "InputKey.cpp"
 /*
 game画面
@@ -12,7 +12,7 @@ id = 楽曲データ
 class GameScreen {
 private:
 	Display display;
-	MusicList music;
+	FileReader music;
 	Graph ring;
 	InputKey input;
 public:
