@@ -1,5 +1,5 @@
 ﻿#UTF-8
-#Title TOKIMEKI
+#Title TOKIMEKIエスカレート
 #Lyricist 俊龍
 #Composer 俊龍
 #BackGround test.png

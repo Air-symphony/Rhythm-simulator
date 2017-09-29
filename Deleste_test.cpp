@@ -28,13 +28,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	int Longjudge[6] = { 0 };
 
 	int Graph[4][3];
-	Graph[0][0] = LoadGraph("materials\\Normal.png");
+	Graph[0][0] = LoadGraph("materials\\Image\\Normal.png");
 	GetGraphSize(Graph[0][0], &Graph[0][1], &Graph[0][2]);
-	Graph[1][0] = LoadGraph("materials\\Long.png");
+	Graph[1][0] = LoadGraph("materials\\Image\\Long.png");
 	GetGraphSize(Graph[1][0], &Graph[1][1], &Graph[1][2]);
-	Graph[2][0] = LoadGraph("materials\\Right.png");
+	Graph[2][0] = LoadGraph("materials\\Image\\Right.png");
 	GetGraphSize(Graph[2][0], &Graph[2][1], &Graph[2][2]);
-	Graph[3][0] = LoadGraph("materials\\Left.png");
+	Graph[3][0] = LoadGraph("materials\\Image\\Left.png");
 	GetGraphSize(Graph[3][0], &Graph[3][1], &Graph[3][2]);
 
 	for (int a = 0; a < 4; a++) {
@@ -44,8 +44,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		}
 	}
 
-	SEp = LoadSoundMem("materials\\PERFECT SE.wav");
-	SEf = LoadSoundMem("materials\\フリック SE.wav");
+	SEp = LoadSoundMem("materials\\SE\\PERFECT SE.wav");
+	SEf = LoadSoundMem("materials\\SE\\フリック SE.wav");
 
 	void Judge1(int SingY, int& judge, int& combo, int& Mcombo, int SE);
 	void JudgeRL(int SingY, int& judge, int& combo, int& Mcombo, int SE);
@@ -74,7 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				combo = 0;
 				limit = 1;
 				//譜面内容
-				PlaySoundFile("materials\\ススメ オトメ～jewel parade～ 【MV】.mp3",
+				PlaySoundFile("materials\\Music\\ススメ オトメ～jewel parade～ 【MV】.mp3",
 					DX_PLAYTYPE_BACK);
 				//PlaySoundFile("TOKIMEKIエスカレート.mp3", DX_PLAYTYPE_BACK);
 				int start = int(-(SPEED * 380) + GraphY * 0.831);//380=音源frame
@@ -749,8 +749,8 @@ int SetupY(int start){
 
 	//縦配置
 	//0123
-	P[5] = 1.0 / (BPM / 60.0);				//一拍にP[4]秒かかる
-	P[1] = P[5] * 60.0 * SPEED;				//四分音符
+	P[5] = 1.0 / (BPM / 60.0);				//一拍にP[5]秒かかる
+	P[1] = P[5] * 60.0 * SPEED;				//四分音符、1秒 = 60frame
 	P[2] = P[1] / 2;				//八分音符
 	P[3] = P[1] / 4;				//十六分音符
 	P[4] = P[1] / 8;				//フリック代用

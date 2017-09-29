@@ -1,6 +1,8 @@
 ﻿  Main.cpp
 c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\main.cpp(1): warning C4067: プリプロセッサ ディレクティブの後に余分な文字がありました - 改行が必要です
+c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\note.cpp(24): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
+c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\note.cpp(32): warning C4244: '=': 'double' から 'int' への変換です。データが失われる可能性があります。
   スキップ中... (関連する変更は検出されませんでした)
-  FileReader.cpp
+  PlayGame.cpp
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.exe
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.pdb (Full PDB)

@@ -11,13 +11,13 @@ class Music{
 public:
 	char title[256];
 	float bpm;
-	int sound, notecount;
-	Graph notegraph[5];
+	int notecount;
 	Note notes[1000];
 	Rhythm rhythm;
 
 	Music() {
-
+		notecount = 0;
+		bpm = 0.0f;
 	}
 };
 
@@ -25,8 +25,9 @@ public:
 idに対応する.txtを読み込み、譜面や楽曲データを返却する
 未実証
 */
-class FileReader :public Music{
+class FileReader{
 private:
+	Music music;
 	char filepath[256] = "materials\\";
 	int FileHandle;
 	int soundHandle;
@@ -34,8 +35,7 @@ private:
 	char *ctx;//内部利用
 public:
 	FileReader() {
-		sound = notecount = NULL;
-		bpm = NULL;
+
 	}
 	//環境設定、BPM等
 	void SetConfig() {
@@ -49,7 +49,7 @@ public:
 			//文字列の比較
 			if (strcmp(next, "#Title") == 0) {
 				next = strtok_s(NULL, "", &ctx);
-				sprintf_s(title, 256, "%s", next);
+				sprintf_s(music.title, 256, "%s", next);
 			}
 			else if (strcmp(next, "#BackGround") == 0) {
 				char background_name[256];
@@ -81,7 +81,8 @@ public:
 				next = strtok_s(NULL, "", &ctx);
 				char char_bpm[256];
 				sprintf_s(char_bpm, 256, "%s", next);
-				bpm = (float)atof(char_bpm);
+				music.bpm = (float)atof(char_bpm);
+				music.rhythm.SetRhythm(music.bpm);
 			}
 			else if (strcmp(next, "#end") == 0) {
 				break;
@@ -95,7 +96,7 @@ public:
 		int bar_number = 0;//何小節目か
 		while (FileRead_eof(FileHandle) == 0) {
 			/*読み込み時の仮保存用*/
-			int _type[32], _first_x[32], _end_x[32];
+			int _type[32], _timing[32], _first_x[32], _end_x[32];
 			/*この節のノーツ数*/
 			int _notecount = 0;
 			/*その小節が何拍子か*/
@@ -124,6 +125,7 @@ public:
 					/*文字コードから数字を出す "0" = 0*/
 					int _note = (int)(_char[i] - '0');
 					if (_note > 0) {
+						_timing[_notecount] = i;
 						_type[_notecount] = _note;
 						_notecount++;
 					}
@@ -156,16 +158,18 @@ public:
 				next = strtok_s(NULL, " ", &ctx);
 				char _char[cher_size];
 				sprintf_s(_char, cher_size, "%s", next);
-				bpm = (float)atof(_char);
+				music.bpm = (float)atof(_char);
+				music.rhythm.SetRhythm(music.bpm);
 			}
 			for (int i = 0; i < _notecount; i++) {
-				notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], bar_number);
+				double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
+				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
 				noteID++;
 			}
-			notecount += _notecount;
+			music.notecount += _notecount;
 
 			/*デバッグ用*/
-			int _testID = noteID - _notecount;
+			/*int _testID = noteID - _notecount;
 			int y = 64 + 16 * bar_number;
 			int x = 0;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d:", bar_number);
@@ -175,23 +179,20 @@ public:
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d, ", rhythm_note);
 			x += 30;
 			for (int i = 0; i < _notecount; i++) {
-				DrawFormatString(x, y, GetColor(255, 255, 255), "%d", notes[_testID + i].getID());
+				DrawFormatString(x, y, GetColor(255, 255, 255), "%d", music.notes[_testID + i].getID());
 				x += 20;
-				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", notes[_testID + i].getType());
+				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
 				x += 20;
-				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", notes[_testID + i].getfirst_x());
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getfirst_x());
 				x += 20;
-				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", notes[_testID + i].getend_x());
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
 				x += 35;
-			}
+			}*/
 		}
 		FileRead_close(FileHandle);
-		DrawFormatString(0, 48, GetColor(255, 255, 255), "fullcombo = %d", notecount);
-		ScreenFlip();// 裏画面の内容を表画面に反映させる
-		WaitKey();
 	}
 
-	void ReadFile(int id) {
+	Music SelectReadFile(int id) {
 		try {
 			char _filepath[256];
 			strcpy_s(_filepath, filepath);
@@ -200,7 +201,7 @@ public:
 				strcat_s(_filepath, "TOKIMEKI.txt");
 			}
 			else if (id == 2) {
-				strcat(_filepath, "Snow Wings.txt");
+				strcat_s(_filepath, "Snow Wings.txt");
 			}
 			FileHandle = FileRead_open(_filepath);
 			if (FileHandle == 0) {
@@ -217,6 +218,7 @@ public:
 			ScreenFlip();
 			WaitKey();
 		}
+		return music;
 		//ScreenFlip();// 裏画面の内容を表画面に反映させる 
 		//WaitKey();
 	}

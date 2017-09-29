@@ -34,11 +34,15 @@ int sizeX, sizeY;
 */
 class Graph {
 private:
+	Display display;
 	int graphID;
 	int sizeX, sizeY;
 public:
 	Graph() {
 		graphID = NULL;
+	}
+	Graph(Display _display) {
+		display =  _display;
 	}
 	/*
 	Graph(LoadGraph("\\00.png"))
@@ -77,5 +81,13 @@ public:
 			DrawGraph(x - sizeX / 2, y - sizeY, graphID, TRUE);
 		else if (number == 9)
 			DrawGraph(x - sizeX, y - sizeY, graphID, TRUE);
+	}
+	/*
+	x = (int)(x * _display.GetScreenX() / 6.0f);
+	Draw(x, y, number);
+	*/
+	void DrawNote(int x, int y, int number, Display _display) {
+		x = (int)(x * _display.GetScreenX() / 6.0f);
+		Draw(x, y, number);
 	}
 };
