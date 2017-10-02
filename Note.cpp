@@ -1,6 +1,6 @@
 /*Noteデータ
 int id, type; 1,2,3,4
-bool flag; //true = 表示、false = 非表示
+int flag;//0=未消化、1=表示、-1=消化済
 int first_x, end_x; 1,2,3,4,5
 int y; 描画用
 int rhythm_count; 何分音符1,4,8,16,32
@@ -10,7 +10,7 @@ double time; 処理される時間(バーに来る時間)
 class Note {
 private:
 	int id, type;
-	bool flag;
+	int flag;//0=未消化、1=表示、-1=消化済
 	int first_x, end_x;
 	int y;
 	int rhythm_count;
@@ -21,7 +21,7 @@ public:
 		y = 0;*/
 	Note() {
 		id = type = first_x = end_x = bar_number = -1;
-		y = time = 0; flag = false;
+		y = time = 0; flag = -1;
 	}
 	/*id = _id;
 		type = first_x = end_x = bar_number = -1;
@@ -37,12 +37,15 @@ public:
 	void setType(int _type) {
 		type = _type;
 	}
+	/*1,2,3,4,5*/
 	void setend_x(int _end_x) {
 		end_x = _end_x;
 	}
+	/*1,2,3,4,5*/
 	void setfirst_x(int _first_x) {
 		first_x = _first_x;
 	}
+	/*1,2,3,4,5*/
 	void setX(int _first_x, int _end_x) {
 		setend_x(_end_x);
 		setfirst_x(_first_x);
@@ -64,32 +67,36 @@ public:
 	}
 	/*
 	int id, int noteの種類, int 出だし位置, int 終わり位置, double 処理される時間(バーに来る時間)
-	setflag(true);
+	setflag() 0=未消化、1=表示、-1=消化済;
 	*/
 	void setNote(int id, int type, int _first_x, int _end_x, double _time) {
 		setID(id); setType(type); setX(_first_x, _end_x); settime(_time);
-		setflag(true);
+		setflag(0);
 	}
 	/*
 	int id, int noteの種類, int 出だし位置, int 終わり位置, int 何小節目, int 何分音符
-	setflag(true);
+	setflag(0) 0=未消化、1=表示、-1=消化済;
 	*/
 	void setNote(int id, int type, int _first_x, int _end_x, int _bar_number, int _rhythm_count) {
 		setID(id); setType(type); setX(_first_x, _end_x); setbar_number(_bar_number); setrhythm_count(_rhythm_count);
-		setflag(true);
+		setflag(0);
 	}
-	void setflag(bool _flag) {
+	/*0=未消化、1=表示、-1=消化済*/
+	void setflag(int _flag) {
 		flag = _flag;
 	}
 	int getID() {
 		return id;
 	}
+	/*1,2,3,4*/
 	int getType() {
 		return type;
 	}
+	/*1,2,3,4,5*/
 	int getend_x() {
 		return end_x;
 	}
+	/*1,2,3,4,5*/
 	int getfirst_x() {
 		return first_x;
 	}
@@ -99,7 +106,8 @@ public:
 	double gettime() {
 		return time;
 	}
-	bool getflag() {
+	/*0=未消化、1=表示、-1=消化済*/
+	int getflag() {
 		return flag;
 	}
 	void setY(int _y) {

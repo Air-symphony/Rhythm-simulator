@@ -14,16 +14,26 @@ private:
 	Display display;
 	Music music;
 	Graph ring;
-	Graph noteGraph;
-	InputKey input;
-	double msec;
+	Graph noteGraph[4];
+	InputKey input;//ボタン入力
+	double msec;//経過時間
+
+	int score = 0;
+	int combo = 0;
 public:
 	/*id = 楽曲データ
 	*/
 	GameScreen(Display _display, int id) {
 		display = _display;
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
-		noteGraph.setGraph(LoadGraph("materials\\Image\\note1.png"));
+		for (int i = 1; i <= 4; i++) {
+			char _imagepath[256];
+			strcpy_s(_imagepath, "materials\\Image\\Note");
+			char _number[256];
+			sprintf_s(_number, 256, "%d.png", i);
+			strcat_s(_imagepath, _number);
+			noteGraph[i - 1].setGraph(LoadGraph(_imagepath));
+		}
 		FileReader file;
 		music = file.SelectReadFile(id);
 		msec = 0;
@@ -32,25 +42,72 @@ public:
 
 	void Start() {
 		/*ゲーム開始時間の取得*/
+		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK);
 		double start_time = GetNowCount();
+
+		/*消化し終わったのノーツをfor文から外す*/
+		int process = 0;
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
 			ClearDrawScreen();
 			clsDx();
 			/*ゲーム進行時間*/
 			msec = (double)((GetNowCount() - start_time) / 1000.0);
-
+			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 6.5f;
 			DrawScreen();
 
 			/*各ノーツの操作*/
-			for (int i = 0; i < music.notecount; i++) {
-				if (music.notes[i].getflag() && msec >= music.notes[i].gettime()) {
-					music.notes[i].Move(15);
-					noteGraph.DrawNote(music.notes[i].getend_x(), music.notes[i].getY(), 5, display);
+			for (int i = process; i < music.notecount; i++) {
+				/*画面上部で存在*/
+				if (music.notes[i].getflag() == 0) {
+					/*時間がきたら表示*/
+					if (music.notes[i].gettime() <= msec) {
+						music.notes[i].setflag(1);
+					}
+					else {
+						continue;
+					}
 				}
-				/*画面外に出た場合*/
-				if (music.notes[i].getY() > display.GetScreenY()) {
-					music.notes[i].setflag(false);
+				/*処理済みの場合*/
+				if (music.notes[i].getflag() == -1) {
+					/*画面下の場合は、forに含めない*/
+					if (music.notes[i].getY() > display.GetScreenY()){
+						process = i;
+					}
+					/*画面内及び画面上の場合*/
+					else {
+						/*画面内にいる時間の場合*/
+						if (music.notes[i].gettime() <= msec) {
+							music.notes[i].Move(15);
+						}
+					}
+				}
+				/*画面内に表示されている場合*/
+				if (music.notes[i].getflag() == 1) {
+					/*画面内の場合は表示*/
+					if (music.notes[i].getY() <= display.GetScreenY()) {
+						music.notes[i].Move(7);
+						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY(), 5, display);
+						/*判定内の場合*/
+						if (-200 + display.GetScreenY() <= music.notes[i].getY() && 
+							music.notes[i].getY() <= display.GetScreenY()) {
+							/*ボタンが押されていたら*/
+							if (input.PushOneframe_PlayGame(music.notes[i].getend_x())) {
+								music.notes[i].setflag(-1);
+								if (-150 <= music.notes[i].getY() - display.GetScreenY() <= 50) {
+									combo++;
+									score += 500;
+								}
+								else {
+									score += 300;
+								}
+							}
+						}
+					}
+					/*画面下の場合は処理*/
+					else {
+						music.notes[i].setflag(-1);
+					}
 				}
 				/*
 				int y = 64 + i * 16;
@@ -75,11 +132,14 @@ public:
 		int _msec = (int)(msec * 1000);
 		DrawFormatString(0, 48, GetColor(255, 255, 255), "%d:", _msec / 1000);
 		DrawFormatString(35, 48, GetColor(255, 255, 255), "%d", _msec % 1000);
+		DrawFormatString(0, 64, GetColor(255, 255, 255), "score = %d", score);
+		DrawFormatString(0, 80, GetColor(255, 255, 255), "combo = %d", combo);
 
 		/*リングの表示*/
 		char c[256];
 		sprintf_s(c, 256, "title = %s\n", music.title);
 		printfDx(c);
 		ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
+		DrawLine(0, display.GetScreenY() - 200, display.GetScreenX(), display.GetScreenY() - 200, GetColor(0, 255, 0));
 	}
 };

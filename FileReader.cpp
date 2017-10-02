@@ -3,14 +3,18 @@
 
 /*楽曲データ
 BGM,BPM,Noteなどを管理
-int sound, bpm, notecount;
-Graph notegraph[5];
+char title[256];
+float bpm;
+int soundHandle;
+int notecount;
 Note notes[1000];
+Rhythm rhythm;
 */
 class Music{
 public:
 	char title[256];
 	float bpm;
+	int soundHandle;
 	int notecount;
 	Note notes[1000];
 	Rhythm rhythm;
@@ -23,20 +27,24 @@ public:
 
 /*楽曲データリスト
 idに対応する.txtを読み込み、譜面や楽曲データを返却する
-未実証
+Music music;
+char filepath[256] = "materials\\";
+int FileHandle;
+char *next;
+char *ctx;//内部利用
 */
 class FileReader{
 private:
 	Music music;
 	char filepath[256] = "materials\\";
 	int FileHandle;
-	int soundHandle;
 	char *next;
 	char *ctx;//内部利用
 public:
 	FileReader() {
 
 	}
+
 	//環境設定、BPM等
 	void SetConfig() {
 		char string[256];
@@ -65,12 +73,16 @@ public:
 					strcpy_s(_filepath, filepath);
 					strcat_s(_filepath, "Music\\");
 					strcat_s(_filepath, sound_name);
-					soundHandle = LoadSoundMem(_filepath);
-					if (soundHandle == -1) {
-						throw "Not SoundFile";
+					music.soundHandle = LoadSoundMem(_filepath);
+					if (music.soundHandle == -1) {
+						char error[256];
+						strcpy_s(error, _filepath);
+						strcat_s(error, " is not found.");
+						throw error;
 					}
 				}
 				catch (char* text) {
+					ClearDrawScreen();
 					clsDx();
 					printfDx(text);
 					ScreenFlip();
@@ -198,14 +210,17 @@ public:
 			strcpy_s(_filepath, filepath);
 			strcat_s(_filepath, "NoteFile\\");
 			if (id == 1) {
-				strcat_s(_filepath, "TOKIMEKI.txt");
+				strcat_s(_filepath, "Snow Wings.txt");
 			}
 			else if (id == 2) {
-				strcat_s(_filepath, "Snow Wings.txt");
+				strcat_s(_filepath, "TOKIMEKI.txt");
 			}
 			FileHandle = FileRead_open(_filepath);
 			if (FileHandle == 0) {
-				throw "Not NoteFile";
+				char error[256];
+				strcpy_s(error, _filepath);
+				strcat_s(error, " is not found.");
+				throw error;
 			}
 			else {
 				SetConfig();
@@ -213,13 +228,12 @@ public:
 			}
 		}
 		catch (char* text) {
+			ClearDrawScreen();
 			clsDx();
 			printfDx(text);
 			ScreenFlip();
 			WaitKey();
 		}
 		return music;
-		//ScreenFlip();// 裏画面の内容を表画面に反映させる 
-		//WaitKey();
 	}
 };

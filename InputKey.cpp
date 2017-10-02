@@ -1,11 +1,39 @@
 #include "DxLib.h"
 
 const int keytype = 6;//1frameボタンの種類
+const int gameKey_type = 5;//1frameボタンの種類
 class InputKey{
 private:
 	int keytime[keytype];
-
+	int GameKey[gameKey_type];
 public:
+	/*D、F、G、H、J
+	number = 1,2,3,4,5*/
+	bool PushOneframe_PlayGame(int number) {
+		int keyCode;
+		switch (number) {
+		case 1:
+			keyCode = KEY_INPUT_D;
+			break;
+		case 2:
+			keyCode = KEY_INPUT_F;
+			break;
+		case 3:
+			keyCode = KEY_INPUT_G;
+			break;
+		case 4:
+			keyCode = KEY_INPUT_H;
+			break;
+		case 5:
+			keyCode = KEY_INPUT_J;
+			break;
+		}
+		int id = number - 1;
+		if (CheckHitKey(keyCode) == 1) GameKey[id]++;
+		else GameKey[id] = 0;
+
+		return GameKey[id] == 1;
+	}
 	bool PushOneframe(int keyCode) {
 		int id;
 		switch (keyCode) {
