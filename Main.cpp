@@ -1,5 +1,4 @@
 #include "PlayGame.cpp";
-
 /*
 ‘I‘ð‰æ–Ê
 int scenecount = 3;

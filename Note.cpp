@@ -21,7 +21,7 @@ public:
 		y = 0;*/
 	Note() {
 		id = type = first_x = end_x = bar_number = -1;
-		y = time = 0; flag = -1;
+		y = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
 		type = first_x = end_x = bar_number = -1;
@@ -29,7 +29,7 @@ public:
 	Note(int _id) {
 		id = _id;
 		type = first_x = end_x = bar_number = -1;
-		y = time = 0; flag = false;
+		y = 0; time = 0.0; flag = false;
 	}
 	void setID(int _id) {
 		id = _id;
@@ -116,8 +116,9 @@ public:
 	int getY() {
 		return y;
 	}
-	void Move(int speed) {
-		y += speed;
+	/*y = _speed * _time*/
+	void ToMove(double _speed, double _time) {
+		y = (int)(_speed * _time);
 	}
 };
 
@@ -133,9 +134,13 @@ private:
 	/*1拍当たりの時間(s)*/
 	double spb = 0;
 	double rh1_1, rh1_4, rh1_8, rh1_16, rh1_32;
+	/*bpmが変更された時のbar_numberの保存*/
+	int d_bar_number = 0;
+	/*それまでのbpmで計算された時間の保存*/
+	double dt = 0;
 public:
 	Rhythm() {
-		spb = rh1_1 = rh1_4 = rh1_8 = rh1_16 = 0;
+		spb = rh1_1 = rh1_4 = rh1_8 = rh1_16 = rh1_32 = dt = 0;
 	}
 	void SetRhythm(float bpm) {
 		spb = (double)(1.0 / (bpm / 60.0));
@@ -145,11 +150,30 @@ public:
 		rh1_16 = (double)(spb / 4.0);
 		rh1_32 = (double)(spb / 8.0);
 	}
-	/*不要*/
-	/*void SetRhythm(float bpm, int speed) {
-		spb = 1.0 / (bpm / 60.0);
-	}*/
-
+	/*
+	_bar_number++;
+	bpmが変更された時のbar_numberの保存
+	　d_barnumber = _bar_number - d_bar_number;
+	それまでのbpmで計算された時間の保存
+	　dt += (double)(d_bar_number) * rh1_1;
+	SetRhythm(bpm);	
+	*/
+	void ChangeRhythm(float bpm, int _bar_number) {
+		_bar_number++;
+		d_bar_number = _bar_number - d_bar_number;
+		dt += (double)(d_bar_number) * rh1_1;
+		SetRhythm(bpm);
+	}
+	/*
+	return dt //今までのbpmでの時間
+			+ (double)(_bar_number - d_bar_number) * getRhythm(1) //以前のbpmを除いたbar分、小節分の時間を加算
+			+ (double)_timing * getRhythm(_rhythm_note);//その小節上での細かい時間
+			*/
+	double CalculateTime(int _bar_number, int _timing, int _rhythm_note) {
+		return dt //今までのbpmでの時間
+			+ (double)(_bar_number - d_bar_number) * getRhythm(1) //以前のbpmを除いたbar分、小節分の時間を加算
+			+ (double)_timing * getRhythm(_rhythm_note);//その小節上での細かい時間
+	}
 	/*
 	return 0.00秒
 	count = 何分音符1,4,8,16,32

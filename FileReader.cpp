@@ -105,7 +105,9 @@ public:
 	void SetNote() {
 		const int cher_size = 64;
 		int noteID = 0;//ノーツに番号を割り振る
-		int bar_number = 0;//何小節目か
+		int bar_number = -1;//何小節目か
+
+		int readline = 0;
 		while (FileRead_eof(FileHandle) == 0) {
 			/*読み込み時の仮保存用*/
 			int _type[32], _timing[32], _first_x[32], _end_x[32];
@@ -114,6 +116,7 @@ public:
 			/*その小節が何拍子か*/
 			int rhythm_note = 0;
 
+			readline++;
 			char string[256];
 			FileRead_gets(string, 256, FileHandle);
 			next = strtok_s(string, ",", &ctx);
@@ -164,17 +167,17 @@ public:
 					_end_x[i] = _note;
 				}
 			}
-			/*#ChangeBPM 9, 167.00*/
+			/*#ChangeBPM,167.00*/
 			else if (strcmp(next, "#ChangeBPM") == 0) {
-				next = strtok_s(NULL, ",", &ctx);
-				next = strtok_s(NULL, " ", &ctx);
+				next = strtok_s(NULL, "", &ctx);
 				char _char[cher_size];
 				sprintf_s(_char, cher_size, "%s", next);
 				music.bpm = (float)atof(_char);
-				music.rhythm.SetRhythm(music.bpm);
+				music.rhythm.ChangeRhythm(music.bpm, bar_number);
 			}
 			for (int i = 0; i < _notecount; i++) {
-				double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
+				double time = music.rhythm.CalculateTime(bar_number, _timing[i], rhythm_note);
+				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
 				noteID++;
 			}
@@ -182,7 +185,7 @@ public:
 
 			/*デバッグ用*/
 			/*int _testID = noteID - _notecount;
-			int y = 64 + 16 * bar_number;
+			int y = 64 + 16 * readline;
 			int x = 0;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d:", bar_number);
 			x += 30;
@@ -190,11 +193,17 @@ public:
 			x += 25; 
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d, ", rhythm_note);
 			x += 30;
+			DrawFormatString(x, y, GetColor(255, 255, 255), "%lf, ", music.bpm);
+			x += 100;
 			for (int i = 0; i < _notecount; i++) {
 				DrawFormatString(x, y, GetColor(255, 255, 255), "%d", music.notes[_testID + i].getID());
 				x += 20;
-				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %lf", music.notes[_testID + i].gettime());
+				x += 100;
+				/*DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
 				x += 20;
+				//DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
+				//x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getfirst_x());
 				x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
@@ -202,8 +211,11 @@ public:
 			}*/
 		}
 		FileRead_close(FileHandle);
+		//ScreenFlip();
+		//WaitKey();
 	}
 
+	/*1. snow wings 2 tokimeki*/
 	Music SelectReadFile(int id) {
 		try {
 			char _filepath[256];
