@@ -116,9 +116,14 @@ public:
 	int getY() {
 		return y;
 	}
-	/*y = _speed * _time*/
-	void ToMove(double _speed, double _time) {
-		y = (int)(_speed * _time);
+	/*
+	_speed = ”»’èÀ•W
+	_dt = Œo‰ßŠÔ
+	_time = ˆÚ“®ŠÔ
+	y = (int)((_speed / _time) * _dt)
+	*/
+	void ToMove(double _speed, double _dt, double _time) {
+		y = (int)((_speed / _time) * _dt);
 	}
 };
 

@@ -27,7 +27,7 @@ public:
 	}
 
 	void Playgame(Display display) {
-		while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
+		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			int scene = SelectNumber(2, musiccount);
 			if (scene == 0)
 				break;
@@ -36,27 +36,27 @@ public:
 	}
 
 	void Config() {
-		while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
+		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			ClearDrawScreen();
 			clsDx();
 			printfDx("Config");
 			ScreenFlip();// — ‰æ–Ê‚Ì“à—e‚ð•\‰æ–Ê‚É”½‰f‚³‚¹‚é 
-			if (input.PushOneframe(KEY_INPUT_RETURN))
+			if (input.PushOneframe_Debug())
 				break;
 		}
 	}
 
 	int SelectNumber(int _type, int _scene) {
 		int number = 1;
-		while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
-			if (input.PushOneframe(KEY_INPUT_UP)) {
+		while (ProcessMessage() == 0 && input.ForcedTermination()) {
+			if (input.PushOneframe_UP()) {
 				number = (number + 1) % _scene;
 			}
-			else if (input.PushOneframe(KEY_INPUT_DOWN)) {
+			else if (input.PushOneframe_DOWN()) {
 				number = (number - 1) % _scene;
 				if (number < 0) number += _scene;
 			}
-			if (input.PushOneframe(KEY_INPUT_RETURN))
+			if (input.PushOneframe_Decide())
 				return number;
 
 			ClearDrawScreen();

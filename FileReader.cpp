@@ -184,7 +184,7 @@ public:
 			music.notecount += _notecount;
 
 			/*デバッグ用*/
-			/*int _testID = noteID - _notecount;
+			int _testID = noteID - _notecount;
 			int y = 64 + 16 * readline;
 			int x = 0;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d:", bar_number);
@@ -207,12 +207,12 @@ public:
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getfirst_x());
 				x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
-				x += 35;
-			}*/
+				x += 35;*/
+			}
 		}
 		FileRead_close(FileHandle);
-		//ScreenFlip();
-		//WaitKey();
+		ScreenFlip();
+		WaitKey();
 	}
 
 	/*1. snow wings 2 tokimeki*/

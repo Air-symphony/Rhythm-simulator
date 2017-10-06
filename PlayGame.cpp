@@ -18,11 +18,18 @@ private:
 	InputKey input;//ボタン入力
 	double msec;//経過時間
 
-	/*一秒当たりの速度(ピクセル数)*/
-	const double speed = 500.0;//判定位置がy = 500;
-	double d_time = 2.0;//判定位置がy = 500;
-	int score = 0;
-	int combo = 0;
+	/*判定位置のy座標*/
+	const double judgePos = display.GetScreenY() - 75.0;//判定位置
+	/*何秒かけて判定位置にたどり着くか*/
+	double speed = 0.6;
+
+	int score = 0, combo = 0;
+	int judge_number = 0;
+
+	double PERFECTtime = 0.033;
+	double GREATtime = 0.060;
+	double NICEtime = 0.085;
+	double BADtime = 0.110;
 public:
 	/*id = 楽曲データ
 	*/
@@ -51,14 +58,15 @@ public:
 		/*消化し終わったのノーツをfor文から外す*/
 		int process = 0;
 		/*ゲーム内容*/
-		while (ProcessMessage() == 0 && CheckHitKey(KEY_INPUT_ESCAPE) == 0) {
+		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			ClearDrawScreen();
 			clsDx();
 			/*ゲーム進行時間*/
-			msec = (double)((GetNowCount() - start_time) / 1000.0) - 0.6;
+			msec = (double)((GetNowCount() - start_time) / 1000.0) + 0.5;
 			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f;
 			DrawScreen();
 
+			bool printjudge = false;
 			int debugcount = 0;
 			/*各ノーツの操作*/
 			for (int i = 0; i < music.notecount; i++) {
@@ -71,16 +79,16 @@ public:
 					/*画面内及び画面上の場合*/
 					else {
 						/*画面内にいる時間の場合*/
-						if (music.notes[i].gettime() <= (msec + d_time)) {
-							double dt = (msec + d_time) - (music.notes[i].gettime());
-							music.notes[i].ToMove(speed, dt);
+						if (music.notes[i].gettime() <= (msec + speed)) {
+							double dt = (msec + speed) - (music.notes[i].gettime());
+							music.notes[i].ToMove(judgePos, dt, speed);
 						}
 					}
 				}
 				/*画面上部で存在*/
 				if (music.notes[i].getflag() == 0) {
 					/*時間がきたら表示*/
-					if (music.notes[i].gettime() <= (msec + d_time)) {
+					if (music.notes[i].gettime() <= (msec + speed)) {
 						music.notes[i].setflag(1);
 					}
 					else {
@@ -91,26 +99,14 @@ public:
 				if (music.notes[i].getflag() == 1) {
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
-
-						double dt = (msec + d_time) - music.notes[i].gettime();
-						music.notes[i].ToMove(speed, dt);
-
+						double dt = (msec + speed) - music.notes[i].gettime();
+						music.notes[i].ToMove(judgePos, dt, speed);
 						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY(), 5, display);
-						/*判定内の場合*/
-						if (-200 + display.GetScreenY() <= music.notes[i].getY() && 
-							music.notes[i].getY() <= display.GetScreenY()) {
-							/*ボタンが押されていたら*/
-							if (input.PushOneframe_PlayGame(music.notes[i].getend_x())) {
-								music.notes[i].setflag(-1);
-								if (-150 <= music.notes[i].getY() - display.GetScreenY() && 
-									music.notes[i].getY() - display.GetScreenY() <= 50) {
-									combo++;
-									score += 500;
-								}
-								else {
-									score += 300;
-								}
-							}
+						
+						int n = Judge(i);
+						if (-1 != n && !printjudge){
+							judge_number = n;
+							printjudge = true;
 						}
 					}
 					/*画面下の場合は処理*/
@@ -119,11 +115,10 @@ public:
 					}
 				}
 				/*デバッグ用*/
-				/*
-				if (music.notes[i].gettime() <= (msec + d_time) &&
+				if (music.notes[i].gettime() <= (msec + speed) &&
 					music.notes[i].getflag() != -1) {
 					debugcount++;
-					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID [type,pos,time, Y]");
+					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type,pos,time, Y");
 					int y = 96 + debugcount * 16;
 					DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
 					DrawFormatString(30, y, GetColor(255, 255, 255), "[%d ", music.notes[i].getType());
@@ -131,10 +126,15 @@ public:
 					DrawFormatString(70, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
 					DrawFormatString(160, y, GetColor(255, 255, 255), " %d]", music.notes[i].getY());
 				}
-				*/
 			}
+
+			if (printjudge) {
+				//char text[5][10] = {"PERFECT","GREAT", "NICE", "BAD", "MISS" };
+				//DrawFormatString(350, display.GetScreenY / 2, GetColor(255, 255, 255), "%d", text[judge_number]);
+			}
+
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
-			if (input.PushOneframe(KEY_INPUT_RETURN)) {
+			if (input.PushOneframe_Debug()) {
 				StopSoundMem(music.soundHandle);
 				DeleteSoundMem(music.soundHandle);
 				break;
@@ -150,15 +150,67 @@ public:
 		int _msec = (int)(msec * 1000);
 		DrawFormatString(0, 48, GetColor(255, 255, 255), "%d:", _msec / 1000);
 		DrawFormatString(35, 48, GetColor(255, 255, 255), "%d", _msec % 1000);
-		//DrawFormatString(100, 64, GetColor(255, 255, 255), "BPM = %lf", music.bpm);
 		DrawFormatString(0, 64, GetColor(255, 255, 255), "score = %d", score);
 		DrawFormatString(0, 80, GetColor(255, 255, 255), "combo = %d", combo);
 
-		/*リングの表示*/
 		char c[256];
 		sprintf_s(c, 256, "title = %s\n", music.title);
 		printfDx(c);
-		ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
-		DrawLine(0, display.GetScreenY() - 200, display.GetScreenX(), display.GetScreenY() - 200, GetColor(0, 255, 0));
+
+		/*リングの表示*/
+		//ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
+		
+		DrawLine(0, (int)judgePos, display.GetScreenX(), (int)judgePos, GetColor(255, 0, 0));
+		int y = (int)((judgePos / speed) * (PERFECTtime / 2.0));
+		DrawLine(0, (int)judgePos - y, display.GetScreenX(), (int)judgePos - y, GetColor(0, 255, 0));
+		DrawLine(0, (int)judgePos + y, display.GetScreenX(), (int)judgePos + y, GetColor(0, 255, 0));
+		y = (int)((judgePos / speed) * (GREATtime / 2.0));
+		DrawLine(0, (int)(judgePos - y), display.GetScreenX(), (int)(judgePos - y), GetColor(0, 0, 255));
+		DrawLine(0, (int)(judgePos + y), display.GetScreenX(), (int)(judgePos + y), GetColor(0, 0, 255));
+		y = (int)((judgePos / speed) * (NICEtime / 2.0));
+		DrawLine(0, (int)judgePos - y, display.GetScreenX(), (int)judgePos - y, GetColor(255, 255, 0));
+		DrawLine(0, (int)judgePos + y, display.GetScreenX(), (int)judgePos + y, GetColor(255, 255, 0));
+	}
+
+	/*ボタン判定の記述*/
+	/*return -1, 0,1,2,3*/
+	int Judge(int i) {
+		/*BAD判定内の場合*/
+		if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
+			/*押された時間の取得*/
+			double _clear_time = abs(music.notes[i].gettime() - msec);
+
+			/*ボタンが押されていたら*/
+			if (input.PushOneframe_PlayGame(music.notes[i].getend_x())) {
+				music.notes[i].setflag(-1);
+				if (_clear_time <= PERFECTtime / 2.0) {
+					combo++;
+					score += 600;
+					return 0;
+				}
+				else if (_clear_time <= GREATtime / 2.0) {
+					combo++;
+					score += 400;
+					return 1;
+				}
+				else if (_clear_time <= NICEtime / 2.0) {
+					combo = 0;
+					score += 200;
+					return 2;
+				}
+				else {
+					combo = 0;
+					score += 100;
+					return 3;
+				}
+			}
+		}
+		return -1;
+	}
+
+	/*絶対値の取得*/
+	double abs(double t) {
+		if (t < 0) return (-t);
+		return t;
 	}
 };
