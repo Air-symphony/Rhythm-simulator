@@ -1,6 +1,6 @@
 #include "DxLib.h"
 
-const int keytype = 6;//1frameボタンの種類
+const int keytype = 7;//1frameボタンの種類
 const int gameKey_type = 5;//gane中のキー
 class InputKey{
 private:
@@ -63,6 +63,10 @@ public:
 	/*5, KEY_INPUT_DOWN*/
 	bool PushOneframe_DOWN() {
 		return PushOneframe(5, KEY_INPUT_DOWN);
+	}
+	/*6, KEY_INPUT_P*/
+	bool PushOneframe_ChangeAutoMode() {
+		return PushOneframe(6, KEY_INPUT_P);
 	}
 
 	/*強制終了

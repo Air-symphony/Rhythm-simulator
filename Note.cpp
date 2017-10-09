@@ -156,7 +156,6 @@ public:
 		rh1_32 = (double)(spb / 8.0);
 	}
 	/*
-	_bar_number++;
 	bpm‚ª•ÏX‚³‚ê‚½‚Ìbar_number‚Ì•Û‘¶
 	@d_barnumber = _bar_number - d_bar_number;
 	‚»‚ê‚Ü‚Å‚Ìbpm‚ÅŒvZ‚³‚ê‚½ŠÔ‚Ì•Û‘¶
@@ -164,7 +163,6 @@ public:
 	SetRhythm(bpm);	
 	*/
 	void ChangeRhythm(float bpm, int _bar_number) {
-		_bar_number++;
 		d_bar_number = _bar_number - d_bar_number;
 		dt += (double)(d_bar_number) * rh1_1;
 		SetRhythm(bpm);

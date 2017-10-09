@@ -105,30 +105,39 @@ public:
 	void SetNote() {
 		const int cher_size = 64;
 		int noteID = 0;//ノーツに番号を割り振る
-		int bar_number = -1;//何小節目か
-
+		/*デバッグ用*/
 		int readline = 0;
+
 		while (FileRead_eof(FileHandle) == 0) {
 			/*読み込み時の仮保存用*/
 			int _type[32], _timing[32], _first_x[32], _end_x[32];
+			/*何小節目か*/
+			int bar_number = 0;
 			/*この節のノーツ数*/
 			int _notecount = 0;
 			/*その小節が何拍子か*/
 			int rhythm_note = 0;
 
+			/*デバッグ用*/
 			readline++;
+
 			char string[256];
 			FileRead_gets(string, 256, FileHandle);
 			next = strtok_s(string, ",", &ctx);
 			/*文字列の比較*/
 			if (strcmp(next, "#0") == 0 || strcmp(next, "#1") == 0) {
-				/*何小節目かカウント*/
-				if (strcmp(next, "#0") == 0) {
-					bar_number++;
-				}
-				next = strtok_s(NULL, ":", &ctx);//何小節目
-				next = strtok_s(NULL, ":", &ctx);//rhythm & type note
 
+
+				next = strtok_s(NULL, ":", &ctx);//何小節目
+				for (int i = 0; i < 3; i++) {
+					int c = (int)(next[i] - '0');
+					for (int j = 0; j < (2 - i); j++) {
+						c *= 10;
+					}
+					bar_number += c;
+				}
+
+				next = strtok_s(NULL, ":", &ctx);//rhythm & type note
 				char _char[cher_size];
 				sprintf_s(_char, cher_size, "%s", next);
 				for (int i = 0; i < cher_size; i++) {
@@ -169,8 +178,16 @@ public:
 			}
 			/*#ChangeBPM,167.00*/
 			else if (strcmp(next, "#ChangeBPM") == 0) {
-				next = strtok_s(NULL, "", &ctx);
+				next = strtok_s(NULL, ":", &ctx);//何小節目
+				for (int i = 0; i < 3; i++) {
+					int c = (int)(next[i] - '0');
+					for (int j = 0; j < (2 - i); j++) {
+						c *= 10;
+					}
+					bar_number += c;
+				}
 				char _char[cher_size];
+				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(_char, cher_size, "%s", next);
 				music.bpm = (float)atof(_char);
 				music.rhythm.ChangeRhythm(music.bpm, bar_number);
