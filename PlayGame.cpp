@@ -135,14 +135,6 @@ public:
 								music.notes[music.notes[i].getlongNoteID()].getY()
 							);
 						}
-<<<<<<< HEAD
-
-=======
-<<<<<<< HEAD
-=======
-
->>>>>>> test2
->>>>>>> b104ec171c1eb6107b039e9e072909f38102bacd
 						//フリックの連結がある場合
 						if (music.notes[i].getlinkNoteID() > 0) {
 							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
