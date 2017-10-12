@@ -10,7 +10,7 @@ int notecount;
 Note notes[1000];
 Rhythm rhythm;
 */
-class Music{
+class Music {
 public:
 	char title[256];
 	float bpm;
@@ -33,7 +33,7 @@ int FileHandle;
 char *next;
 char *ctx;//内部利用
 */
-class FileReader{
+class FileReader {
 private:
 	Music music;
 	char filepath[256] = "materials\\";
@@ -105,7 +105,7 @@ public:
 	void SetNote() {
 		const int SIZE = 64;
 		int noteID = 0;//ノーツに番号を割り振る
-		/*デバッグ用*/
+					   /*デバッグ用*/
 		int readline = 0;
 
 		/*同一小節上での処理判定に使用*/
@@ -151,8 +151,8 @@ public:
 			/*その小節が何拍子か*/
 			int rhythm_note = 0;
 			/*・「0」か「1」の時　…　フリック方向の先にあるフリックノートと接続
-			 ・「2」か「3」の時　…　フリック方向に関係なく接続
-				（※推奨は <左手用：0,2> <右手用：1,3> です。）*/
+			・「2」か「3」の時　…　フリック方向に関係なく接続
+			（※推奨は <左手用：0,2> <右手用：1,3> です。）*/
 			int channel = -1;
 
 			/*デバッグ用*/
@@ -162,8 +162,8 @@ public:
 			FileRead_gets(string, 256, FileHandle);
 			next = strtok_s(string, ",", &ctx);
 			/*文字列の比較*/
-			if (strcmp(next, "#0") == 0 || strcmp(next, "#1") == 0 || 
-				strcmp(next, "#2") == 0 || strcmp(next, "#3") == 0){
+			if (strcmp(next, "#0") == 0 || strcmp(next, "#1") == 0 ||
+				strcmp(next, "#2") == 0 || strcmp(next, "#3") == 0) {
 				channel = (int)(next[1] - '0');
 
 				next = strtok_s(NULL, ":", &ctx);//何小節目
@@ -250,7 +250,7 @@ public:
 				double time = music.rhythm.CalculateTime(bar_number, _timing[i], rhythm_note);
 				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
-				
+
 				if (same_bar_number) {
 					for (int j = 0; j < memory._notecount; j++) {
 						float _memory = (float)memory._timing[j] / (float)memory._rhythm_note;
@@ -265,7 +265,7 @@ public:
 					memory.noteID[i] = noteID;
 				}
 				/*フリックの連結*/
-				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0) ) {
+				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0)) {
 					/*同じ方向のフリックの連結*/
 					if (channel == 0 || channel == 1) {
 						if (_type[i] == _type[i - 1]) {
@@ -290,7 +290,7 @@ public:
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d:", bar_number);
 			x += 30;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d/", _notecount);
-			x += 25; 
+			x += 25;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d, ", rhythm_note);
 			x += 30;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%lf, ", music.bpm);
