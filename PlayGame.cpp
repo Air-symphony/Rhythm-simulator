@@ -128,11 +128,24 @@ public:
 						music.notes[i].ToMove(judgePos, dt, speed);
 						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY());
 						
+						//フリックの連結がある場合
 						if (music.notes[i].getlinkNoteID() > 0) {
 							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
 								music.notes[music.notes[i].getlinkNoteID()].getend_x(), 
 								music.notes[music.notes[i].getlinkNoteID()].getY()
 							);
+						}
+						//同時押しがある場合
+						if (music.notes[i].getsideNoteID() > 0) {
+							//相方も表示中の場合かつ、相方のidの方が小さい場合(動き終わった状態)
+							if (music.notes[music.notes[i].getsideNoteID()].getflag() == 1 &&
+								i > music.notes[i].getsideNoteID()
+								) {
+								Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
+									music.notes[music.notes[i].getsideNoteID()].getend_x(),
+									music.notes[music.notes[i].getsideNoteID()].getY()
+								);
+							}
 						}
 						/*判定内容*/
 						if (autoMode) {

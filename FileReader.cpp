@@ -103,18 +103,49 @@ public:
 	}
 
 	void SetNote() {
-		const int cher_size = 64;
+		const int SIZE = 64;
 		int noteID = 0;//ノーツに番号を割り振る
 		/*デバッグ用*/
 		int readline = 0;
 
+		/*同一小節上での処理判定に使用*/
+		bool same_bar_number = false;
+
+		/*同一小節上、もしくはロングノーツの保存*/
+		class Memory {
+		public:
+			int bar_number;
+			/*同一小節上での処理に使用*/
+			int _timing[SIZE];
+			/*その小節が何拍子かの保存*/
+			int _rhythm_note;
+			/*その小節のノーツ数*/
+			int _notecount;
+			/*noteIDの保存*/
+			int noteID[SIZE];
+			/*ロングノーツのID保存*/
+			int longNoteID[2];
+			Memory() {
+				bar_number = _rhythm_note = 0;
+			}
+			void reset(int _bar_number) {
+				bar_number = _bar_number;
+				for (int i = 0; i < SIZE; i++) {
+					noteID[i] = -1;
+					_timing[i] = -1;
+				}
+				_rhythm_note = 0;
+				_notecount = 0;
+			}
+		};
+
+		Memory memory;
+
 		while (FileRead_eof(FileHandle) == 0) {
 			/*読み込み時の仮保存用*/
-			int _type[32], _timing[32], _first_x[32], _end_x[32];
+			int _type[SIZE], _timing[SIZE], _first_x[SIZE], _end_x[SIZE];
 			/*何小節目か*/
 			int bar_number = 0;
-			/*同一小節上での処理に使用*/
-			int memory_bar_number = 0;
 			/*この節のノーツ数*/
 			int _notecount = 0;
 			/*その小節が何拍子か*/
@@ -143,13 +174,24 @@ public:
 					}
 					bar_number += c;
 				}
+				same_bar_number = (memory.bar_number == bar_number);
+				/*同一小節でない場合*/
+				if (!same_bar_number) {
+					/*memoryの初期化*/
+					memory.reset(bar_number);
+				}
 
 				next = strtok_s(NULL, ":", &ctx);//rhythm & type note
-				char _char[cher_size];
-				sprintf_s(_char, cher_size, "%s", next);
-				for (int i = 0; i < cher_size; i++) {
+				char _char[SIZE];
+				sprintf_s(_char, SIZE, "%s", next);
+				for (int i = 0; i < SIZE; i++) {
 					/*空文字であれば読み込み終了*/
 					if (strcmp(&_char[i], "") == 0) {
+						/*同一小節でない場合、memoryの改ざん*/
+						if (!same_bar_number) {
+							memory._rhythm_note = i;
+							memory._notecount = _notecount;
+						}
 						rhythm_note = i;
 						break;
 					}
@@ -158,12 +200,16 @@ public:
 					if (_note > 0) {
 						_timing[_notecount] = i;
 						_type[_notecount] = _note;
+						/*同一小節でない場合、memoryの改ざん*/
+						if (!same_bar_number) {
+							memory._timing[_notecount] = _timing[_notecount];
+						}
 						_notecount++;
 					}
 				}
 				next = strtok_s(NULL, ":", &ctx);//first_x note
-				sprintf_s(_char, cher_size, "%s", next);
-				for (int i = 0; i < cher_size; i++) {
+				sprintf_s(_char, SIZE, "%s", next);
+				for (int i = 0; i < SIZE; i++) {
 					if (strcmp(&_char[i], "") == 0) {
 						break;
 					}
@@ -171,8 +217,8 @@ public:
 					_first_x[i] = _end_x[i] = _note;
 				}
 				next = strtok_s(NULL, ":", &ctx);//end_x note
-				sprintf_s(_char, cher_size, "%s", next);
-				for (int i = 0; i < cher_size; i++) {
+				sprintf_s(_char, SIZE, "%s", next);
+				for (int i = 0; i < SIZE; i++) {
 					if (strcmp(&_char[i], "") == 0) {
 						break;
 					}
@@ -193,9 +239,9 @@ public:
 					}
 					bar_number += c;
 				}
-				char _char[cher_size];
+				char _char[SIZE];
 				next = strtok_s(NULL, "", &ctx);
-				sprintf_s(_char, cher_size, "%s", next);
+				sprintf_s(_char, SIZE, "%s", next);
 				music.bpm = (float)atof(_char);
 				music.rhythm.ChangeRhythm(music.bpm, bar_number);
 			}
@@ -205,6 +251,19 @@ public:
 				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
 				
+				if (same_bar_number) {
+					for (int j = 0; j < memory._notecount; j++) {
+						float _memory = (float)memory._timing[j] / (float)memory._rhythm_note;
+						float d = (float)_timing[i] / (float)rhythm_note;
+						if (_memory == d) {
+							music.notes[noteID].setsideNoteID(memory.noteID[j]);
+							music.notes[memory.noteID[j]].setsideNoteID(noteID);
+						}
+					}
+				}
+				else {
+					memory.noteID[i] = noteID;
+				}
 				/*フリックの連結*/
 				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0) ) {
 					/*同じ方向のフリックの連結*/
