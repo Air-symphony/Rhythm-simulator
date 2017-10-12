@@ -124,7 +124,8 @@ public:
 			/*noteIDの保存*/
 			int noteID[SIZE];
 			/*ロングノーツのID保存*/
-			int longNoteID[2];
+			int longNoteID[100];
+			int count = 0;
 			Memory() {
 				bar_number = _rhythm_note = 0;
 			}
@@ -136,6 +137,10 @@ public:
 				}
 				_rhythm_note = 0;
 				_notecount = 0;
+			}
+			void setLongNoteID(int _id) {
+				longNoteID[count] = _id;
+				count++;
 			}
 		};
 
@@ -200,6 +205,9 @@ public:
 					if (_note > 0) {
 						_timing[_notecount] = i;
 						_type[_notecount] = _note;
+						if (_note == 4) {
+							memory.setLongNoteID(noteID + _notecount);
+						}
 						/*同一小節でない場合、memoryの改ざん*/
 						if (!same_bar_number) {
 							memory._timing[_notecount] = _timing[_notecount];
@@ -251,6 +259,7 @@ public:
 				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
 
+				/*同時押し*/
 				if (same_bar_number) {
 					for (int j = 0; j < memory._notecount; j++) {
 						float _memory = (float)memory._timing[j] / (float)memory._rhythm_note;
@@ -264,6 +273,8 @@ public:
 				else {
 					memory.noteID[i] = noteID;
 				}
+				/*ロングノーツの連結*/
+
 				/*フリックの連結*/
 				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0)) {
 					/*同じ方向のフリックの連結*/
@@ -300,14 +311,16 @@ public:
 				//x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), " %lf", music.notes[_testID + i].gettime());
 				//x += 100;
-				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
+				/*DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
 				x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
 				//x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getfirst_x());
 				x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
-				x += 35;
+				x += 35;*/
+				DrawFormatString(x, y, GetColor(255, 255, 255), "long:%d", music.notes[_testID + i].getlongNoteID());
+				x += 80;
 			}
 		}
 		FileRead_close(FileHandle);
