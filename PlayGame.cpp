@@ -128,6 +128,13 @@ public:
 						music.notes[i].ToMove(judgePos, dt, speed);
 						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY());
 						
+						//ロングノーツ連結がある場合
+						if (music.notes[i].getlongNoteID() > 0) {
+							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
+								music.notes[music.notes[i].getlongNoteID()].getend_x(),
+								music.notes[music.notes[i].getlongNoteID()].getY()
+							);
+						}
 						//フリックの連結がある場合
 						if (music.notes[i].getlinkNoteID() > 0) {
 							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),

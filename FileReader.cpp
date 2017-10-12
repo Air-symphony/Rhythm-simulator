@@ -124,7 +124,8 @@ public:
 			/*noteIDの保存*/
 			int noteID[SIZE];
 			/*ロングノーツのID保存*/
-			int longNoteID[2];
+			int longNoteID[2] = {-1, -1};
+			int count = 0;
 			Memory() {
 				bar_number = _rhythm_note = 0;
 			}
@@ -136,6 +137,10 @@ public:
 				}
 				_rhythm_note = 0;
 				_notecount = 0;
+			}
+			void setLongNoteID(int _id) {
+				longNoteID[count] = _id;
+				count++;
 			}
 		};
 
@@ -200,6 +205,10 @@ public:
 					if (_note > 0) {
 						_timing[_notecount] = i;
 						_type[_notecount] = _note;
+						/*ロングノーツの場合*/
+						if (_note == 4) {
+							memory.setLongNoteID(noteID + _notecount);
+						}
 						/*同一小節でない場合、memoryの改ざん*/
 						if (!same_bar_number) {
 							memory._timing[_notecount] = _timing[_notecount];
@@ -251,6 +260,7 @@ public:
 				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
 				
+				/*同一小節の場合*/
 				if (same_bar_number) {
 					for (int j = 0; j < memory._notecount; j++) {
 						float _memory = (float)memory._timing[j] / (float)memory._rhythm_note;
@@ -264,6 +274,25 @@ public:
 				else {
 					memory.noteID[i] = noteID;
 				}
+
+				/*ロングノーツの連結*/
+				for (int j = 0; j < memory.count; j++) {
+					if (0 < memory.longNoteID[j] && memory.longNoteID[j] < noteID) {
+						if (music.notes[memory.longNoteID[j]].getfirst_x() == music.notes[noteID].getfirst_x() &&
+							music.notes[memory.longNoteID[j]].getend_x() == music.notes[noteID].getend_x()
+							) {
+							music.notes[memory.longNoteID[j]].setlongNoteID(noteID);
+							memory.longNoteID[j] = -1;
+							if (j == 0 && memory.count == 2) {
+								memory.longNoteID[0] = memory.longNoteID[1];
+								memory.longNoteID[1] = - 1;
+								j--;
+							}
+							memory.count--;
+						}
+					}
+				}
+				
 				/*フリックの連結*/
 				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0) ) {
 					/*同じ方向のフリックの連結*/
@@ -300,7 +329,7 @@ public:
 				//x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), " %lf", music.notes[_testID + i].gettime());
 				//x += 100;
-				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
+				/*DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
 				x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
 				//x += 20;
@@ -308,7 +337,11 @@ public:
 				x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
 				x += 35;
+				*/
+				DrawFormatString(x, y, GetColor(255, 255, 255), "long = %d,", music.notes[_testID + i].getlongNoteID());
+				x += 90;
 			}
+			DrawFormatString(x, y, GetColor(255, 255, 255), "  line = %d,", readline);
 		}
 		FileRead_close(FileHandle);
 		ScreenFlip();

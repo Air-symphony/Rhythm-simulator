@@ -5,6 +5,7 @@ int first_x, end_x; 1,2,3,4,5
 int y; 描画用
 int rhythm_count; 何分音符1,4,8,16,32
 int bar_number 何小節目
+int longNoteID; フリックの連結に使用
 int linkNoteID; フリックの連結に使用
 int sideNoteID; 同時押し用
 double time; 処理される時間(バーに来る時間)
@@ -17,6 +18,7 @@ private:
 	int y;
 	int rhythm_count;
 	int bar_number;
+	int longNoteID;
 	int linkNoteID;
 	int sideNoteID;
 	double time;
@@ -56,6 +58,9 @@ public:
 	}
 	void setbar_number(int _bar_number) {
 		bar_number = _bar_number;
+	}
+	void setlongNoteID(int _id) {
+		longNoteID = _id;
 	}
 	void setlinkNoteID(int _id) {
 		linkNoteID = _id;
@@ -125,6 +130,9 @@ public:
 	}
 	int getY() {
 		return y;
+	}
+	int getlongNoteID() {
+		return longNoteID;
 	}
 	int getlinkNoteID() {
 		return linkNoteID;
