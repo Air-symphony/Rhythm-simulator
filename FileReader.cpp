@@ -124,10 +124,13 @@ public:
 			/*noteIDの保存*/
 			int noteID[SIZE];
 			/*ロングノーツのID保存*/
-			int longNoteID[100];
+			int longNoteID[32];
 			int count = 0;
 			Memory() {
 				bar_number = _rhythm_note = 0;
+				for (int i = 0; i < 32; i++) {
+					longNoteID[i] = -1;
+				}
 			}
 			void reset(int _bar_number) {
 				bar_number = _bar_number;
@@ -141,6 +144,19 @@ public:
 			void setLongNoteID(int _id) {
 				longNoteID[count] = _id;
 				count++;
+			}
+			void CompressionlongNoteID() {
+				for (int i = 0; i < 32 - 1; i++) {
+					if (longNoteID[i] == -1 && longNoteID[i + 1] > 0) {
+						longNoteID[i] = longNoteID[i + 1];
+						longNoteID[i + 1] = -1;
+						count = i + 1;
+					}
+					else if (longNoteID[i] == -1 && longNoteID[i + 1] == -1) {
+						count = i;
+						break;
+					}
+				}
 			}
 		};
 
@@ -274,7 +290,17 @@ public:
 					memory.noteID[i] = noteID;
 				}
 				/*ロングノーツの連結*/
-
+				for (int i = 0; i < memory.count; i++) {
+					if (0 < memory.longNoteID[i] && memory.longNoteID[i] < noteID) {
+						if (music.notes[memory.longNoteID[i]].getfirst_x() == music.notes[noteID].getfirst_x() &&
+							music.notes[memory.longNoteID[i]].getend_x() == music.notes[noteID].getend_x()
+							) {
+							music.notes[memory.longNoteID[i]].setlongNoteID(noteID);
+							memory.longNoteID[i] = -1;
+							memory.CompressionlongNoteID();
+						}
+					}
+				}
 				/*フリックの連結*/
 				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0)) {
 					/*同じ方向のフリックの連結*/
