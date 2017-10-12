@@ -5,7 +5,11 @@ int first_x, end_x; 1,2,3,4,5
 int y; 描画用
 int rhythm_count; 何分音符1,4,8,16,32
 int bar_number 何小節目
+<<<<<<< HEAD
 int longNoteID; フリックの連結に使用
+=======
+int longNoteID; ロングノーツの連結に使用
+>>>>>>> test2
 int linkNoteID; フリックの連結に使用
 int sideNoteID; 同時押し用
 double time; 処理される時間(バーに来る時間)
@@ -26,7 +30,7 @@ public:
 	/*id = type = first_x = end_x = bar_number = -1;
 		y = 0;*/
 	Note() {
-		id = type = first_x = end_x = bar_number = linkNoteID = sideNoteID = -1;
+		id = type = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
 		y = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
