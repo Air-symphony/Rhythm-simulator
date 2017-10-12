@@ -113,10 +113,16 @@ public:
 			int _type[32], _timing[32], _first_x[32], _end_x[32];
 			/*何小節目か*/
 			int bar_number = 0;
+			/*同一小節上での処理に使用*/
+			int memory_bar_number = 0;
 			/*この節のノーツ数*/
 			int _notecount = 0;
 			/*その小節が何拍子か*/
 			int rhythm_note = 0;
+			/*・「0」か「1」の時　…　フリック方向の先にあるフリックノートと接続
+			 ・「2」か「3」の時　…　フリック方向に関係なく接続
+				（※推奨は <左手用：0,2> <右手用：1,3> です。）*/
+			int channel = -1;
 
 			/*デバッグ用*/
 			readline++;
@@ -125,8 +131,9 @@ public:
 			FileRead_gets(string, 256, FileHandle);
 			next = strtok_s(string, ",", &ctx);
 			/*文字列の比較*/
-			if (strcmp(next, "#0") == 0 || strcmp(next, "#1") == 0) {
-
+			if (strcmp(next, "#0") == 0 || strcmp(next, "#1") == 0 || 
+				strcmp(next, "#2") == 0 || strcmp(next, "#3") == 0){
+				channel = (int)(next[1] - '0');
 
 				next = strtok_s(NULL, ":", &ctx);//何小節目
 				for (int i = 0; i < 3; i++) {
@@ -176,7 +183,7 @@ public:
 					_end_x[i] = _note;
 				}
 			}
-			/*#ChangeBPM,167.00*/
+			/*#ChangeBPM:9 167.00*/
 			else if (strcmp(next, "#ChangeBPM") == 0) {
 				next = strtok_s(NULL, ":", &ctx);//何小節目
 				for (int i = 0; i < 3; i++) {
@@ -192,10 +199,27 @@ public:
 				music.bpm = (float)atof(_char);
 				music.rhythm.ChangeRhythm(music.bpm, bar_number);
 			}
+
 			for (int i = 0; i < _notecount; i++) {
 				double time = music.rhythm.CalculateTime(bar_number, _timing[i], rhythm_note);
 				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
+				
+				/*フリックの連結*/
+				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0) ) {
+					/*同じ方向のフリックの連結*/
+					if (channel == 0 || channel == 1) {
+						if (_type[i] == _type[i - 1]) {
+							music.notes[noteID - 1].setlinkNoteID(noteID);
+						}
+					}
+					/*ジグザグなフリックの連結*/
+					else if (channel == 2 || channel == 3) {
+						if (_type[i - 1] == 1 || _type[i - 1] == 3) {
+							music.notes[noteID - 1].setlinkNoteID(noteID);
+						}
+					}
+				}
 				noteID++;
 			}
 			music.notecount += _notecount;
@@ -213,18 +237,18 @@ public:
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%lf, ", music.bpm);
 			x += 100;
 			for (int i = 0; i < _notecount; i++) {
-				DrawFormatString(x, y, GetColor(255, 255, 255), "%d", music.notes[_testID + i].getID());
-				x += 20;
-				DrawFormatString(x, y, GetColor(255, 255, 255), " %lf", music.notes[_testID + i].gettime());
-				x += 100;
-				/*DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
+				//DrawFormatString(x, y, GetColor(255, 255, 255), "%d", music.notes[_testID + i].getID());
+				//x += 20;
+				//DrawFormatString(x, y, GetColor(255, 255, 255), " %lf", music.notes[_testID + i].gettime());
+				//x += 100;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
 				x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
 				//x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getfirst_x());
 				x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
-				x += 35;*/
+				x += 35;
 			}
 		}
 		FileRead_close(FileHandle);

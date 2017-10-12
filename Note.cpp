@@ -1,10 +1,12 @@
 /*Noteデータ
 int id, type; 1,2,3,4
-int flag;//0=未消化、1=表示、-1=消化済
+int flag; 0=未消化、1=表示、-1=消化済
 int first_x, end_x; 1,2,3,4,5
 int y; 描画用
 int rhythm_count; 何分音符1,4,8,16,32
 int bar_number 何小節目
+int linkNoteID; フリックの連結に使用
+int sideNoteID; 同時押し用
 double time; 処理される時間(バーに来る時間)
 */
 class Note {
@@ -15,12 +17,14 @@ private:
 	int y;
 	int rhythm_count;
 	int bar_number;
+	int linkNoteID;
+	int sideNoteID;
 	double time;
 public:
 	/*id = type = first_x = end_x = bar_number = -1;
 		y = 0;*/
 	Note() {
-		id = type = first_x = end_x = bar_number = -1;
+		id = type = first_x = end_x = bar_number = linkNoteID = sideNoteID = -1;
 		y = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
@@ -53,6 +57,12 @@ public:
 	void setbar_number(int _bar_number) {
 		bar_number = _bar_number;
 	}
+	void setlinkNoteID(int _id) {
+		linkNoteID = _id;
+	}
+	void setsideNoteID(int _id) {
+		sideNoteID = _id;
+	}
 	void setrhythm_count(int _rhythm_count) {
 		rhythm_count = _rhythm_count;
 	}
@@ -77,10 +87,10 @@ public:
 	int id, int noteの種類, int 出だし位置, int 終わり位置, int 何小節目, int 何分音符
 	setflag(0) 0=未消化、1=表示、-1=消化済;
 	*/
-	void setNote(int id, int type, int _first_x, int _end_x, int _bar_number, int _rhythm_count) {
+	/*void setNote(int id, int type, int _first_x, int _end_x, int _bar_number, int _rhythm_count) {
 		setID(id); setType(type); setX(_first_x, _end_x); setbar_number(_bar_number); setrhythm_count(_rhythm_count);
 		setflag(0);
-	}
+	}*/
 	/*0=未消化、1=表示、-1=消化済*/
 	void setflag(int _flag) {
 		flag = _flag;
@@ -115,6 +125,12 @@ public:
 	}
 	int getY() {
 		return y;
+	}
+	int getlinkNoteID() {
+		return linkNoteID;
+	}
+	int getsideNoteID() {
+		return sideNoteID;
 	}
 	/*
 	_speed = 判定座標

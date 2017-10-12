@@ -15,6 +15,7 @@ private:
 	Music music;
 	Graph ring;
 	Graph noteGraph[4];
+	Graph Line;
 	int SE[2];
 	InputKey input;//ボタン入力
 	double msec;//経過時間
@@ -45,6 +46,8 @@ public:
 	GameScreen(Display _display, int id) {
 		display = _display;
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
+		ring.setDisplay(display);
+		Line.setDisplay(display);
 		for (int i = 1; i <= 4; i++) {
 			char _imagepath[256];
 			strcpy_s(_imagepath, "materials\\Image\\Note");
@@ -52,6 +55,7 @@ public:
 			sprintf_s(_number, 256, "%d.png", i);
 			strcat_s(_imagepath, _number);
 			noteGraph[i - 1].setGraph(LoadGraph(_imagepath));
+			noteGraph[i - 1].setDisplay(display);
 		}
 		SE[0] = LoadSoundMem("materials\\SE\\PERFECT SE.ogg");
 		SE[1] = LoadSoundMem("materials\\SE\\フリック SE.wav");
@@ -122,8 +126,14 @@ public:
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
 						music.notes[i].ToMove(judgePos, dt, speed);
-						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY(), 5, display);
+						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY());
 						
+						if (music.notes[i].getlinkNoteID() > 0) {
+							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
+								music.notes[music.notes[i].getlinkNoteID()].getend_x(), 
+								music.notes[music.notes[i].getlinkNoteID()].getY()
+							);
+						}
 						/*判定内容*/
 						if (autoMode) {
 							AutoMode(i);
