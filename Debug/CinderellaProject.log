@@ -2,5 +2,7 @@
 c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\main.cpp(1): warning C4067: プリプロセッサ ディレクティブの後に余分な文字がありました - 改行が必要です
   スキップ中... (関連する変更は検出されませんでした)
   PlayGame.cpp
+  Note.cpp
+  FileReader.cpp
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.exe
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.pdb (Full PDB)
