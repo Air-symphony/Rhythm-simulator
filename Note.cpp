@@ -1,8 +1,9 @@
+#include <Math.h>
 /*Noteデータ
 int id, type; 1,2,3,4
 int flag; 0=未消化、1=表示、-1=消化済
 int first_x, end_x; 1,2,3,4,5
-int y; 描画用
+int x, y; 描画用
 int rhythm_count; 何分音符1,4,8,16,32
 int bar_number 何小節目
 int longNoteID; ロングノーツの連結に使用
@@ -15,7 +16,7 @@ private:
 	int id, type;
 	int flag;//0=未消化、1=表示、-1=消化済
 	int first_x, end_x;
-	int y;
+	int x, y;
 	int rhythm_count;
 	int bar_number;
 	int longNoteID;
@@ -27,7 +28,7 @@ public:
 		y = 0;*/
 	Note() {
 		id = type = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
-		y = 0; time = 0.0; flag = -1;
+		x = y = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
 		type = first_x = end_x = bar_number = -1;
@@ -35,7 +36,7 @@ public:
 	Note(int _id) {
 		id = _id;
 		type = first_x = end_x = bar_number = -1;
-		y = 0; time = 0.0; flag = false;
+		x = y = 0; time = 0.0; flag = false;
 	}
 	void setID(int _id) {
 		id = _id;
@@ -55,6 +56,9 @@ public:
 	void setX(int _first_x, int _end_x) {
 		setend_x(_end_x);
 		setfirst_x(_first_x);
+	}
+	void setx(int _x) {
+		x = _x;
 	}
 	void setbar_number(int _bar_number) {
 		bar_number = _bar_number;
@@ -131,6 +135,9 @@ public:
 	int getY() {
 		return y;
 	}
+	int getX() {
+		return x;
+	}
 	int getlongNoteID() {
 		return longNoteID;
 	}
@@ -141,13 +148,17 @@ public:
 		return sideNoteID;
 	}
 	/*
-	_speed = 判定座標
+	_posX, _posY = 判定座標
 	_dt = 経過時間
 	_time = 移動時間
-	y = (int)((_speed / _time) * _dt)
+	double dx = (sqrt(_dt) * (end_x - first_x) / sqrt(_time));
+		x = (int)((first_x + dx) * (_posX));
+		y = (int)((_posY / _time) * _dt);
 	*/
-	void ToMove(double _speed, double _dt, double _time) {
-		y = (int)((_speed / _time) * _dt);
+	void ToMove(double _posX, double _posY, double _dt, double _time) {
+		double dx = sqrt(_dt) * (end_x - first_x) / sqrt(_time);
+		x = (int)((first_x + dx) * _posX);
+		y = (int)((_posY / _time) * _dt);
 	}
 };
 

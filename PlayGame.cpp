@@ -22,9 +22,11 @@ private:
 	double d_msec;//デバッグ用、変化値
 
 	/*判定位置のy座標*/
-	const double judgePos = display.GetScreenY() - 75.0;//判定位置
+	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
 	/*何秒かけて判定位置にたどり着くか*/
-	double speed = 0.6;
+	double speed = 0.8;
+	/*五つの*/
+	const double judgePos_x = display.GetScreenX() / 6.0;
 
 	int score = 0, combo = 0;
 
@@ -64,6 +66,7 @@ public:
 
 		FileReader file;
 		music = file.SelectReadFile(id);
+		music.setX(judgePos_x);
 		msec = 0;
 		Start();
 	}
@@ -106,7 +109,7 @@ public:
 						/*画面内にいる時間の場合*/
 						if (music.notes[i].gettime() <= (msec + speed)) {
 							double dt = (msec + speed) - (music.notes[i].gettime());
-							music.notes[i].ToMove(judgePos, dt, speed);
+							music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed);
 						}
 					}
 				}
@@ -125,20 +128,23 @@ public:
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
-						music.notes[i].ToMove(judgePos, dt, speed);
-						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getend_x(), music.notes[i].getY());
+						music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed);
+						noteGraph[music.notes[i].getType() - 1].Draw(music.notes[i].getX(), music.notes[i].getY(), 5);
 						
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
-							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
-								music.notes[music.notes[i].getlongNoteID()].getend_x(),
-								music.notes[music.notes[i].getlongNoteID()].getY()
-							);
+							/*画面上にいる場合*/
+							if (music.notes[i].getflag() >= 0) {
+								Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
+									music.notes[music.notes[i].getlongNoteID()].getX(),
+									music.notes[music.notes[i].getlongNoteID()].getY()
+								);
+							}
 						}
 						//フリックの連結がある場合
 						if (music.notes[i].getlinkNoteID() > 0) {
-							Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
-								music.notes[music.notes[i].getlinkNoteID()].getend_x(), 
+							Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
+								music.notes[music.notes[i].getlinkNoteID()].getX(),
 								music.notes[music.notes[i].getlinkNoteID()].getY()
 							);
 						}
@@ -148,8 +154,8 @@ public:
 							if (music.notes[music.notes[i].getsideNoteID()].getflag() == 1 &&
 								i > music.notes[i].getsideNoteID()
 								) {
-								Line.Draw_LinkLine(music.notes[i].getend_x(), music.notes[i].getY(),
-									music.notes[music.notes[i].getsideNoteID()].getend_x(),
+								Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
+									music.notes[music.notes[i].getsideNoteID()].getX(),
 									music.notes[music.notes[i].getsideNoteID()].getY()
 								);
 							}
@@ -238,16 +244,16 @@ public:
 		/*リングの表示*/
 		//ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
 		/*判定範囲の表示*/
-		DrawLine(0, (int)judgePos, display.GetScreenX(), (int)judgePos, GetColor(255, 0, 0));
-		int y = (int)((judgePos / speed) * (PERFECTtime / 2.0));
-		DrawLine(0, (int)judgePos - y, display.GetScreenX(), (int)judgePos - y, GetColor(0, 255, 0));
-		DrawLine(0, (int)judgePos + y, display.GetScreenX(), (int)judgePos + y, GetColor(0, 255, 0));
-		y = (int)((judgePos / speed) * (GREATtime / 2.0));
-		DrawLine(0, (int)(judgePos - y), display.GetScreenX(), (int)(judgePos - y), GetColor(0, 0, 255));
-		DrawLine(0, (int)(judgePos + y), display.GetScreenX(), (int)(judgePos + y), GetColor(0, 0, 255));
-		y = (int)((judgePos / speed) * (NICEtime / 2.0));
-		DrawLine(0, (int)judgePos - y, display.GetScreenX(), (int)judgePos - y, GetColor(255, 255, 0));
-		DrawLine(0, (int)judgePos + y, display.GetScreenX(), (int)judgePos + y, GetColor(255, 255, 0));
+		DrawLine(0, (int)judgePos_y, display.GetScreenX(), (int)judgePos_y, GetColor(255, 0, 0));
+		int y = (int)((judgePos_y / speed) * (PERFECTtime / 2.0));
+		DrawLine(0, (int)judgePos_y - y, display.GetScreenX(), (int)judgePos_y - y, GetColor(0, 255, 0));
+		DrawLine(0, (int)judgePos_y + y, display.GetScreenX(), (int)judgePos_y + y, GetColor(0, 255, 0));
+		y = (int)((judgePos_y / speed) * (GREATtime / 2.0));
+		DrawLine(0, (int)(judgePos_y - y), display.GetScreenX(), (int)(judgePos_y - y), GetColor(0, 0, 255));
+		DrawLine(0, (int)(judgePos_y + y), display.GetScreenX(), (int)(judgePos_y + y), GetColor(0, 0, 255));
+		y = (int)((judgePos_y / speed) * (NICEtime / 2.0));
+		DrawLine(0, (int)judgePos_y - y, display.GetScreenX(), (int)judgePos_y - y, GetColor(255, 255, 0));
+		DrawLine(0, (int)judgePos_y + y, display.GetScreenX(), (int)judgePos_y + y, GetColor(255, 255, 0));
 	}
 
 	/*ボタン判定の記述*/

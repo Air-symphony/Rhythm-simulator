@@ -23,6 +23,11 @@ public:
 		notecount = 0;
 		bpm = 0.0f;
 	}
+	void setX(double _posX) {
+		for (int i = 0; i < notecount; i++) {
+			notes[i].setx((int)(notes[i].getfirst_x() * _posX));
+		}
+	}
 };
 
 /*楽曲データリスト

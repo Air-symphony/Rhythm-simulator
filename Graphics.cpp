@@ -87,21 +87,11 @@ public:
 			DrawGraph(x - sizeX, y - sizeY, graphID, TRUE);
 	}
 	/*
-	x = (int)(x * _display.GetScreenX() / 6.0f);
-	Draw(x, y, 5);
-	*/
-	void DrawNote(int x, int y) {
-		x = (int)(x * display.GetScreenX() / 6.0f);
-		Draw(x, y, 5);
-	}
-	/*
 	x1 = (int)(x1 * display.GetScreenX() / 6.0f);
 		x2 = (int)(x2 * display.GetScreenX() / 6.0f);
 		DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
 		*/
 	void Draw_LinkLine(int x1, int y1, int x2, int y2) {
-		x1 = (int)(x1 * display.GetScreenX() / 6.0f);
-		x2 = (int)(x2 * display.GetScreenX() / 6.0f);
 		DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
 	}
 };
