@@ -18,15 +18,15 @@ private:
 	Graph Line;
 	int SE[2];
 	InputKey input;//ボタン入力
-	double msec;//経過時間
+	double msec;//経過時間(s)
 	double d_msec;//デバッグ用、変化値
 
 	/*判定位置のy座標*/
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
+	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
+	const double judgePos_x = display.GetScreenX() / 6.0;
 	/*何秒かけて判定位置にたどり着くか*/
 	double speed = 0.8;
-	/*五つの*/
-	const double judgePos_x = display.GetScreenX() / 6.0;
 
 	int score = 0, combo = 0;
 
@@ -37,6 +37,8 @@ private:
 	int printjudge_number = 0;
 
 	bool autoMode = false;
+
+	double timestop = 0.0;
 
 	const double PERFECTtime = 0.066;
 	const double GREATtime = 0.090;
@@ -72,9 +74,9 @@ public:
 	}
 
 	void Start() {
-		/*ゲーム開始時間の取得*/
+		/*ゲーム開始時間の取得(ms)*/
 		double start_time = GetNowCount();
-		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK);
+		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
 
 		/*消化し終わったのノーツをfor文から外す*/
 		int process = 0;
@@ -85,10 +87,24 @@ public:
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			ClearDrawScreen();
 			clsDx();
-			/*ゲーム進行時間*/
+			/*timestop時*/
+			if (timestop > 0) {
+				DrawFormatString(display.GetScreenX() - 100, 0, GetColor(255, 255, 255), "%s", "停止中");
+				if (input.PushOneframe_Decide()) {
+					double d_time = (GetNowCount() - start_time) - (timestop - 0.5) * 1000.0;
+					start_time += d_time;
+					timestop = 0.0;
+					PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
+				}
+			}
+
+			/*ゲーム進行時間(s)*/
 			msec = (double)((GetNowCount() - start_time) / 1000.0) + 0.5;//Snow wings合わせ
 			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f;
 			
+			if (timestop > 0) {
+				msec = timestop;
+			}
 			/*常に表示させるもの*/
 			DrawScreen();
 			
@@ -179,13 +195,15 @@ public:
 				if (music.notes[i].gettime() <= (msec + speed) &&
 					music.notes[i].getflag() != -1) {
 					debugcount++;
-					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type,pos,time, Y");
+					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
 					int y = 96 + debugcount * 16;
 					DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
-					DrawFormatString(30, y, GetColor(255, 255, 255), "[%d ", music.notes[i].getType());
-					DrawFormatString(50, y, GetColor(255, 255, 255), " %d ", music.notes[i].getend_x());
-					DrawFormatString(70, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
-					DrawFormatString(160, y, GetColor(255, 255, 255), " %d]", music.notes[i].getY());
+					DrawFormatString(30, y, GetColor(255, 255, 255), " %d ", music.notes[i].getType());
+					DrawFormatString(50, y, GetColor(255, 255, 255), " %d ", music.notes[i].getfirst_x());
+					DrawFormatString(70, y, GetColor(255, 255, 255), "-%d ", music.notes[i].getend_x());
+					DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
+					DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
+					DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
 				}
 			}
 			/*判定を表示する必要性があったとき*/
@@ -200,9 +218,14 @@ public:
 				printjudge = ((msec - printjudge_time) <= 1.0);
 			}
 
+			/*一時停止*/
+			if (input.PushOneframe_Stop()) {
+				timestop = msec;
+				StopSoundMem(music.soundHandle);
+			}
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 
-			/*ゲーム画面の終了*/
+			/*ゲーム画面の強制終了*/
 			if (input.PushOneframe_Debug()) {
 				StopSoundMem(music.soundHandle);
 				DeleteSoundMem(music.soundHandle);
@@ -220,13 +243,13 @@ public:
 		/*時間表示*/
 		int _msec = (int)(msec * 1000);
 		DrawFormatString(0, 48, GetColor(255, 255, 255), "%d:", _msec / 1000);
-		DrawFormatString(35, 48, GetColor(255, 255, 255), "%d", _msec % 1000);
+		DrawFormatString(35, 48, GetColor(255, 255, 255), "%d(s)", _msec % 1000);
 		/*スコア表示*/
 		DrawFormatString(0, 64, GetColor(255, 255, 255), "score = %d", score);
 		DrawFormatString(0, 80, GetColor(255, 255, 255), "combo = %d", combo);
 
 		/*1フレーム当たりの秒数*/
-		DrawFormatString(70, 48, GetColor(255, 255, 255), "%lf:", msec - d_msec);
+		DrawFormatString(100, 48, GetColor(255, 255, 255), "%d(ms)", (int)((msec - d_msec) * 1000.0));
 		d_msec = msec;
 
 		char c[256];
