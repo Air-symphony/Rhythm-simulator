@@ -6,6 +6,7 @@ BGM,BPM,Noteなどを管理
 char title[256];
 float bpm;
 int soundHandle;
+int offset;
 int notecount;
 Note notes[1000];
 Rhythm rhythm;
@@ -15,12 +16,13 @@ public:
 	char title[256];
 	float bpm;
 	int soundHandle;
+	int offset;//(ms)
 	int notecount;
 	Note notes[1000];
 	Rhythm rhythm;
 
 	Music() {
-		notecount = 0;
+		offset = notecount = 0;
 		bpm = 0.0f;
 	}
 	void setX(double _posX) {
@@ -100,6 +102,17 @@ public:
 				sprintf_s(char_bpm, 256, "%s", next);
 				music.bpm = (float)atof(char_bpm);
 				music.rhythm.SetRhythm(music.bpm);
+			}
+			else if (strcmp(next, "#Offset") == 0) {
+				int count = 4;
+				next = strtok_s(NULL, "", &ctx);
+				for (int i = 0; i < count; i++) {
+					int c = (int)(next[i] - '0');
+					for (int j = 0; j < ((count - 1) - i); j++) {
+						c *= 10;
+					}
+					music.offset += c;
+				}
 			}
 			else if (strcmp(next, "#end") == 0) {
 				break;
@@ -326,7 +339,7 @@ public:
 			music.notecount += _notecount;
 
 			/*デバッグ用*/
-			int _testID = noteID - _notecount;
+			/*int _testID = noteID - _notecount;
 			int y = 64 + 16 * readline;
 			int x = 0;
 			DrawFormatString(x, y, GetColor(255, 255, 255), "%d:", bar_number);
@@ -349,14 +362,14 @@ public:
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getfirst_x());
 				x += 20;
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
-				x += 35;*/
+				x += 35;
 				DrawFormatString(x, y, GetColor(255, 255, 255), "long:%d", music.notes[_testID + i].getlongNoteID());
 				x += 80;
-			}
+			}*/
 		}
 		FileRead_close(FileHandle);
-		ScreenFlip();
-		WaitKey();
+		//ScreenFlip();
+		//WaitKey();
 	}
 
 	/*1. snow wings 2 tokimeki*/

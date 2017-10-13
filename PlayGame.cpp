@@ -6,7 +6,7 @@ Display display;
 Music music;
 Graph ring;
 InputKey input;
-GameScreen(Display _display, int id) 
+GameScreen(Display _display, int id)
 id = 楽曲データ
 */
 class GameScreen {
@@ -21,7 +21,7 @@ private:
 	double msec;//経過時間(s)
 	double d_msec;//デバッグ用、変化値
 
-	/*判定位置のy座標*/
+	/*判定位置の座標*/
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
 	const double judgePos_x = display.GetScreenX() / 6.0;
@@ -37,8 +37,6 @@ private:
 	int printjudge_number = 0;
 
 	bool autoMode = false;
-
-	double timestop = 0.0;
 
 	const double PERFECTtime = 0.066;
 	const double GREATtime = 0.090;
@@ -75,39 +73,50 @@ public:
 
 	void Start() {
 		/*ゲーム開始時間の取得(ms)*/
-		double start_time = GetNowCount();
 		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
+		/*曲が始まる時間　GetNowCount() - music.offset*/
+		double start_time = (double)GetNowCount() - (double)music.offset;
+
+		/*止まり始めた時間(ms)*/
+		double stop_time = 0.0;
 
 		/*消化し終わったのノーツをfor文から外す*/
-		int process = 0;
+		//int process = 0;
 
 		/*AutoModeの真偽*/
 		autoMode = true;
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
-			ClearDrawScreen();
-			clsDx();
+			/*ゲーム進行時間(s)*/
+			msec = ((double)GetNowCount() - start_time) / 1000.0;
+			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f; トキメキ
+
+			/*一時停止*//*徐々にノーツが速くなるかも？*/
+			if (input.PushOneframe_Stop()) {
+				stop_time = (double)GetNowCount();
+				StopSoundMem(music.soundHandle);
+			}
+
 			/*timestop時*/
-			if (timestop > 0) {
-				DrawFormatString(display.GetScreenX() - 100, 0, GetColor(255, 255, 255), "%s", "停止中");
+			if (stop_time > 0) {
+				msec = (stop_time - start_time) / 1000.0;
+				DrawFormatString(display.GetScreenX() - 100, 10, GetColor(255, 255, 255), "%s", "停止中");
+				
 				if (input.PushOneframe_Decide()) {
-					double d_time = (GetNowCount() - start_time) - (timestop - 0.5) * 1000.0;
-					start_time += d_time;
-					timestop = 0.0;
 					PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
+					double d_time = (double)GetNowCount();
+
+					start_time += (d_time - stop_time);
+					msec = ((double)GetNowCount() - start_time) / 1000.0;
+					stop_time = 0.0;
 				}
 			}
 
-			/*ゲーム進行時間(s)*/
-			msec = (double)((GetNowCount() - start_time) / 1000.0) + 0.5;//Snow wings合わせ
-			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f;
-			
-			if (timestop > 0) {
-				msec = timestop;
-			}
 			/*常に表示させるもの*/
+			ClearDrawScreen();
+			clsDx();
 			DrawScreen();
-			
+
 			/*判定内容を保存、毎フレームで初期化*/
 			judge_number = -1;
 			int debugcount = 0;
@@ -146,7 +155,7 @@ public:
 						double dt = (msec + speed) - music.notes[i].gettime();
 						music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed);
 						noteGraph[music.notes[i].getType() - 1].Draw(music.notes[i].getX(), music.notes[i].getY(), 5);
-						
+
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
 							/*画面上にいる場合*/
@@ -218,14 +227,9 @@ public:
 				printjudge = ((msec - printjudge_time) <= 1.0);
 			}
 
-			/*一時停止*/
-			if (input.PushOneframe_Stop()) {
-				timestop = msec;
-				StopSoundMem(music.soundHandle);
-			}
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 
-			/*ゲーム画面の強制終了*/
+						 /*ゲーム画面の強制終了*/
 			if (input.PushOneframe_Debug()) {
 				StopSoundMem(music.soundHandle);
 				DeleteSoundMem(music.soundHandle);
@@ -239,9 +243,9 @@ public:
 	/*常に表示させるもの、スコアなど*/
 	void DrawScreen() {
 		printfDx("Game Screen\n");
-		
+
 		/*時間表示*/
-		int _msec = (int)(msec * 1000);
+		int _msec = (int)(msec * 1000.0);
 		DrawFormatString(0, 48, GetColor(255, 255, 255), "%d:", _msec / 1000);
 		DrawFormatString(35, 48, GetColor(255, 255, 255), "%d(s)", _msec % 1000);
 		/*スコア表示*/

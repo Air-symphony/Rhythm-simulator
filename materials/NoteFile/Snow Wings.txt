@@ -6,7 +6,7 @@
 #Song Snow Wings.mp3
 #Lyrics Snow Wings.lyr
 #BPM 160.00
-#Offset 1500
+#Offset 0500
 #Difficulty Master
 #LV 26
 #BGMVol 100
