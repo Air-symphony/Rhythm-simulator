@@ -1,4 +1,5 @@
 #include "DxLib.h"
+#include <Math.h>
 
 /*screen = 50
 ratio[2] = {16, 9}
@@ -87,11 +88,24 @@ public:
 			DrawGraph(x - sizeX, y - sizeY, graphID, TRUE);
 	}
 	/*
-	x1 = (int)(x1 * display.GetScreenX() / 6.0f);
-		x2 = (int)(x2 * display.GetScreenX() / 6.0f);
-		DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
-		*/
+	DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
+	*/
 	void Draw_LinkLine(int x1, int y1, int x2, int y2) {
-		DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
+		DrawLine(x1, y1, x2, y2, GetColor(255, 255, 255));
+	}
+	/*
+	画像サイズ変更
+	if (time < dt) dt = time;
+	double dx = ((double)sizeX / sqrt(time)) * sqrt(dt);
+	double dy = ((double)sizeY / sqrt(time)) * sqrt(dt);
+	DrawExtendGraph(x - dx / 2.0, y - dy / 2.0, 
+		x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
+	*/
+	void DrawNote(int x, int y, double time, double dt) {
+		if (time < dt) dt = time;
+		double dx = ((double)sizeX / sqrt(time)) * sqrt(dt);
+		double dy = ((double)sizeY / sqrt(time)) * sqrt(dt);
+		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0, 
+			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
 	}
 };

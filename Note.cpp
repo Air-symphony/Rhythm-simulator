@@ -28,7 +28,7 @@ public:
 		y = 0;*/
 	Note() {
 		id = type = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
-		x = y = 0; time = 0.0; flag = -1;
+		x = 0; y = 50; time = 0.0; flag = -1;
 	}
 	/*id = _id;
 		type = first_x = end_x = bar_number = -1;
@@ -36,7 +36,7 @@ public:
 	Note(int _id) {
 		id = _id;
 		type = first_x = end_x = bar_number = -1;
-		x = y = 0; time = 0.0; flag = false;
+		x = 0; y = 50; time = 0.0; flag = false;
 	}
 	void setID(int _id) {
 		id = _id;
@@ -158,7 +158,7 @@ public:
 	void ToMove(double _posX, double _posY, double _dt, double _time) {
 		double dx = sqrt(_dt) * (end_x - first_x) / sqrt(_time);
 		x = (int)((first_x + dx) * _posX);
-		y = (int)((_posY / _time) * _dt);
+		y = (int)(((_posY - 50) / _time) * _dt) + 50;
 	}
 };
 

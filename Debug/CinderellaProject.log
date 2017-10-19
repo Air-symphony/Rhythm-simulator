@@ -1,5 +1,9 @@
-﻿  スキップ中... (関連する変更は検出されませんでした)
-  Main.cpp
+﻿  Main.cpp
+c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\main.cpp(1): warning C4067: プリプロセッサ ディレクティブの後に余分な文字がありました - 改行が必要です
+c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(109): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\inputkey.cpp(52): warning C4800: 'int': ブール値を 'true' または 'false' に強制的に設定します (警告の処理)
+c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\playgame.cpp(151): warning C4244: '引数': 'const double' から 'int' への変換です。データが失われる可能性があります。
+  スキップ中... (関連する変更は検出されませんでした)
   PlayGame.cpp
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.exe
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.pdb (Full PDB)

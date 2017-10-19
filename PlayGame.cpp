@@ -26,7 +26,7 @@ private:
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
 	const double judgePos_x = display.GetScreenX() / 6.0;
 	/*何秒かけて判定位置にたどり着くか*/
-	double speed = 0.8;
+	double speed = 0.5;
 
 	int score = 0, combo = 0;
 
@@ -36,6 +36,24 @@ private:
 	double printjudge_time = 0.0;
 	int printjudge_number = 0;
 
+	/*ロングノーツの場所を保持*/
+	class HoldKey {
+	public:
+		int noteID = 0;
+		int key = 0;
+		void Set(int _noteID, int _key) {
+			noteID = _noteID;
+			key = _key;
+		}
+	};
+	int holdKeyCount = 0;
+	/*
+	int noteID = 0;
+	int key = 0;
+	*/
+	HoldKey holdkey[2];
+
+	/*AutoModeの真偽*/
 	bool autoMode = false;
 
 	const double PERFECTtime = 0.066;
@@ -80,10 +98,6 @@ public:
 		/*止まり始めた時間(ms)*/
 		double stop_time = 0.0;
 
-		/*消化し終わったのノーツをfor文から外す*/
-		//int process = 0;
-
-		/*AutoModeの真偽*/
 		autoMode = true;
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
@@ -92,7 +106,7 @@ public:
 			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f; トキメキ
 
 			/*一時停止*//*徐々にノーツが速くなるかも？*/
-			if (input.PushOneframe_Stop()) {
+			if (stop_time <= 0 && input.PushOneframe_Stop()) {
 				stop_time = (double)GetNowCount();
 				StopSoundMem(music.soundHandle);
 			}
@@ -123,6 +137,34 @@ public:
 
 			/*各ノーツの操作*/
 			for (int i = 0; i < music.notecount; i++) {
+				/*ロングノーツの保持状態*/
+				for (int j = 0; j < holdKeyCount; j++) {
+					if (holdkey[j].key == 0) break;
+
+					/*長押し中なら線を表示*/
+					if (input.LongHoldKey(holdkey[j].key) || autoMode) {
+						Line.Draw_LinkLine(
+							(int)(music.notes[holdkey[j].noteID].getend_x() * judgePos_x),
+							judgePos_y,
+							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getX(),
+							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getY()
+						);
+					}
+					/*長押しを離してしまった時*/
+					else{
+						music.notes[holdkey[j].noteID].setflag(-1);
+						holdkey[j].noteID = holdkey[j].key = 0;
+						holdKeyCount--;
+						if (j == 0 && holdkey[1].key > 0) {
+							holdkey[0].noteID = holdkey[1].noteID;
+							holdkey[0].key = holdkey[1].key;
+							holdkey[1].noteID = holdkey[1].key = 0;
+							j--;
+						}
+						judge_number = 4;
+					}
+				}
+				
 				/*処理済みの場合*/
 				if (music.notes[i].getflag() == -1) {
 					/*画面下の場合は、forに含めない*/
@@ -144,9 +186,6 @@ public:
 					if (music.notes[i].gettime() <= (msec + speed)) {
 						music.notes[i].setflag(1);
 					}
-					else {
-						//continue;
-					}
 				}
 				/*画面内に表示されている場合*/
 				if (music.notes[i].getflag() == 1) {
@@ -154,8 +193,7 @@ public:
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
 						music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed);
-						noteGraph[music.notes[i].getType() - 1].Draw(music.notes[i].getX(), music.notes[i].getY(), 5);
-
+						
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
 							/*画面上にいる場合*/
@@ -183,25 +221,42 @@ public:
 									music.notes[music.notes[i].getsideNoteID()].getX(),
 									music.notes[music.notes[i].getsideNoteID()].getY()
 								);
+								noteGraph[music.notes[music.notes[i].getsideNoteID()].getType() - 1]
+									.DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
+
 							}
 						}
+						/*ノーツの描画*/
+						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
+						
 						/*判定内容*/
-						if (autoMode) {
-							AutoMode(i);
-						}
-						else {
-							Judge(i);
-						}
+						if (autoMode) AutoMode(i);
+						else PlayKey(i);
 					}
 					/*画面下の場合は処理*/
 					else {
 						music.notes[i].setflag(-1);
+						if (music.notes[i].getType() == 4) {
+							music.notes[music.notes[i].getlongNoteID()].setflag(-1);
+						}
+						for (int j = 0; j < holdKeyCount; j++) {
+							if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
+								holdkey[j].noteID = holdkey[j].key = 0;
+								holdKeyCount--;
+								if (j == 0 && holdkey[1].key > 0) {
+									holdkey[0].noteID = holdkey[1].noteID;
+									holdkey[0].key = holdkey[1].key;
+									holdkey[1].noteID = holdkey[1].key = 0;
+									j--;
+								}
+							}
+						}
 						combo = 0;
 						judge_number = 4;
 					}
 				}
 				/*デバッグ用*/
-				if (music.notes[i].gettime() <= (msec + speed) &&
+				/*if (music.notes[i].gettime() <= (msec + speed) &&
 					music.notes[i].getflag() != -1) {
 					debugcount++;
 					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
@@ -213,7 +268,12 @@ public:
 					DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
 					DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
 					DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
-				}
+				}*/
+			}
+			DrawFormatString(0, 200, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
+			for (int j = 0; j < 2; j++) {
+				DrawFormatString(0, 230 + j * 30, GetColor(255, 255, 255), "(%d,", holdkey[j].noteID);
+				DrawFormatString(40, 230 + j * 30, GetColor(255, 255, 255), "%d)", holdkey[j].key);
 			}
 			/*判定を表示する必要性があったとき*/
 			if (judge_number != -1) {
@@ -284,42 +344,71 @@ public:
 	}
 
 	/*ボタン判定の記述*/
-	/*return -1, 0,1,2,3*/
-	void Judge(int i) {
+	void PlayKey(int i) {
 		/*BAD判定内の場合*/
 		if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
-			/*押された時間の取得*/
-			double _clear_time = abs(music.notes[i].gettime() - msec);
+			/*ロングノーツ終点の判定*/
+			for (int j = 0; j < holdKeyCount; j++) {
+				if (holdkey[j].key == 0) break;
+				
+				if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
+					/*ボタンが離されていたら*/
+					if (!input.LongHoldKey(holdkey[j].key)) {
+						Judge(i);
 
-			/*ボタンが押されていたら*/
-			if (input.PushOneframe_PlayGame(music.notes[i].getend_x())) {
-				music.notes[i].setflag(-1);
-				if (_clear_time <= PERFECTtime / 2.0) {
-					combo++;
-					score += 300;
-					PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
-					judge_number = 0;
-					return;
-				}
-				else if (_clear_time <= GREATtime / 2.0) {
-					combo++;
-					score += 150;
-					judge_number = 1;
-					return;
-				}
-				else if (_clear_time <= NICEtime / 2.0) {
-					combo = 0;
-					score += 100;
-					judge_number = 2;
-					return;
-				}
-				else {
-					combo = 0;
-					score += 50;
-					judge_number = 3;
-					return;
+						holdkey[j].noteID = holdkey[j].key = 0;
+						holdKeyCount--;
+						if (j == 0 && holdkey[1].key > 0) {
+							holdkey[0].noteID = holdkey[1].noteID;
+							holdkey[0].key = holdkey[1].key;
+							holdkey[1].noteID = holdkey[1].key = 0;
+						}
+					}
 				}
 			}
+			/*ノーツの判定*/
+			if (input.PushOneframe_PlayGame(music.notes[i].getend_x())) {
+				Judge(i);
+				music.notes[i].setflag(-1);
+			}
+		}
+	}
+
+	void Judge(int i) {
+		/*押された時間の取得*/
+		double _clear_time = abs(music.notes[i].gettime() - msec);
+
+		if (_clear_time <= GREATtime / 2.0) {
+			/*ロングノーツなら*/
+			if (music.notes[i].getType() == 4) {
+				holdkey[holdKeyCount].Set(i, music.notes[i].getend_x());
+				holdKeyCount++;
+			}
+		}
+		if (_clear_time <= PERFECTtime / 2.0) {
+			combo++;
+			score += 300;
+			PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
+			judge_number = 0;
+			return;
+		}
+		else if (_clear_time <= GREATtime / 2.0) {
+			combo++;
+			score += 150;
+			judge_number = 1;
+			return;
+		}
+		else if (_clear_time <= NICEtime / 2.0) {
+			combo = 0;
+			score += 100;
+			judge_number = 2;
+			return;
+		}
+		else {
+			combo = 0;
+			score += 50;
+			judge_number = 3;
+			return;
 		}
 	}
 
@@ -327,6 +416,7 @@ public:
 	void AutoMode(int i) {
 		/*中心バーを越えたらすぐ*/
 		if (music.notes[i].gettime() <= msec) {
+			/*フリック音*/
 			if (music.notes[i].getType() == 1 || music.notes[i].getType() == 3) {
 				PlaySoundMem(SE[1], DX_PLAYTYPE_BACK, TRUE);
 			}
@@ -337,6 +427,23 @@ public:
 			score += 300;
 			judge_number = 0;
 			music.notes[i].setflag(-1);
+			/*ロングノーツなら*/
+			if (music.notes[i].getType() == 4) {
+				holdkey[holdKeyCount].Set(i, music.notes[i].getend_x());
+				holdKeyCount++;
+			}
+			for (int j = 0; j < holdKeyCount; j++) {
+				if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
+					holdkey[j].noteID = holdkey[j].key = 0;
+					holdKeyCount--;
+					if (j == 0 && holdkey[1].key > 0) {
+						holdkey[0].noteID = holdkey[1].noteID;
+						holdkey[0].key = holdkey[1].key;
+						holdkey[1].noteID = holdkey[1].key = 0;
+						j--;
+					}
+				}
+			}
 		}
 	}
 

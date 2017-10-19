@@ -6,15 +6,14 @@ class InputKey{
 private:
 	int keytime[keytype];
 	int GameKey[gameKey_type];
+	int holdGameKey[gameKey_type];
 	bool PushOneframe(int id, int keyCode) {
 		if (CheckHitKey(keyCode) == 1) keytime[id]++;
 		else keytime[id] = 0;
 		return keytime[id] == 1;
 	}
-public:
-	/*D、F、G、H、J
-	number = 1,2,3,4,5*/
-	bool PushOneframe_PlayGame(int number) {
+	/*D、F、G、H、J*/
+	int getGameKeyCode(int number) {
 		int keyCode;
 		switch (number) {
 		case 1:
@@ -33,11 +32,24 @@ public:
 			keyCode = KEY_INPUT_J;
 			break;
 		}
+		return keyCode;
+	}
+public:
+	/*number = 1,2,3,4,5*/
+	bool PushOneframe_PlayGame(int number) {
+		int keyCode = getGameKeyCode(number);
 		int id = number - 1;
 		if (CheckHitKey(keyCode) == 1) GameKey[id]++;
 		else GameKey[id] = 0;
 
 		return GameKey[id] == 1;
+	}
+	/*ロングノーツ時に使用
+	number = 1,2,3,4,5
+	return CheckHitKey(keyCode)*/
+	bool LongHoldKey(int number) {
+		int keyCode = getGameKeyCode(number);
+		return CheckHitKey(keyCode);
 	}
 
 	/*0, KEY_INPUT_SPACE*/
