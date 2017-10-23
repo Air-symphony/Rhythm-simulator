@@ -28,7 +28,7 @@ public:
 		y = 0;*/
 	Note() {
 		id = type = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
-		x = 0; y = 50; time = 0.0; flag = -1;
+		x = y = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
 		type = first_x = end_x = bar_number = -1;
@@ -36,7 +36,7 @@ public:
 	Note(int _id) {
 		id = _id;
 		type = first_x = end_x = bar_number = -1;
-		x = 0; y = 50; time = 0.0; flag = false;
+		x = y = 0; time = 0.0; flag = false;
 	}
 	void setID(int _id) {
 		id = _id;

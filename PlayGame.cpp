@@ -13,9 +13,9 @@ class GameScreen {
 private:
 	Display display;
 	Music music;
-	Graph ring;
+	Graph ring, Line;
 	Graph noteGraph[4];
-	Graph Line;
+	HitEffect effect;
 	int SE[2];
 	InputKey input;//ボタン入力
 	double msec;//経過時間(s)
@@ -84,7 +84,8 @@ public:
 
 		FileReader file;
 		music = file.SelectReadFile(id);
-		music.setX(judgePos_x);
+		music.SetPos(judgePos_x, 50.0);
+		effect.SetPos(judgePos_x, judgePos_y);
 		msec = 0;
 		Start();
 	}
@@ -256,7 +257,7 @@ public:
 					}
 				}
 				/*デバッグ用*/
-				/*if (music.notes[i].gettime() <= (msec + speed) &&
+				if (music.notes[i].gettime() <= (msec + speed) &&
 					music.notes[i].getflag() != -1) {
 					debugcount++;
 					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
@@ -268,13 +269,14 @@ public:
 					DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
 					DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
 					DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
-				}*/
+				}
 			}
-			DrawFormatString(0, 200, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
+			/*デバッグ用*/
+			/*DrawFormatString(0, 200, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
 			for (int j = 0; j < 2; j++) {
 				DrawFormatString(0, 230 + j * 30, GetColor(255, 255, 255), "(%d,", holdkey[j].noteID);
 				DrawFormatString(40, 230 + j * 30, GetColor(255, 255, 255), "%d)", holdkey[j].key);
-			}
+			}*/
 			/*判定を表示する必要性があったとき*/
 			if (judge_number != -1) {
 				printjudge_time = msec;
@@ -327,6 +329,9 @@ public:
 		if (autoMode) {
 			DrawString(0, display.GetScreenY() - 20, "AutoMode", GetColor(255, 255, 255));
 		}
+
+		/*エフェクトの表示*/
+		effect.PrintEffect();
 
 		/*リングの表示*/
 		//ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
@@ -388,6 +393,7 @@ public:
 		if (_clear_time <= PERFECTtime / 2.0) {
 			combo++;
 			score += 300;
+			effect.Hit(music.notes[i].getend_x());
 			PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
 			judge_number = 0;
 			return;
@@ -417,6 +423,7 @@ public:
 		/*中心バーを越えたらすぐ*/
 		if (music.notes[i].gettime() <= msec) {
 			/*フリック音*/
+			effect.Hit(music.notes[i].getend_x());
 			if (music.notes[i].getType() == 1 || music.notes[i].getType() == 3) {
 				PlaySoundMem(SE[1], DX_PLAYTYPE_BACK, TRUE);
 			}

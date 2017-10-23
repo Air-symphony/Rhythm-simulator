@@ -95,6 +95,7 @@ public:
 	}
 	/*
 	画像サイズ変更
+	_time = 時間制限、dt=今の時間
 	if (time < dt) dt = time;
 	double dx = ((double)sizeX / sqrt(time)) * sqrt(dt);
 	double dy = ((double)sizeY / sqrt(time)) * sqrt(dt);
@@ -105,7 +106,20 @@ public:
 		if (time < dt) dt = time;
 		double dx = ((double)sizeX / sqrt(time)) * sqrt(dt);
 		double dy = ((double)sizeY / sqrt(time)) * sqrt(dt);
-		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0, 
+		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
+			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
+	}
+	/*_time = 時間制限、dt=今の時間
+	if (time < dt) dt = time;
+		double dx = ((double)sizeX / time) * dt;
+		double dy = ((double)sizeY / time) * dt;
+		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
+			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);*/
+	void DrawHitEffect(int x, int y, double time, double dt) {
+		if (time < dt) dt = time;
+		double dx = ((double)sizeX / time) * dt;
+		double dy = ((double)sizeY / time) * dt;
+		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
 			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
 	}
 };
