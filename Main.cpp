@@ -9,7 +9,7 @@ InputKey input;
 class GameSimulator {
 private:
 	int scenecount = 3;
-	int musiccount = 2 + 1;
+	int musiccount = 3 + 1;
 	InputKey input;
 
 public:
@@ -67,7 +67,7 @@ public:
 			}
 			else if (_type == 2) {
 				printfDx("Please Select Music.\n");
-				printfDx("1.Snow Wings 2.TOKIMEKI 0.Cancel\n");
+				printfDx("1.Snow Wings 2.ススメオトメ 3.TOKIMEKI 0.Cancel\n");
 			}
 			printfDx("number = %d", number);
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 

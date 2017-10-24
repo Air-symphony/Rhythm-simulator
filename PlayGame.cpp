@@ -272,11 +272,11 @@ public:
 				}
 			}
 			/*デバッグ用*/
-			/*DrawFormatString(0, 200, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
+			DrawFormatString(0, 200, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
 			for (int j = 0; j < 2; j++) {
 				DrawFormatString(0, 230 + j * 30, GetColor(255, 255, 255), "(%d,", holdkey[j].noteID);
 				DrawFormatString(40, 230 + j * 30, GetColor(255, 255, 255), "%d)", holdkey[j].key);
-			}*/
+			}
 			/*判定を表示する必要性があったとき*/
 			if (judge_number != -1) {
 				printjudge_time = msec;

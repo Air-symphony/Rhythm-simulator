@@ -5,26 +5,7 @@ c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.
 c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\hiteffect.cpp(41): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
 c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\inputkey.cpp(52): warning C4800: 'int': ブール値を 'true' または 'false' に強制的に設定します (警告の処理)
 c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\playgame.cpp(152): warning C4244: '引数': 'const double' から 'int' への変換です。データが失われる可能性があります。
-  HitEffect.cpp
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(110): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(123): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\hiteffect.cpp(41): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
+  スキップ中... (関連する変更は検出されませんでした)
   FileReader.cpp
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(110): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(123): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\hiteffect.cpp(41): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-  PlayGame.cpp
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(110): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(123): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\hiteffect.cpp(41): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\inputkey.cpp(52): warning C4800: 'int': ブール値を 'true' または 'false' に強制的に設定します (警告の処理)
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\playgame.cpp(152): warning C4244: '引数': 'const double' から 'int' への変換です。データが失われる可能性があります。
-  Note.cpp
-  InputKey.cpp
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\inputkey.cpp(52): warning C4800: 'int': ブール値を 'true' または 'false' に強制的に設定します (警告の処理)
-  Graphics.cpp
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(110): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\graphics.cpp(123): warning C4244: '引数': 'double' から 'int' への変換です。データが失われる可能性があります。
-  コードを生成中...
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.exe
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.pdb (Full PDB)

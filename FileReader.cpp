@@ -356,7 +356,7 @@ public:
 				//x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), " %lf", music.notes[_testID + i].gettime());
 				//x += 100;
-				/*DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
+				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
 				x += 20;
 				//DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", music.notes[_testID + i].getType());
 				//x += 20;
@@ -367,10 +367,42 @@ public:
 				DrawFormatString(x, y, GetColor(255, 255, 255), "long:%d", music.notes[_testID + i].getlongNoteID());
 				x += 80;
 			}*/
+			ClearDrawScreen();
+			int _testID = noteID - _notecount;
+			int y = 64 + 16 * 1;
+			int x = 0;
+			DrawFormatString(x, y, GetColor(255, 255, 255), "%d:", bar_number);
+			x += 30;
+			DrawFormatString(x, y, GetColor(255, 255, 255), "%d/", _notecount);
+			x += 25;
+			DrawFormatString(x, y, GetColor(255, 255, 255), "%d, ", rhythm_note);
+			y += 16;
+			DrawString(0, y, "ID  time     (num, ty, f-e) long", GetColor(255, 255, 255));
+			y += 16;
+			for (int i = 0; i < _notecount; i++) {
+				int x = 0;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "%d", music.notes[_testID + i].getID());
+				x += 30;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "%lf", music.notes[_testID + i].gettime());
+				x += 100;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d,", _timing[i]);
+				x += 30;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d,", music.notes[_testID + i].getType());
+				x += 20;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d-", music.notes[_testID + i].getfirst_x());
+				x += 20;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[_testID + i].getend_x());
+				x += 35;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d", music.notes[_testID + i].getlongNoteID());
+				x += 80;
+				y += 16;
+			}
+			ScreenFlip();
+			WaitKey();//53小節目、ロングノーツ未接続
 		}
 		FileRead_close(FileHandle);
-		//ScreenFlip();
-		//WaitKey();
+		ScreenFlip();
+		WaitKey();
 	}
 
 	/*1. snow wings 2 tokimeki*/
@@ -383,6 +415,9 @@ public:
 				strcat_s(_filepath, "Snow Wings.txt");
 			}
 			else if (id == 2) {
+				strcat_s(_filepath, "ススメオトメ.txt");
+			}
+			else if (id == 3) {
 				strcat_s(_filepath, "TOKIMEKI.txt");
 			}
 			FileHandle = FileRead_open(_filepath);
