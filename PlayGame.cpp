@@ -100,6 +100,7 @@ public:
 		double stop_time = 0.0;
 
 		autoMode = true;
+		SetFontSize(16);
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			/*ゲーム進行時間(s)*/
@@ -257,10 +258,10 @@ public:
 					}
 				}
 				/*デバッグ用*/
+				DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
 				if (music.notes[i].gettime() <= (msec + speed) &&
 					music.notes[i].getflag() != -1) {
 					debugcount++;
-					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
 					int y = 96 + debugcount * 16;
 					DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
 					DrawFormatString(30, y, GetColor(255, 255, 255), " %d ", music.notes[i].getType());
@@ -272,11 +273,13 @@ public:
 				}
 			}
 			/*デバッグ用*/
-			DrawFormatString(0, 200, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
+			int longnote_y = 300;
+			DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
 			for (int j = 0; j < 2; j++) {
-				DrawFormatString(0, 230 + j * 30, GetColor(255, 255, 255), "(%d,", holdkey[j].noteID);
-				DrawFormatString(40, 230 + j * 30, GetColor(255, 255, 255), "%d)", holdkey[j].key);
+				DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d", holdkey[j].noteID);
+				DrawFormatString(50, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
 			}
+
 			/*判定を表示する必要性があったとき*/
 			if (judge_number != -1) {
 				printjudge_time = msec;

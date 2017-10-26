@@ -292,7 +292,7 @@ public:
 			for (int i = 0; i < _notecount; i++) {
 				double time = music.rhythm.CalculateTime(bar_number, _timing[i], rhythm_note);
 				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
-				music.notes[noteID].setNote(noteID, _type[i], _first_x[i], _end_x[i], time);
+				music.notes[noteID].setNote(noteID, channel, _type[i], _first_x[i], _end_x[i], time, bar_number + 1);
 
 				/*同時押し*/
 				if (same_bar_number) {
@@ -311,8 +311,10 @@ public:
 				/*ロングノーツの連結*/
 				for (int i = 0; i < memory.count; i++) {
 					if (0 < memory.longNoteID[i] && memory.longNoteID[i] < noteID) {
-						if (music.notes[memory.longNoteID[i]].getfirst_x() == music.notes[noteID].getfirst_x() &&
-							music.notes[memory.longNoteID[i]].getend_x() == music.notes[noteID].getend_x()
+						if (music.notes[memory.longNoteID[i]].getchannel() == music.notes[noteID].getchannel() &&
+							music.notes[memory.longNoteID[i]].getfirst_x() == music.notes[noteID].getfirst_x() &&
+							music.notes[memory.longNoteID[i]].getend_x() == music.notes[noteID].getend_x() &&
+							music.notes[memory.longNoteID[i]].gettime() < music.notes[noteID].gettime()
 							) {
 							music.notes[memory.longNoteID[i]].setlongNoteID(noteID);
 							memory.longNoteID[i] = -1;
@@ -324,8 +326,15 @@ public:
 				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0)) {
 					/*同じ方向のフリックの連結*/
 					if (channel == 0 || channel == 1) {
-						if (_type[i] == _type[i - 1]) {
-							music.notes[noteID - 1].setlinkNoteID(noteID);
+						if (_type[i] == _type[i - 1]){
+							if (_type[i - 1] == 1 &&
+								(music.notes[noteID - 1].getend_x() - 1) == music.notes[noteID].getend_x()) {
+								music.notes[noteID - 1].setlinkNoteID(noteID);
+							}
+							else if (_type[i - 1] == 3 &&
+								(music.notes[noteID - 1].getend_x() + 1) == music.notes[noteID].getend_x()) {
+								music.notes[noteID - 1].setlinkNoteID(noteID);
+							}
 						}
 					}
 					/*ジグザグなフリックの連結*/
@@ -367,7 +376,7 @@ public:
 				DrawFormatString(x, y, GetColor(255, 255, 255), "long:%d", music.notes[_testID + i].getlongNoteID());
 				x += 80;
 			}*/
-			ClearDrawScreen();
+			/*ClearDrawScreen();
 			int _testID = noteID - _notecount;
 			int y = 64 + 16 * 1;
 			int x = 0;
@@ -396,13 +405,55 @@ public:
 				DrawFormatString(x, y, GetColor(255, 255, 255), " %d", music.notes[_testID + i].getlongNoteID());
 				x += 80;
 				y += 16;
-			}
+			}*/
 			ScreenFlip();
-			WaitKey();//53小節目、ロングノーツ未接続
+			//WaitKey();//53小節目、ロングノーツ未接続
 		}
 		FileRead_close(FileHandle);
+
+		/*デバッグ用*/
+		int t = 0, mass = 15, fontsize = 20;
+		SetFontSize(fontsize);
+		while (ProcessMessage() == 0 
+			&& CheckHitKey(KEY_INPUT_ESCAPE) == 0 
+			&& CheckHitKey(KEY_INPUT_SPACE) == 0
+			) {
+			int y = 64;
+			if (CheckHitKey(KEY_INPUT_UP)) {
+				t--;
+				if (t < 0) t = 0;
+			}
+			else if (CheckHitKey(KEY_INPUT_DOWN)) {
+				t++;
+				if (t + mass >= noteID) t = noteID - mass;
+			}
+			ClearDrawScreen();
+			DrawString(0, y, "bar ID    time     (f-e) type side,long,flic", GetColor(255, 255, 255));
+			for (int i = t; i < t + mass; i++) {
+				y += fontsize;
+				int x = 0;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d", music.notes[i].getbar_number());
+				x += 45;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
+				x += 45;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "%lf", music.notes[i].gettime());
+				x += 120;
+				DrawFormatString(x, y, GetColor(255, 255, 255), "(%d-", music.notes[i].getfirst_x());
+				x += 25;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d)", music.notes[i].getend_x());
+				x += 35;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d  ", music.notes[i].getType());
+				x += 45;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d  ", music.notes[i].getsideNoteID());
+				x += 50;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d  ", music.notes[i].getlongNoteID());
+				x += 55;
+				DrawFormatString(x, y, GetColor(255, 255, 255), " %d", music.notes[i].getlinkNoteID());
+			}
+			ScreenFlip();
+		}
 		ScreenFlip();
-		WaitKey();
+		//WaitKey();
 	}
 
 	/*1. snow wings 2 tokimeki*/

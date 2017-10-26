@@ -13,7 +13,7 @@ double time; 処理される時間(バーに来る時間)
 */
 class Note {
 private:
-	int id, type;
+	int id, type, channel;
 	int flag;//0=未消化、1=表示、-1=消化済
 	int first_x, end_x;
 	int x, y;
@@ -27,7 +27,7 @@ public:
 	/*id = type = first_x = end_x = bar_number = -1;
 		y = 0;*/
 	Note() {
-		id = type = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
+		id = type = channel = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
 		x = y = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
@@ -84,13 +84,16 @@ public:
 	void setNote(int _id, int _type) {
 		setID(id); setType(type);
 	}
+	void setchannel(int _channel) {
+		channel = _channel;
+	}
 	/*
 	int id, int noteの種類, int 出だし位置, int 終わり位置, double 処理される時間(バーに来る時間)
 	setflag() 0=未消化、1=表示、-1=消化済;
 	*/
-	void setNote(int id, int type, int _first_x, int _end_x, double _time) {
-		setID(id); setType(type); setX(_first_x, _end_x); settime(_time);
-		setflag(0);
+	void setNote(int id, int _channel, int type, int _first_x, int _end_x, double _time, int _bar_number) {
+		setID(id); setType(type); setchannel(_channel); setX(_first_x, _end_x); settime(_time);
+		setflag(0); setbar_number(_bar_number);
 	}
 	/*
 	int id, int noteの種類, int 出だし位置, int 終わり位置, int 何小節目, int 何分音符
@@ -128,6 +131,9 @@ public:
 	/*0=未消化、1=表示、-1=消化済*/
 	int getflag() {
 		return flag;
+	}
+	int getchannel() {
+		return channel;
 	}
 	void setY(int _y) {
 		y = _y;
