@@ -317,6 +317,7 @@ public:
 							music.notes[memory.longNoteID[i]].gettime() < music.notes[noteID].gettime()
 							) {
 							music.notes[memory.longNoteID[i]].setlongNoteID(noteID);
+							music.notes[noteID].setlongNoteID(memory.longNoteID[i]);
 							memory.longNoteID[i] = -1;
 							memory.CompressionlongNoteID();
 						}

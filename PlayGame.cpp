@@ -14,7 +14,8 @@ private:
 	Display display;
 	Music music;
 	Graph ring, Line;
-	Graph noteGraph[4];
+	/*0=左, 1=普通, 2=右, 3=ロング, 4=ロング先*/
+	Graph noteGraph[5];
 	HitEffect effect;
 	int SE[2];
 	InputKey input;//ボタン入力
@@ -68,7 +69,7 @@ public:
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
 		ring.setDisplay(display);
 		Line.setDisplay(display);
-		for (int i = 1; i <= 4; i++) {
+		for (int i = 1; i <= 5; i++) {
 			char _imagepath[256];
 			strcpy_s(_imagepath, "materials\\Image\\Note");
 			char _number[256];
@@ -199,7 +200,7 @@ public:
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
 							/*画面上にいる場合*/
-							if (music.notes[i].getflag() >= 0) {
+							if (music.notes[i].getflag() >= 0 && music.notes[i].getType() == 4) {
 								Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
 									music.notes[music.notes[i].getlongNoteID()].getX(),
 									music.notes[music.notes[i].getlongNoteID()].getY()
@@ -223,14 +224,24 @@ public:
 									music.notes[music.notes[i].getsideNoteID()].getX(),
 									music.notes[music.notes[i].getsideNoteID()].getY()
 								);
+								/*ノーツの描画*/
 								noteGraph[music.notes[music.notes[i].getsideNoteID()].getType() - 1]
 									.DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
-
+								if (music.notes[music.notes[i].getsideNoteID()].getlongNoteID() > 0 && 
+									music.notes[music.notes[i].getsideNoteID()].getType() == 2) {
+									noteGraph[4].DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), 
+										music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
+								}
 							}
 						}
 						/*ノーツの描画*/
-						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
-						
+						if (music.notes[i].getlongNoteID() > 0 && music.notes[i].getType() == 2) {
+							noteGraph[4].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
+						}
+						else {
+							noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
+						}
+
 						/*判定内容*/
 						if (autoMode) AutoMode(i);
 						else PlayKey(i);
