@@ -1,13 +1,8 @@
-#include "FileReader.cpp"
+#include "NoteFileReader.cpp"
 #include "InputKey.cpp"
 /*
 game画面
-Display display;
-Music music;
-Graph ring;
-InputKey input;
-GameScreen(Display _display, int id)
-id = 楽曲データ
+Display _display, char filename[], bool _debugMode, bool _autoMode
 */
 class GameScreen {
 private:
@@ -19,8 +14,8 @@ private:
 	HitEffect effect;
 	int SE[2];
 	InputKey input;//ボタン入力
-	double msec;//経過時間(s)
-	double d_msec;//デバッグ用、変化値
+	double msec = 0;//経過時間(s)
+	double d_msec = 0;//デバッグ用、変化値
 
 	/*判定位置の座標*/
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
@@ -48,23 +43,23 @@ private:
 		}
 	};
 	int holdKeyCount = 0;
-	/*
-	int noteID = 0;
-	int key = 0;
-	*/
+
 	HoldKey holdkey[2];
 
 	/*AutoModeの真偽*/
 	bool autoMode = false;
+	bool debugMode = false;
 
 	const double PERFECTtime = 0.066;
 	const double GREATtime = 0.090;
 	const double NICEtime = 0.115;
 	const double BADtime = 0.130;
 public:
-	/*id = 楽曲データ
+	/*
+	filename = 0000.txt
+
 	*/
-	GameScreen(Display _display, int id) {
+	GameScreen(Display _display, char filename[], bool _debugMode, bool _autoMode) {
 		display = _display;
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
 		ring.setDisplay(display);
@@ -83,8 +78,10 @@ public:
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[0]);
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[1]);
 
-		FileReader file;
-		music = file.SelectReadFile(id);
+		autoMode = _autoMode;
+		debugMode = _debugMode;
+		NoteFileReader file;
+		music = file.SelectReadFile(filename, _debugMode);
 		music.SetPos(judgePos_x, 50.0);
 		effect.SetPos(judgePos_x, judgePos_y);
 		msec = 0;
@@ -92,6 +89,21 @@ public:
 	}
 
 	void Start() {
+		SetFontSize(16);
+
+		ClearDrawScreen();
+		clsDx();
+		DrawScreen();
+
+		DrawString(display.GetScreenX() / 2 - 50, display.GetScreenY() / 2, 
+			"Push Space", GetColor(255,255,255));
+		ScreenFlip();
+		while (ProcessMessage() == 0 
+			&& input.ForcedTermination()) {
+
+			if (input.PushOneframe_Decide())
+				break;
+		}
 		/*ゲーム開始時間の取得(ms)*/
 		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
 		/*曲が始まる時間　GetNowCount() - music.offset*/
@@ -100,8 +112,6 @@ public:
 		/*止まり始めた時間(ms)*/
 		double stop_time = 0.0;
 
-		autoMode = true;
-		SetFontSize(16);
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			/*ゲーム進行時間(s)*/
@@ -148,7 +158,7 @@ public:
 					if (input.LongHoldKey(holdkey[j].key) || autoMode) {
 						Line.Draw_LinkLine(
 							(int)(music.notes[holdkey[j].noteID].getend_x() * judgePos_x),
-							judgePos_y,
+							(int)judgePos_y,
 							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getX(),
 							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getY()
 						);
@@ -269,26 +279,30 @@ public:
 					}
 				}
 				/*デバッグ用*/
-				DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
-				if (music.notes[i].gettime() <= (msec + speed) &&
-					music.notes[i].getflag() != -1) {
-					debugcount++;
-					int y = 96 + debugcount * 16;
-					DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
-					DrawFormatString(30, y, GetColor(255, 255, 255), " %d ", music.notes[i].getType());
-					DrawFormatString(50, y, GetColor(255, 255, 255), " %d ", music.notes[i].getfirst_x());
-					DrawFormatString(70, y, GetColor(255, 255, 255), "-%d ", music.notes[i].getend_x());
-					DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
-					DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
-					DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
+				if (debugMode) {
+					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
+					if (music.notes[i].gettime() <= (msec + speed) &&
+						music.notes[i].getflag() != -1) {
+						debugcount++;
+						int y = 96 + debugcount * 16;
+						DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
+						DrawFormatString(30, y, GetColor(255, 255, 255), " %d ", music.notes[i].getType());
+						DrawFormatString(50, y, GetColor(255, 255, 255), " %d ", music.notes[i].getfirst_x());
+						DrawFormatString(70, y, GetColor(255, 255, 255), "-%d ", music.notes[i].getend_x());
+						DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
+						DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
+						DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
+					}
 				}
 			}
 			/*デバッグ用*/
-			int longnote_y = 300;
-			DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
-			for (int j = 0; j < 2; j++) {
-				DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d", holdkey[j].noteID);
-				DrawFormatString(50, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
+			if (debugMode) {
+				int longnote_y = 300;
+				DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
+				for (int j = 0; j < 2; j++) {
+					DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d", holdkey[j].noteID);
+					DrawFormatString(50, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
+				}
 			}
 
 			/*判定を表示する必要性があったとき*/
@@ -305,12 +319,13 @@ public:
 
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 
-						 /*ゲーム画面の強制終了*/
+			/*ゲーム画面の強制終了*/
 			if (input.PushOneframe_Debug()) {
 				StopSoundMem(music.soundHandle);
 				DeleteSoundMem(music.soundHandle);
 				DeleteSoundMem(SE[0]);
 				DeleteSoundMem(SE[1]);
+				clsDx();
 				break;
 			}
 		}
@@ -328,9 +343,11 @@ public:
 		DrawFormatString(0, 64, GetColor(255, 255, 255), "score = %d", score);
 		DrawFormatString(0, 80, GetColor(255, 255, 255), "combo = %d", combo);
 
-		/*1フレーム当たりの秒数*/
-		DrawFormatString(100, 48, GetColor(255, 255, 255), "%d(ms)", (int)((msec - d_msec) * 1000.0));
-		d_msec = msec;
+		if (debugMode) {
+			/*1フレーム当たりの秒数*/
+			DrawFormatString(100, 48, GetColor(255, 255, 255), "%d(ms)", (int)((msec - d_msec) * 1000.0));
+			d_msec = msec;
+		}
 
 		char c[256];
 		sprintf_s(c, 256, "title = %s\n", music.title);

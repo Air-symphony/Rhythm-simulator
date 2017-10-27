@@ -1,6 +1,6 @@
 #include <Math.h>
 /*Noteデータ
-int id, type; 1,2,3,4
+int id, type 1,2,3,4, channel 0,1,2,3
 int flag; 0=未消化、1=表示、-1=消化済
 int first_x, end_x; 1,2,3,4,5
 int x, y; 描画用

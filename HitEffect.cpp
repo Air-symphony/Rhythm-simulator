@@ -38,7 +38,7 @@ public:
 	void PrintEffect() {
 		for (int i = 0; i < type; i++) {
 			if (0.0 < time[i]) {
-				effect.DrawHitEffect(posX * (i + 1), posY, moveTime, (double)GetNowCount() / 1000.0 - time[i]);
+				effect.DrawHitEffect((int)posX * (i + 1), (int)posY, moveTime, (double)GetNowCount() / 1000.0 - time[i]);
 				if (finishTime <= GetNowCount() / 1000.0 - time[i]) {
 					time[i] = 0.0;
 				}

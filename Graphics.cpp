@@ -106,8 +106,8 @@ public:
 		if (time < dt) dt = time;
 		double dx = ((double)sizeX / sqrt(time)) * sqrt(dt);
 		double dy = ((double)sizeY / sqrt(time)) * sqrt(dt);
-		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
-			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
+		DrawExtendGraph((int)(x - dx / 2.0), (int)(y - dy / 2.0),
+			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
 	}
 	/*_time = ŽžŠÔ§ŒÀAdt=¡‚ÌŽžŠÔ
 	if (time < dt) dt = time;
@@ -119,7 +119,7 @@ public:
 		if (time < dt) dt = time;
 		double dx = ((double)sizeX / time) * dt;
 		double dy = ((double)sizeY / time) * dt;
-		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
-			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
+		DrawExtendGraph((int)(x - dx / 2.0), (int)(y - dy / 2.0),
+			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
 	}
 };

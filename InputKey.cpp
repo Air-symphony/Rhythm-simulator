@@ -1,6 +1,6 @@
 #include "DxLib.h"
 
-const int keytype = 7;//1frameボタンの種類
+const int keytype = 9;//1frameボタンの種類
 const int gameKey_type = 5;//gane中のキー
 class InputKey{
 private:
@@ -49,7 +49,7 @@ public:
 	return CheckHitKey(keyCode)*/
 	bool LongHoldKey(int number) {
 		int keyCode = getGameKeyCode(number);
-		return CheckHitKey(keyCode);
+		return CheckHitKey(keyCode) > 0;
 	}
 
 	/*0, KEY_INPUT_SPACE*/
@@ -76,9 +76,17 @@ public:
 	bool PushOneframe_DOWN() {
 		return PushOneframe(5, KEY_INPUT_DOWN);
 	}
-	/*6, KEY_INPUT_P*/
+	/*6, KEY_INPUT_LEFT*/
+	bool PushOneframe_LEFT() {
+		return PushOneframe(6, KEY_INPUT_LEFT);
+	}
+	/*7, KEY_INPUT_RIGHT*/
+	bool PushOneframe_RIGHT() {
+		return PushOneframe(7, KEY_INPUT_RIGHT);
+	}
+	/*8, KEY_INPUT_P*/
 	bool PushOneframe_ChangeAutoMode() {
-		return PushOneframe(6, KEY_INPUT_P);
+		return PushOneframe(8, KEY_INPUT_P);
 	}
 
 	/*強制終了
