@@ -5,13 +5,21 @@ private:
 	int FileHandle;
 	char FileListpath[50] = "materials\\NoteFile\\FileList.txt";
 	int ConfigFileHandle;
-	char Configpath[50] = "materials\\Config.dll";
+	char Configpath[25] = "materials\\Config.dll";
 	char *next;
 	char *ctx;//“à•”—˜—p
 public:
+	char AutoMode[15] = "AutoMode";
+	char DebugMode[15] = "DebugMode";
+	char SPEED[15] = "SPEED";
+	char connectText[2] = ":";
+	char True[5] = "true";
+	char False[6] = "false";
+
 	char fileList[10][256];
 	int fileCount = 0;
 	bool autoMode, debugMode;
+	int speed;
 
 	void ReadFileList() {
 		FileHandle = FileRead_open(FileListpath);
@@ -49,20 +57,30 @@ public:
 				char string[256];
 				FileRead_gets(string, 256, ConfigFileHandle);
 
-				next = strtok_s(string, ":", &ctx);
-				if (strcmp(next, "AutoMode") == 0) {
+				next = strtok_s(string, connectText, &ctx);
+				if (strcmp(next, AutoMode) == 0) {
 					next = strtok_s(NULL, ",", &ctx);
-					if (strcmp(next, "0") == 0 || strcmp(next, "false") == 0)
+					if (strcmp(next, "0") == 0 || strcmp(next, False) == 0)
 						autoMode = false;
-					else if (strcmp(next, "1") == 0 || strcmp(next, "true") == 0)
+					else if (strcmp(next, "1") == 0 || strcmp(next, True) == 0)
 						autoMode = true;
 				}
-				else if (strcmp(next, "DebugMode") == 0) {
+				else if (strcmp(next, DebugMode) == 0) {
 					next = strtok_s(NULL, ",", &ctx);
-					if (strcmp(next, "0") == 0 || strcmp(next, "false") == 0)
+					if (strcmp(next, "0") == 0 || strcmp(next, False) == 0)
 						debugMode = false;
-					else if (strcmp(next, "1") == 0 || strcmp(next, "true") == 0)
+					else if (strcmp(next, "1") == 0 || strcmp(next, True) == 0)
 						debugMode = true;
+				}
+				else if (strcmp(next, SPEED) == 0) {
+					next = strtok_s(NULL, ",", &ctx);
+					for (int i = 0; i < 2; i++) {
+						int c = (int)(next[i] - '0');
+						for (int j = 0; j < (1 - i); j++) {
+							c *= 10;
+						}
+						speed += c;
+					}
 				}
 			}
 		}
@@ -74,13 +92,31 @@ public:
 		int err_no = fopen_s(&fp, Configpath, "w");
 		if (err_no != 0) return false;
 
-		fprintf(fp, "AutoMode:");
-		if (autoMode) fprintf(fp, "true");
-		else fprintf(fp, "false");
+		char string[100];
+		strcat_s(string, AutoMode);
+		strcat_s(string, connectText);
+		fprintf(fp, string);
+		if (autoMode) fprintf(fp, True);
+		else fprintf(fp, False);
 
-		fprintf(fp, "\nDebugMode:");
-		if (debugMode) fprintf(fp, "true");
-		else fprintf(fp, "false");
+		strcpy_s(string, "\n");
+		strcat_s(string, DebugMode);
+		strcat_s(string, connectText);
+		fprintf(fp, string);
+		if (debugMode) fprintf(fp, True);
+		else fprintf(fp, False);
+
+		strcpy_s(string, "\n");
+		strcat_s(string, SPEED);
+		strcat_s(string, connectText);
+		fprintf(fp, string);
+		if (speed == 10) fprintf(fp, "10");
+		else {
+			fprintf(fp, "0");
+			char c[5];
+			sprintf_s(c, 5, "%d", speed);
+			fprintf(fp, c);
+		}
 		
 		fclose(fp);
 		return true;

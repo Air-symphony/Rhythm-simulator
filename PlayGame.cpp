@@ -21,15 +21,21 @@ private:
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
 	const double judgePos_x = display.GetScreenX() / 6.0;
-	/*速度変更上限*/
-	int speedCount = 8;
-	int Max_speedCount = 9;
+	/*速度変更上限 0 ~ 9*/
+	int speedCount = 1, Max_speedCount = 9;
 	/*Maxspeed = 0.3, Minspeed = 2.0;*/
 	double Maxspeed = 0.3, Minspeed = 2.0;
+
+	/*
+	曲が始まるまでの時間
+	waitTime = 3000;
+	*/
+	int waitTime = 3000;
+
 	/*(Minspeed - Maxspeed) / 9.0;*/
 	double d_speed = (Minspeed - Maxspeed) / (double)Max_speedCount;
 	/*何秒かけて判定位置にたどり着くか*/
-	double speed = Maxspeed + (double)speedCount * d_speed;
+	double speed;// = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
 
 	int score = 0, combo = 0;
 	char judge_text[5][10] = { "PERFECT","GREAT", "NICE", "BAD", "MISS" };
@@ -64,7 +70,7 @@ public:
 	/*
 	filename = 0000.txt
 	*/
-	GameScreen(Display _display, char filename[], bool _debugMode, bool _autoMode) {
+	GameScreen(Display _display, char filename[], int _speed, bool _debugMode, bool _autoMode) {
 		display = _display;
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
 		ring.setDisplay(display);
@@ -85,6 +91,9 @@ public:
 
 		autoMode = _autoMode;
 		debugMode = _debugMode;
+		speedCount = _speed - 1;
+		speed = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
+
 		NoteFileReader file;
 		music = file.SelectReadFile(filename, _debugMode);
 		music.SetPos(judgePos_x, 50.0);
@@ -103,21 +112,19 @@ public:
 		ScreenFlip();
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			if (input.PushOneframe_Decide()) {
-				ClearDrawScreen();
-				DrawScreen();
-				ScreenFlip();
-				WaitTimer(2000); 
 				break;
 			}
 		}
 
-		/*ゲーム開始時間の取得(ms)*/
-		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
-		/*曲が始まる時間　GetNowCount() - music.offset*/
-		double start_time = (double)(GetNowCount() - music.offset);
+		music.offset -= waitTime;
+		int _waitTime = GetNowCount();
+		/*曲が始まる時間　waitTime - music.offset*/
+		double start_time = (double)(_waitTime - music.offset);
 		/*止まり始めた時間(ms)*/
 		double stop_time = 0.0;
 
+		/*曲開始*/
+		bool playMusic = false;
 		/*処理が終わった小節番号の保存*/
 		int finish_bar_number = -1;
 		/*処理が終わっていないNoteID*/
@@ -127,6 +134,12 @@ public:
 
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
+			if (GetNowCount() - _waitTime > waitTime && !playMusic) {
+				/*ゲーム開始時間の取得(ms)*/
+				PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
+				playMusic = true;
+			}
+
 			/*ゲーム進行時間(s)*/
 			msec = ((double)GetNowCount() - start_time) / 1000.0;
 			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f; トキメキ
@@ -153,15 +166,15 @@ public:
 			}
 
 			/*速度変更*/
-			if (input.PushOneframe_UP()) {
+			if (input.PushOneframe_DOWN()) {
 				speedCount -= 1;
 				if (speedCount < 0)speedCount = Max_speedCount;
 			}
-			else if (input.PushOneframe_DOWN()) {
+			else if (input.PushOneframe_UP()) {
 				speedCount += 1;
 				if (speedCount > Max_speedCount)speedCount = 0;
 			}
-			speed = Maxspeed + (double)speedCount * d_speed;
+			speed = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
 
 			/*常に表示させるもの*/
 			ClearDrawScreen();
@@ -374,7 +387,7 @@ public:
 	/*常に表示させるもの、スコアなど*/
 	void DrawScreen() {
 		DrawFormatString(0, 0, GetColor(255, 255, 255), "Title : %s", music.title);
-		DrawFormatString(display.GetScreenX() - 100, 0, GetColor(255, 255, 255), "SPEED : %d", ((Max_speedCount - speedCount) + 1));
+		DrawFormatString(display.GetScreenX() - 120, 0, GetColor(255, 255, 255), "SPEED : %d.0", (speedCount + 1));
 		
 		/*時間表示*/
 		int _msec = (int)(msec * 1000.0);

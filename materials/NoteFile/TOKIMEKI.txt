@@ -6,7 +6,7 @@
 #Song TOKIMEKIエスカレート.mp3
 #Lyrics Snow Wings.lyr
 #BPM 140.00
-#Offset 1500
+#Offset 7500
 #Difficulty Master
 #LV 28
 #BGMVol 100

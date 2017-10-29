@@ -30,9 +30,9 @@ public:
 
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			int scene = SelectNumber(1, scenecount);
-			if (scene == 1) 
+			if (scene == 1)
 				Playgame(display);
-			else if (scene == 2) 
+			else if (scene == 2)
 				Config();
 			else if (scene == 0)
 				break;
@@ -45,12 +45,13 @@ public:
 			int scene = SelectNumber(2, file.fileCount + 1);
 			if (scene == 0)
 				break;
-			GameScreen game(display, file.fileList[scene - 1], file.debugMode, file.autoMode);
+			GameScreen game(display, file.fileList[scene - 1], 
+				file.speed, file.debugMode, file.autoMode);
 		}
 	}
 
 	void Config() {
-		SelectNumber(3, 2);
+		SelectNumber(3, 3);
 		file.UpdateConfig();
 	}
 
@@ -88,32 +89,50 @@ public:
 				DrawString(50, y + fontsize * file.fileCount, "Cancel", GetColor(255, 255, 255));
 			}
 			else if (_type == 3) {
-				int y = 100;
 				DrawString(0, 0, "Config", GetColor(255, 255, 255));
-				DrawString(20, y, "AutoMode:", GetColor(255, 255, 255));
-				DrawString(20, y + 30, "DebugMode:", GetColor(255, 255, 255));
+				int y = 100;
+				int SPEED_y = y, AutoMode_y = y + 20, DebugMode_y = y + 40;
+				DrawString(20, SPEED_y, file.SPEED, GetColor(255, 255, 255));
+				DrawString(20, AutoMode_y, file.AutoMode, GetColor(255, 255, 255));
+				DrawString(20, DebugMode_y, file.DebugMode, GetColor(255, 255, 255));
 				if (number == 0)
-					DrawString(20, y, "AutoMode", GetColor(255, 0, 0));
+					DrawString(20, SPEED_y, file.SPEED, GetColor(255, 0, 0));
 				else if (number == 1)
-					DrawString(20, y + 30, "DebugMode", GetColor(255, 0, 0));
+					DrawString(20, AutoMode_y, file.AutoMode, GetColor(255, 0, 0));
+				else if (number == 2)
+					DrawString(20, DebugMode_y, file.DebugMode, GetColor(255, 0, 0));
 
-				if (input.PushOneframe_LEFT() || input.PushOneframe_RIGHT()) {
-					if (number == 0)
+				if (input.PushOneframe_LEFT()) {
+					if (number == 0) {
+						file.speed -= 1;
+						if (file.speed < 1) file.speed = 10;
+					}
+					if (number == 1)
 						file.autoMode = !file.autoMode;
-					else if (number == 1)
+					else if (number == 2)
 						file.debugMode = !file.debugMode;
 				}
-
+				else if(input.PushOneframe_RIGHT()){
+					if (number == 0) {
+						file.speed += 1;
+						if (file.speed > 10) file.speed = 1;
+					}
+					if (number == 1)
+						file.autoMode = !file.autoMode;
+					else if (number == 2)
+						file.debugMode = !file.debugMode;
+				}
 				int x = 140;
+				DrawFormatString(x, SPEED_y, GetColor(255, 255, 255), "%d", file.speed);
 				if (file.autoMode)
-					DrawString(x, y, "true", GetColor(255, 255, 255));
+					DrawString(x, AutoMode_y, file.True, GetColor(255, 255, 255));
 				else
-					DrawString(x, y, "false", GetColor(255, 255, 255));
+					DrawString(x, AutoMode_y, file.False, GetColor(255, 255, 255));
 
 				if (file.debugMode)
-					DrawString(x, y + 30, "true", GetColor(255, 255, 255));
+					DrawString(x, DebugMode_y, file.True, GetColor(255, 255, 255));
 				else
-					DrawString(x, y + 30, "false", GetColor(255, 255, 255));
+					DrawString(x, DebugMode_y, file.False, GetColor(255, 255, 255));
 			}
 			DrawFormatString(20, fontsize * 2, GetColor(255, 255, 255), "Select number : %d", number);
 			ScreenFlip();// — ‰æ–Ê‚Ì“à—e‚ð•\‰æ–Ê‚É”½‰f‚³‚¹‚é 
