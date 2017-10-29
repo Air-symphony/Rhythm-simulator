@@ -126,7 +126,7 @@ public:
 		/*曲開始*/
 		bool playMusic = false;
 		/*処理が終わった小節番号の保存*/
-		int finish_bar_number = -1;
+		int start_bar_number = -1, end_bar_number = music.notes[music.notecount - 1].getbar_number();
 		/*処理が終わっていないNoteID*/
 		int start_noteID = 0;
 		/*遠すぎるノーツは処理しない*/
@@ -215,9 +215,13 @@ public:
 				}
 				
 				/*for文の処理数軽減*/
-				if (music.notes[i].getbar_number() <= (finish_bar_number - 1)) {
+				if (music.notes[i].getbar_number() <= (start_bar_number - 1)) {
 					start_noteID = music.notes[i].getID();
 					continue;
+				}
+				else if (end_bar_number < music.notes[i].getbar_number()){
+					end_noteID = music.notes[i].getID();
+					break;
 				}
 				/*処理済みの場合*/
 				if (music.notes[i].getflag() == -1) {
@@ -225,7 +229,7 @@ public:
 					if (music.notes[i].getY() > display.GetScreenY()) {
 						if (music.notes[i].getType() == 2 &&
 							music.notes[i].getlongNoteID() < 0) {
-							finish_bar_number = music.notes[i].getbar_number();
+							start_bar_number = music.notes[i].getbar_number();
 							continue;
 						}
 					}
@@ -244,14 +248,10 @@ public:
 					if (music.notes[i].gettime() <= (msec + speed)) {
 						music.notes[i].setflag(1);
 					}
-					/*for文の処理数軽減*/
-					else if (music.notes[i].getbar_number() == finish_bar_number + 4) {
-						end_noteID = music.notes[i].getID();
-						break;
-					}
 				}
 				/*画面内に表示されている場合*/
 				if (music.notes[i].getflag() == 1) {
+					end_bar_number = music.notes[i].getbar_number() + 2;
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
@@ -354,9 +354,11 @@ public:
 					DrawFormatString(40, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
 				}
 				/*for文の回数*/
-				DrawFormatString(display.GetScreenX() - 100, 32, GetColor(255, 255, 255), "ID : %d", start_noteID);
-				DrawFormatString(display.GetScreenX() - 100, 48, GetColor(255, 255, 255), "ID : %d", end_noteID);
-				DrawFormatString(display.GetScreenX() - 100, 64, GetColor(255, 255, 255), "for: %d", end_noteID - start_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 32, GetColor(255, 255, 255), "for: %d", end_noteID - start_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 48, GetColor(255, 255, 255), "ID : %d", start_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 64, GetColor(255, 255, 255), "ID : %d", end_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 80, GetColor(255, 255, 255), "bar: %d", start_bar_number);
+				DrawFormatString(display.GetScreenX() - 100, 96, GetColor(255, 255, 255), "bar: %d", end_bar_number);
 			}
 
 			/*判定を表示する必要性があったとき*/
@@ -373,8 +375,8 @@ public:
 
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 
-			/*ゲーム画面の強制終了*/
-			if (input.PushOneframe_Debug()) {
+			/*時間経過後、ゲーム画面の強制終了*/
+			if (input.PushOneframe_Debug() || msec >= music.notes[music.notecount - 1].gettime() + 3.0) {
 				break;
 			}
 		}
