@@ -18,7 +18,7 @@ private:
 	int first_x, end_x;
 	int x, y;
 	int rhythm_count;
-	int bar_number;
+	int bar_number;//0~
 	int longNoteID;
 	int linkNoteID;
 	int sideNoteID;

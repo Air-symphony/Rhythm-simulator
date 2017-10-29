@@ -21,18 +21,17 @@ private:
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
 	const double judgePos_x = display.GetScreenX() / 6.0;
-	/*何秒かけて判定位置にたどり着くか*/
-	double speed = 0.5;
 	/*速度変更上限*/
-	int speedCount = 0;
+	int speedCount = 8;
 	int Max_speedCount = 9;
 	/*Maxspeed = 0.3, Minspeed = 2.0;*/
 	double Maxspeed = 0.3, Minspeed = 2.0;
 	/*(Minspeed - Maxspeed) / 9.0;*/
 	double d_speed = (Minspeed - Maxspeed) / (double)Max_speedCount;
+	/*何秒かけて判定位置にたどり着くか*/
+	double speed = Maxspeed + (double)speedCount * d_speed;
 
 	int score = 0, combo = 0;
-
 	char judge_text[5][10] = { "PERFECT","GREAT", "NICE", "BAD", "MISS" };
 	bool printjudge = false;
 	int judge_number = 0;/*判定内容を保存、毎フレームで初期化*/
@@ -123,6 +122,8 @@ public:
 		int finish_bar_number = -1;
 		/*処理が終わっていないNoteID*/
 		int start_noteID = 0;
+		/*遠すぎるノーツは処理しない*/
+		int end_noteID = music.notecount;
 
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
@@ -201,8 +202,9 @@ public:
 				}
 				
 				/*for文の処理数軽減*/
-				if (music.notes[i].getbar_number() == finish_bar_number) {
-
+				if (music.notes[i].getbar_number() <= (finish_bar_number - 1)) {
+					start_noteID = music.notes[i].getID();
+					continue;
 				}
 				/*処理済みの場合*/
 				if (music.notes[i].getflag() == -1) {
@@ -210,7 +212,7 @@ public:
 					if (music.notes[i].getY() > display.GetScreenY()) {
 						if (music.notes[i].getType() == 2 &&
 							music.notes[i].getlongNoteID() < 0) {
-							//finish_bar_number = music.notes[i].getbar_number() - 1;
+							finish_bar_number = music.notes[i].getbar_number();
 							continue;
 						}
 					}
@@ -228,6 +230,11 @@ public:
 					/*時間がきたら表示*/
 					if (music.notes[i].gettime() <= (msec + speed)) {
 						music.notes[i].setflag(1);
+					}
+					/*for文の処理数軽減*/
+					else if (music.notes[i].getbar_number() == finish_bar_number + 4) {
+						end_noteID = music.notes[i].getID();
+						break;
 					}
 				}
 				/*画面内に表示されている場合*/
@@ -328,11 +335,15 @@ public:
 			/*デバッグ用*/
 			if (debugMode) {
 				int longnote_y = 300;
-				DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKeyCount = %d", holdKeyCount);
+				DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKeyCount : %d", holdKeyCount);
 				for (int j = 0; j < 2; j++) {
 					DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d", holdkey[j].noteID);
-					DrawFormatString(50, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
+					DrawFormatString(40, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
 				}
+				/*for文の回数*/
+				DrawFormatString(display.GetScreenX() - 100, 32, GetColor(255, 255, 255), "ID : %d", start_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 48, GetColor(255, 255, 255), "ID : %d", end_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 64, GetColor(255, 255, 255), "for: %d", end_noteID - start_noteID);
 			}
 
 			/*判定を表示する必要性があったとき*/
@@ -351,13 +362,13 @@ public:
 
 			/*ゲーム画面の強制終了*/
 			if (input.PushOneframe_Debug()) {
-				StopSoundMem(music.soundHandle);
-				DeleteSoundMem(music.soundHandle);
-				DeleteSoundMem(SE[0]);
-				DeleteSoundMem(SE[1]);
 				break;
 			}
 		}
+		StopSoundMem(music.soundHandle);
+		DeleteSoundMem(music.soundHandle);
+		DeleteSoundMem(SE[0]);
+		DeleteSoundMem(SE[1]);
 	}
 
 	/*常に表示させるもの、スコアなど*/
