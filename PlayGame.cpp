@@ -23,6 +23,13 @@ private:
 	const double judgePos_x = display.GetScreenX() / 6.0;
 	/*何秒かけて判定位置にたどり着くか*/
 	double speed = 0.5;
+	/*速度変更上限*/
+	int speedCount = 0;
+	int Max_speedCount = 9;
+	/*Maxspeed = 0.3, Minspeed = 2.0;*/
+	double Maxspeed = 0.3, Minspeed = 2.0;
+	/*(Minspeed - Maxspeed) / 9.0;*/
+	double d_speed = (Minspeed - Maxspeed) / (double)Max_speedCount;
 
 	int score = 0, combo = 0;
 
@@ -57,7 +64,6 @@ private:
 public:
 	/*
 	filename = 0000.txt
-
 	*/
 	GameScreen(Display _display, char filename[], bool _debugMode, bool _autoMode) {
 		display = _display;
@@ -92,25 +98,31 @@ public:
 		SetFontSize(16);
 
 		ClearDrawScreen();
-		clsDx();
 		DrawScreen();
-
-		DrawString(display.GetScreenX() / 2 - 50, display.GetScreenY() / 2, 
-			"Push Space", GetColor(255,255,255));
+		DrawString(display.GetScreenX() / 2 - 50, display.GetScreenY() / 2,
+			"Push Space", GetColor(255, 255, 255));
 		ScreenFlip();
-		while (ProcessMessage() == 0 
-			&& input.ForcedTermination()) {
-
-			if (input.PushOneframe_Decide())
+		while (ProcessMessage() == 0 && input.ForcedTermination()) {
+			if (input.PushOneframe_Decide()) {
+				ClearDrawScreen();
+				DrawScreen();
+				ScreenFlip();
+				WaitTimer(2000); 
 				break;
+			}
 		}
+
 		/*ゲーム開始時間の取得(ms)*/
 		PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
 		/*曲が始まる時間　GetNowCount() - music.offset*/
-		double start_time = (double)GetNowCount() - (double)music.offset;
-
+		double start_time = (double)(GetNowCount() - music.offset);
 		/*止まり始めた時間(ms)*/
 		double stop_time = 0.0;
+
+		/*処理が終わった小節番号の保存*/
+		int finish_bar_number = -1;
+		/*処理が終わっていないNoteID*/
+		int start_noteID = 0;
 
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
@@ -139,9 +151,19 @@ public:
 				}
 			}
 
+			/*速度変更*/
+			if (input.PushOneframe_UP()) {
+				speedCount -= 1;
+				if (speedCount < 0)speedCount = Max_speedCount;
+			}
+			else if (input.PushOneframe_DOWN()) {
+				speedCount += 1;
+				if (speedCount > Max_speedCount)speedCount = 0;
+			}
+			speed = Maxspeed + (double)speedCount * d_speed;
+
 			/*常に表示させるもの*/
 			ClearDrawScreen();
-			clsDx();
 			DrawScreen();
 
 			/*判定内容を保存、毎フレームで初期化*/
@@ -149,7 +171,7 @@ public:
 			int debugcount = 0;
 
 			/*各ノーツの操作*/
-			for (int i = 0; i < music.notecount; i++) {
+			for (int i = start_noteID; i < music.notecount; i++) {
 				/*ロングノーツの保持状態*/
 				for (int j = 0; j < holdKeyCount; j++) {
 					if (holdkey[j].key == 0) break;
@@ -178,11 +200,19 @@ public:
 					}
 				}
 				
+				/*for文の処理数軽減*/
+				if (music.notes[i].getbar_number() == finish_bar_number) {
+
+				}
 				/*処理済みの場合*/
 				if (music.notes[i].getflag() == -1) {
 					/*画面下の場合は、forに含めない*/
 					if (music.notes[i].getY() > display.GetScreenY()) {
-						continue;
+						if (music.notes[i].getType() == 2 &&
+							music.notes[i].getlongNoteID() < 0) {
+							//finish_bar_number = music.notes[i].getbar_number() - 1;
+							continue;
+						}
 					}
 					/*画面内及び画面上の場合*/
 					else {
@@ -325,7 +355,6 @@ public:
 				DeleteSoundMem(music.soundHandle);
 				DeleteSoundMem(SE[0]);
 				DeleteSoundMem(SE[1]);
-				clsDx();
 				break;
 			}
 		}
@@ -333,25 +362,22 @@ public:
 
 	/*常に表示させるもの、スコアなど*/
 	void DrawScreen() {
-		printfDx("Game Screen\n");
-
+		DrawFormatString(0, 0, GetColor(255, 255, 255), "Title : %s", music.title);
+		DrawFormatString(display.GetScreenX() - 100, 0, GetColor(255, 255, 255), "SPEED : %d", ((Max_speedCount - speedCount) + 1));
+		
 		/*時間表示*/
 		int _msec = (int)(msec * 1000.0);
 		DrawFormatString(0, 48, GetColor(255, 255, 255), "%d:", _msec / 1000);
 		DrawFormatString(35, 48, GetColor(255, 255, 255), "%d(s)", _msec % 1000);
 		/*スコア表示*/
-		DrawFormatString(0, 64, GetColor(255, 255, 255), "score = %d", score);
-		DrawFormatString(0, 80, GetColor(255, 255, 255), "combo = %d", combo);
+		DrawFormatString(0, 64, GetColor(255, 255, 255), "SCORE : %d", score);
+		DrawFormatString(0, 80, GetColor(255, 255, 255), "COMBO : %d", combo);
 
 		if (debugMode) {
 			/*1フレーム当たりの秒数*/
 			DrawFormatString(100, 48, GetColor(255, 255, 255), "%d(ms)", (int)((msec - d_msec) * 1000.0));
 			d_msec = msec;
 		}
-
-		char c[256];
-		sprintf_s(c, 256, "title = %s\n", music.title);
-		printfDx(c);
 
 		/*オートモードの切り替え*/
 		if (input.PushOneframe_ChangeAutoMode()) {
@@ -360,10 +386,6 @@ public:
 		if (autoMode) {
 			DrawString(0, display.GetScreenY() - 20, "AutoMode", GetColor(255, 255, 255));
 		}
-
-		/*エフェクトの表示*/
-		effect.PrintEffect();
-
 		/*リングの表示*/
 		//ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
 		/*判定範囲の表示*/
@@ -377,6 +399,9 @@ public:
 		y = (int)((judgePos_y / speed) * (NICEtime / 2.0));
 		DrawLine(0, (int)judgePos_y - y, display.GetScreenX(), (int)judgePos_y - y, GetColor(255, 255, 0));
 		DrawLine(0, (int)judgePos_y + y, display.GetScreenX(), (int)judgePos_y + y, GetColor(255, 255, 0));
+
+		/*エフェクトの表示*/
+		effect.PrintEffect();
 	}
 
 	/*ボタン判定の記述*/

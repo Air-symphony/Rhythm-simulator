@@ -45,7 +45,7 @@ class NoteFileReader {
 	bool debugMode;
 private:
 	Music music;
-	char filepath[256] = "materials\\";
+	char filepath[20] = "materials\\";
 	int FileHandle;
 	int fileSize = 0;
 	char *next;
@@ -72,6 +72,7 @@ public:
 				throw error;
 			}
 			else {
+				DrawLoading();
 				SetConfig();
 				SetNote();
 			}
@@ -88,9 +89,9 @@ public:
 	//環境設定、BPM等
 	void SetConfig() {
 		char string[256];
-		DrawLoading();
 		while (FileRead_eof(FileHandle) == 0)
 		{
+			DrawLoading();
 			// 一行読み込み
 			FileRead_gets(string, 256, FileHandle);
 			//先頭から分割していく　a,b,c = a + b,c
@@ -138,20 +139,29 @@ public:
 				music.rhythm.SetRhythm(music.bpm);
 			}
 			else if (strcmp(next, "#Offset") == 0) {
-				int count = 4;
+				int start = 0, count = 4;
 				next = strtok_s(NULL, "", &ctx);
-				for (int i = 0; i < count; i++) {
+
+				bool minus = false;
+				/*next内に含まれるかどうか*/
+				if (strstr(next, "-") != NULL || strstr(next, "+") != NULL) {
+					minus = (strstr(next, "-") != NULL);
+					start++;
+					count++;
+				}
+				for (int i = start; i < count; i++) {
 					int c = (int)(next[i] - '0');
 					for (int j = 0; j < ((count - 1) - i); j++) {
 						c *= 10;
 					}
 					music.offset += c;
 				}
+				if (minus) music.offset *= -1;
 			}
 			else if (strcmp(next, "#end") == 0) {
+				DrawLoading();
 				break;
 			}
-			DrawLoading();
 		}
 	}
 
@@ -214,7 +224,7 @@ public:
 		};
 
 		Memory memory;
-
+		DrawLoading();
 		while (FileRead_eof(FileHandle) == 0) {
 			/*読み込み時の仮保存用*/
 			int _type[SIZE], _timing[SIZE], _first_x[SIZE], _end_x[SIZE];
@@ -430,7 +440,7 @@ public:
 			SetFontSize(fontsize);
 			while (ProcessMessage() == 0
 				&& CheckHitKey(KEY_INPUT_ESCAPE) == 0
-				&& CheckHitKey(KEY_INPUT_SPACE) == 0
+				&& CheckHitKey(KEY_INPUT_RETURN) == 0
 				) {
 				int y = 64;
 				if (CheckHitKey(KEY_INPUT_UP)) {

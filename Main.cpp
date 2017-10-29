@@ -21,7 +21,7 @@ InputKey input;
 class GameSimulator {
 private:
 	int scenecount = 3;
-	int musiccount = 3 + 1;
+	//int musiccount = 3 + 1;
 	InputKey input;
 	FileReader file;
 public:
@@ -42,7 +42,7 @@ public:
 	void Playgame(Display display) {
 		file.ReadFileList();
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
-			int scene = SelectNumber(2, musiccount);
+			int scene = SelectNumber(2, file.fileCount + 1);
 			if (scene == 0)
 				break;
 			GameScreen game(display, file.fileList[scene - 1], file.debugMode, file.autoMode);
@@ -52,9 +52,10 @@ public:
 	void Config() {
 		SelectNumber(3, 2);
 		file.UpdateConfig();
-		//file.ReadConfig();
 	}
 
+	/*_type 1,2,3
+	_scene ‘I‘ðŽˆ‚ª‰½ŒÂ‚©*/
 	int SelectNumber(int _type, int _scene) {
 		int number = 1;
 		FontSize(20);

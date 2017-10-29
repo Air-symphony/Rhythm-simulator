@@ -1,5 +1,11 @@
-﻿  Graphics.cpp
-  スキップ中... (関連する変更は検出されませんでした)
+﻿  HitEffect.cpp
+  NoteFileReader.cpp
+  PlayGame.cpp
+  Note.cpp
+  InputKey.cpp
+  Graphics.cpp
+  FileReader.cpp
+  コードを生成中...
   Main.cpp
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.exe
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.pdb (Full PDB)

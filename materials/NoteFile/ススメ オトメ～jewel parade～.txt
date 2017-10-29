@@ -3,7 +3,7 @@
 #BackGround bg_sw.png
 #Song ススメ オトメ～jewel parade～.mp3
 #BPM 130.00
-#Offset 0450
+#Offset -0350
 #Difficulty Master
 #LV 25
 #Attribute All
