@@ -142,7 +142,6 @@ public:
 
 			/*ゲーム進行時間(s)*/
 			msec = ((double)GetNowCount() - start_time) / 1000.0;
-			//msec = (double)((GetNowCount() - start_time) / 1000.0) - 8.5f; トキメキ
 
 			/*一時停止*//*徐々にノーツが速くなるかも？*/
 			if (stop_time <= 0 && input.PushOneframe_Stop()) {
@@ -219,7 +218,10 @@ public:
 					start_noteID = music.notes[i].getID();
 					continue;
 				}
-				else if (end_bar_number < music.notes[i].getbar_number()){
+				else if (music.notes[i].getbar_number() == music.notes[music.notecount - 1].getbar_number()) {
+					end_noteID = music.notes[i].getID();
+				}
+				else if ((end_bar_number + 2) < music.notes[i].getbar_number()){
 					end_noteID = music.notes[i].getID();
 					break;
 				}
@@ -251,7 +253,7 @@ public:
 				}
 				/*画面内に表示されている場合*/
 				if (music.notes[i].getflag() == 1) {
-					end_bar_number = music.notes[i].getbar_number() + 2;
+					end_bar_number = music.notes[i].getbar_number();
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
@@ -285,22 +287,22 @@ public:
 									music.notes[music.notes[i].getsideNoteID()].getY()
 								);
 								/*ノーツの描画*/
-								noteGraph[music.notes[music.notes[i].getsideNoteID()].getType() - 1]
+								/*noteGraph[music.notes[music.notes[i].getsideNoteID()].getType() - 1]
 									.DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
 								if (music.notes[music.notes[i].getsideNoteID()].getlongNoteID() > 0 && 
 									music.notes[music.notes[i].getsideNoteID()].getType() == 2) {
 									noteGraph[4].DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), 
 										music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
-								}
+								}*/
 							}
 						}
 						/*ノーツの描画*/
-						if (music.notes[i].getlongNoteID() > 0 && music.notes[i].getType() == 2) {
+						/*if (music.notes[i].getlongNoteID() > 0 && music.notes[i].getType() == 2) {
 							noteGraph[4].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
 						}
 						else {
 							noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
-						}
+						}*/
 
 						/*判定内容*/
 						if (autoMode) AutoMode(i);
@@ -342,6 +344,19 @@ public:
 						DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
 						DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
 						DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
+					}
+				}
+			}
+			
+			/*ノーツの描画*/
+			for (int i = end_noteID; i >= start_noteID; i--) {
+				if (music.notes[i].getflag() == 1) {
+					double dt = (msec + speed) - music.notes[i].gettime();
+					if (music.notes[i].getlongNoteID() > 0 && music.notes[i].getType() == 2) {
+						noteGraph[4].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
+					}
+					else {
+						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
 					}
 				}
 			}
