@@ -1,5 +1,4 @@
-﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppClean.targets(76,5): warning : 別のプロセスで使用されているため、プロセスはファイル 'c:\users\admin\documents\visual studio 2013\projects\cinderellaproject\debug\cinderellaproject.exe' にアクセスできません。
-  HitEffect.cpp
+﻿  HitEffect.cpp
   NoteFileReader.cpp
   PlayGame.cpp
   Note.cpp

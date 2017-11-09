@@ -92,10 +92,13 @@ public:
 		int err_no = fopen_s(&fp, Configpath, "w");
 		if (err_no != 0) return false;
 
+		ClearDrawScreen();
 		char string[100];
-		strcat_s(string, AutoMode);
+		strcpy_s(string, "");
+		strcat_s(string, 15, AutoMode);
 		strcat_s(string, connectText);
 		fprintf(fp, string);
+
 		if (autoMode) fprintf(fp, True);
 		else fprintf(fp, False);
 
