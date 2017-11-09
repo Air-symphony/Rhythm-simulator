@@ -168,62 +168,9 @@ public:
 	void SetNote() {
 		const int SIZE = 64;
 		int noteID = 0;//ノーツに番号を割り振る
-					   /*デバッグ用*/
+		/*デバッグ用*/
 		int readline = 0;
-
-		/*同一小節上での処理判定に使用*/
-		bool same_bar_number = false;
-
-		/*同一小節上、もしくはロングノーツの保存*/
-		class Memory {
-		public:
-			int bar_number;
-			/*同一小節上での処理に使用*/
-			int _timing[SIZE];
-			/*その小節が何拍子かの保存*/
-			int _rhythm_note;
-			/*その小節のノーツ数*/
-			int _notecount;
-			/*noteIDの保存*/
-			int noteID[SIZE];
-			/*ロングノーツのID保存*/
-			int longNoteID[32];
-			int count = 0;
-			Memory() {
-				reset(0);
-				for (int i = 0; i < 32; i++) {
-					longNoteID[i] = -1;
-				}
-			}
-			void reset(int _bar_number) {
-				bar_number = _bar_number;
-				for (int i = 0; i < SIZE; i++) {
-					noteID[i] = -1;
-					_timing[i] = -1;
-				}
-				_rhythm_note = 0;
-				_notecount = 0;
-			}
-			void setLongNoteID(int _id) {
-				longNoteID[count] = _id;
-				count++;
-			}
-			void CompressionlongNoteID() {
-				for (int i = 0; i < 32 - 1; i++) {
-					if (longNoteID[i] == -1 && longNoteID[i + 1] > 0) {
-						longNoteID[i] = longNoteID[i + 1];
-						longNoteID[i + 1] = -1;
-						count = i + 1;
-					}
-					else if (longNoteID[i] == -1 && longNoteID[i + 1] == -1) {
-						count = i;
-						break;
-					}
-				}
-			}
-		};
-
-		Memory memory;
+		
 		DrawLoading();
 		while (FileRead_eof(FileHandle) == 0) {
 			/*読み込み時の仮保存用*/
@@ -258,12 +205,6 @@ public:
 					}
 					bar_number += c;
 				}
-				same_bar_number = (memory.bar_number == bar_number);
-				/*同一小節でない場合*/
-				if (!same_bar_number) {
-					/*memoryの初期化*/
-					memory.reset(bar_number);
-				}
 
 				next = strtok_s(NULL, ":", &ctx);//rhythm & type note
 				char _char[SIZE];
@@ -271,11 +212,6 @@ public:
 				for (int i = 0; i < SIZE; i++) {
 					/*空文字であれば読み込み終了*/
 					if (strcmp(&_char[i], "") == 0) {
-						/*同一小節でない場合、memoryの改ざん*/
-						if (!same_bar_number) {
-							memory._rhythm_note = i;
-							memory._notecount = _notecount;
-						}
 						rhythm_note = i;
 						break;
 					}
@@ -284,13 +220,6 @@ public:
 					if (_note > 0) {
 						_timing[_notecount] = i;
 						_type[_notecount] = _note;
-						if (_note == 4) {
-							memory.setLongNoteID(noteID + _notecount);
-						}
-						/*同一小節でない場合、memoryの改ざん*/
-						if (!same_bar_number) {
-							memory._timing[_notecount] = _timing[_notecount];
-						}
 						_notecount++;
 					}
 				}
@@ -332,64 +261,11 @@ public:
 				music.bpm = (float)atof(_char);
 				music.rhythm.ChangeRhythm(music.bpm, bar_number);
 			}
-
 			DrawLoading();
+
 			for (int i = 0; i < _notecount; i++) {
 				double time = music.rhythm.CalculateTime(bar_number, _timing[i], rhythm_note);
-				//double time = (double)bar_number * music.rhythm.getRhythm(1) + (double)_timing[i] * music.rhythm.getRhythm(rhythm_note);
 				music.notes[noteID].setNote(noteID, channel, _type[i], _first_x[i], _end_x[i], time, bar_number + 1);
-
-				/*同時押し*/
-				if (same_bar_number) {
-					for (int _i = 0; _i < memory._notecount; _i++) {
-						float _memory = (float)memory._timing[_i] / (float)memory._rhythm_note;
-						float d = (float)_timing[i] / (float)rhythm_note;
-						if (_memory == d) {
-							music.notes[noteID].setsideNoteID(memory.noteID[_i]);
-							music.notes[memory.noteID[_i]].setsideNoteID(noteID);
-						}
-					}
-				}
-				else {
-					memory.noteID[i] = noteID;
-				}
-				/*ロングノーツの連結*/
-				for (int i = 0; i < memory.count; i++) {
-					if (0 < memory.longNoteID[i] && memory.longNoteID[i] < noteID) {
-						if (music.notes[memory.longNoteID[i]].getchannel() == music.notes[noteID].getchannel() &&
-							music.notes[memory.longNoteID[i]].getfirst_x() == music.notes[noteID].getfirst_x() &&
-							music.notes[memory.longNoteID[i]].getend_x() == music.notes[noteID].getend_x() &&
-							music.notes[memory.longNoteID[i]].gettime() < music.notes[noteID].gettime()
-							) {
-							music.notes[memory.longNoteID[i]].setlongNoteID(noteID);
-							music.notes[noteID].setlongNoteID(memory.longNoteID[i]);
-							memory.longNoteID[i] = -1;
-							memory.CompressionlongNoteID();
-						}
-					}
-				}
-				/*フリックの連結*/
-				if ((_type[i] == 1 || _type[i] == 3) && ((i - 1) >= 0)) {
-					/*同じ方向のフリックの連結*/
-					if (channel == 0 || channel == 1) {
-						if (_type[i] == _type[i - 1]) {
-							if (_type[i - 1] == 1 &&
-								(music.notes[noteID - 1].getend_x() - 1) == music.notes[noteID].getend_x()) {
-								music.notes[noteID - 1].setlinkNoteID(noteID);
-							}
-							else if (_type[i - 1] == 3 &&
-								(music.notes[noteID - 1].getend_x() + 1) == music.notes[noteID].getend_x()) {
-								music.notes[noteID - 1].setlinkNoteID(noteID);
-							}
-						}
-					}
-					/*ジグザグなフリックの連結*/
-					else if (channel == 2 || channel == 3) {
-						if (_type[i - 1] == 1 || _type[i - 1] == 3) {
-							music.notes[noteID - 1].setlinkNoteID(noteID);
-						}
-					}
-				}
 				noteID++;
 			}
 			music.notecount += _notecount;
@@ -433,6 +309,74 @@ public:
 			}*/
 		}
 		FileRead_close(FileHandle);
+
+		/*同時押し、ロング、フリック連結*/
+		int bar_number = 0, channel = 0;
+		for (noteID = 0; noteID < music.notecount; noteID++) {
+			bar_number = music.notes[noteID].getbar_number();
+			channel = music.notes[noteID].getchannel();
+			/*同時押し*/
+			for (int k = noteID + 1; k < music.notecount; k++) {
+				if (bar_number < music.notes[k].getbar_number()) {
+					break;
+				}
+				if(fabs(music.notes[noteID].gettime() - music.notes[k].gettime()) 
+					<= DBL_EPSILON * 
+					fmax(1, fmax(fabs(music.notes[noteID].gettime()), fabs(music.notes[k].gettime())))
+					) {
+					music.notes[noteID].setsideNoteID(k);
+					music.notes[k].setsideNoteID(noteID);
+				}
+			}
+			/*長押し*/
+			if (music.notes[noteID].getType() == 4) {
+				for (int k = noteID + 1; k < music.notecount; k++) {
+					if (channel == music.notes[k].getchannel() && 
+						music.notes[noteID].getfirst_x() == music.notes[k].getfirst_x() &&
+						music.notes[noteID].getend_x() == music.notes[k].getend_x()
+						) {
+						music.notes[noteID].setlongNoteID(k);
+						music.notes[k].setlongNoteID(noteID);
+						break;
+					}
+				}
+			}
+			/*フリック*/
+			else if (music.notes[noteID].getType() == 1 || music.notes[noteID].getType() == 3) {
+				for (int k = noteID + 1; k < music.notecount; k++) {
+					if (music.notes[noteID].getend_x() == music.notes[k].getend_x()) {
+						break;
+					}
+					if (channel == music.notes[k].getchannel()) {
+						if (music.notes[k].getType() == 1 || music.notes[k].getType() == 3) {
+							/*同方向*/
+							if ((channel == 0 || channel == 1) &&
+								music.notes[noteID].getType() == music.notes[k].getType()
+								) {
+								if (music.notes[noteID].getType() == 1 &&
+									(music.notes[noteID].getend_x() - 1) == music.notes[k].getend_x()) {
+									music.notes[noteID].setlinkNoteID(k);
+									break;
+								}
+								else if (music.notes[noteID].getType() == 3 &&
+									(music.notes[noteID].getend_x() + 1) == music.notes[k].getend_x()) {
+									music.notes[noteID].setlinkNoteID(k);
+									break;
+								}
+							}
+							/*ジグザグフリック*/
+							else if (channel == 2 || channel == 3) {
+								music.notes[noteID].setlinkNoteID(k);
+								break;
+							}
+						}
+						else {
+							break;
+						}
+					}
+				}
+			}
+		}
 
 		/*デバッグ用*/
 		if (debugMode){

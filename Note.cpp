@@ -1,4 +1,5 @@
 #include <Math.h>
+#include <float.h>
 /*Noteデータ
 int id, type 1,2,3,4, channel 0,1,2,3
 int flag; 0=未消化、1=表示、-1=消化済
