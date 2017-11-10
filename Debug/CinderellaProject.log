@@ -1,10 +1,5 @@
-﻿  HitEffect.cpp
-  NoteFileReader.cpp
-  PlayGame.cpp
+﻿  PlayGame.cpp
   Note.cpp
-  InputKey.cpp
-  Graphics.cpp
-  FileReader.cpp
   コードを生成中...
   Main.cpp
   CinderellaProject.vcxproj -> C:\Users\admin\Documents\Visual Studio 2013\Projects\CinderellaProject\Debug\CinderellaProject.exe

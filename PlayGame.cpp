@@ -132,16 +132,26 @@ public:
 		/*遠すぎるノーツは処理しない*/
 		int end_noteID = music.notecount;
 
+		msec = ((double)GetNowCount() - start_time) / 1000.0;
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
-			if (GetNowCount() - _waitTime > waitTime && !playMusic) {
-				/*ゲーム開始時間の取得(ms)*/
-				PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
-				playMusic = true;
+			if (debugMode) {
+				if (input.Push_LEFT()) {
+					msec -= 0.030;
+				}
+				else if (input.Push_RIGHT()) {
+					msec += 0.030;
+				}
 			}
-
-			/*ゲーム進行時間(s)*/
-			msec = ((double)GetNowCount() - start_time) / 1000.0;
+			else {
+				if (GetNowCount() - _waitTime > waitTime && !playMusic) {
+					/*ゲーム開始時間の取得(ms)*/
+					PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
+					playMusic = true;
+				}
+				/*ゲーム進行時間(s)*/
+				msec = ((double)GetNowCount() - start_time) / 1000.0;
+			}
 
 			/*一時停止*//*徐々にノーツが速くなるかも？*/
 			if (stop_time <= 0 && input.PushOneframe_Stop()) {
@@ -174,7 +184,6 @@ public:
 				if (speedCount > Max_speedCount)speedCount = 0;
 			}
 			speed = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
-
 			/*常に表示させるもの*/
 			ClearDrawScreen();
 			DrawScreen();

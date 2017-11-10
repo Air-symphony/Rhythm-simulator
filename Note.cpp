@@ -180,22 +180,16 @@ class Rhythm {
 private:
 	/*1”“–‚½‚è‚ÌŠÔ(s)*/
 	double spb = 0;
-	double rh1_1, rh1_4, rh1_8, rh1_16, rh1_32;
 	/*bpm‚ª•ÏX‚³‚ê‚½‚Ìbar_number‚Ì•Û‘¶*/
 	int d_bar_number = 0;
 	/*‚»‚ê‚Ü‚Å‚Ìbpm‚ÅŒvZ‚³‚ê‚½ŠÔ‚Ì•Û‘¶*/
 	double dt = 0;
 public:
 	Rhythm() {
-		spb = rh1_1 = rh1_4 = rh1_8 = rh1_16 = rh1_32 = dt = 0;
+		spb = dt = 0;
 	}
 	void SetRhythm(float bpm) {
 		spb = (double)(1.0 / (bpm / 60.0));
-		rh1_1 = (double)(spb * 4);
-		rh1_4 = (double)(spb);
-		rh1_8 = (double)(spb / 2.0);
-		rh1_16 = (double)(spb / 4.0);
-		rh1_32 = (double)(spb / 8.0);
 	}
 	/*
 	bpm‚ª•ÏX‚³‚ê‚½‚Ìbar_number‚Ì•Û‘¶
@@ -206,7 +200,7 @@ public:
 	*/
 	void ChangeRhythm(float bpm, int _bar_number) {
 		d_bar_number = _bar_number - d_bar_number;
-		dt += (double)(d_bar_number) * rh1_1;
+		dt += (double)(d_bar_number) * (spb * 4.0);
 		SetRhythm(bpm);
 	}
 	/*
@@ -222,23 +216,8 @@ public:
 	/*
 	return 0.00•b
 	count = ‰½•ª‰¹•„1,4,8,16,32
-	error = -1*/
+	return (double)(spb * 4.0 / (double)(count))*/
 	double getRhythm(int count) {
-		if (count == 1) {
-			return rh1_1;
-		}
-		else if (count == 4) {
-			return rh1_4;
-		}
-		else if (count == 8) {
-			return rh1_8;
-		}
-		else if (count == 16) {
-			return rh1_16;
-		}
-		else if (count == 32) {
-			return rh1_32;
-		}
-		return -1;
+		return (double)(spb * 4.0 / (double)(count));
 	}
 };

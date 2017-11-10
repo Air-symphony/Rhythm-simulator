@@ -89,6 +89,24 @@ public:
 		return PushOneframe(8, KEY_INPUT_P);
 	}
 
+	/*CheckHitKey(KEY_INPUT_UP) == 1*/
+	bool Push_UP() {
+		return CheckHitKey(KEY_INPUT_UP) == 1;
+	}
+	/*CheckHitKey(KEY_INPUT_DOWN) == 1*/
+	bool Push_DOWN() {
+		return CheckHitKey(KEY_INPUT_DOWN) == 1;
+	}
+	/*CheckHitKey(KEY_INPUT_RIGHT) == 1*/
+	bool Push_RIGHT() {
+		return CheckHitKey(KEY_INPUT_RIGHT) == 1;
+	}
+	/*CheckHitKey(KEY_INPUT_LEFT) == 1*/
+	bool Push_LEFT() {
+		return CheckHitKey(KEY_INPUT_LEFT) == 1;
+	}
+	
+
 	/*ã≠êßèIóπ
 	CheckHitKey(KEY_INPUT_ESCAPE) == 0*/
 	bool ForcedTermination() {
