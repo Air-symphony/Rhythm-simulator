@@ -7,6 +7,7 @@ private:
 	const int type = 5;
 	const double moveTime = 0.2;
 	const double finishTime = 0.5;
+	double blendTime = finishTime / 5.0;
 	double time[5];
 	double posX, posY;
 public:
@@ -27,19 +28,29 @@ public:
 	}
 	/*
 	for (int i = 0; i < type; i++) {
-		if (0.0 < time[i]) {
-			effect.DrawHitEffect(posX * (i + 1), posY, moveTime, (double)GetNowCount() / 1000.0 - time[i]);
-			if (finishTime <= GetNowCount() / 1000.0 - time[i]) {
-				time[i] = 0.0;
+			if (0.0 < time[i]) {
+				double limit = GetNowCount() / 1000.0 - time[i];
+				if (finishTime <= limit + blendTime) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.0 * (finishTime - limit) / blendTime));
+				}
+				effect.DrawHitEffect((int)posX * (i + 1), (int)posY, moveTime, limit);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				if (finishTime <= limit) {
+					time[i] = 0.0;
+				}
 			}
 		}
-	}
 	*/
 	void PrintEffect() {
 		for (int i = 0; i < type; i++) {
 			if (0.0 < time[i]) {
-				effect.DrawHitEffect((int)posX * (i + 1), (int)posY, moveTime, (double)GetNowCount() / 1000.0 - time[i]);
-				if (finishTime <= GetNowCount() / 1000.0 - time[i]) {
+				double limit = GetNowCount() / 1000.0 - time[i];
+				if (finishTime <= limit + blendTime) {
+					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.0 * (finishTime - limit) / blendTime));
+				}
+				effect.DrawHitEffect((int)posX * (i + 1), (int)posY, moveTime, limit);
+				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				if (finishTime <= limit) {
 					time[i] = 0.0;
 				}
 			}
