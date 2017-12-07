@@ -43,14 +43,13 @@ public:
 		graphID = NULL;
 	}
 	Graph(Display _display) {
-		display =  _display;
+		setDisplay(_display);
 	}
 	/*
 	Graph(LoadGraph("\\00.png"))
 	*/
 	Graph(int _graphID) {
-		graphID = _graphID;
-		GetGraphSize(graphID, &sizeX, &sizeY);
+		setGraph(_graphID);
 	}
 	/*displayの大きさ*/
 	void setDisplay(Display _display) {
@@ -88,10 +87,31 @@ public:
 			DrawGraph(x - sizeX, y - sizeY, graphID, TRUE);
 	}
 	/*
+	int d = 10;
+	DrawExtendGraph(x1, y1 - d, x2, y2 + d, graphID, TRUE);
+	*/
+	void Draw_LinkLine(int x1, int y1, int x2, int y2, double time, double dt) {
+		if (time < dt) dt = time;
+		int dy = (int)(((double)15.0 / sqrt(time)) * sqrt(dt) + 0.5); 
+		DrawExtendGraph(x1, y1 - dy, x2, y2 + dy, graphID, TRUE);
+	}
+	/*
 	DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
 	*/
-	void Draw_LinkLine(int x1, int y1, int x2, int y2) {
-		DrawLine(x1, y1, x2, y2, GetColor(255, 255, 255));
+	void Draw_LongLine(int x1, int y1, int x2, int y2, double time, double dt) {
+		if (time < dt) dt = time; 
+		int dx = (int)(((double)30.0 / sqrt(time)) * sqrt(dt) + 0.5);
+		for (int i = -(dx / 2); i <= dx / 2; i++)
+			DrawLine(x1 + i, y1, x2 + i, y2, GetColor(255, 255, 255));
+	}
+	/*
+	DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
+	*/
+	void Draw_FlickLine(int x1, int y1, int x2, int y2, double time, double dt) {
+		if (time < dt) dt = time; 
+		int dy = (int)(((double)30.0 / sqrt(time)) * sqrt(dt) + 0.5);
+		for (int i = -(dy / 2); i <= dy / 2; i++)
+			DrawLine(x1, y1 + i, x2, y2 + i, GetColor(255, 255, 255));
 	}
 	/*
 	画像サイズ変更

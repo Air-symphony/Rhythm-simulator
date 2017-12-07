@@ -70,6 +70,7 @@ public:
 		display = _display;
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
 		ring.setDisplay(display);
+		Line.setGraph(LoadGraph("materials\\Image\\note_cat.png"));
 		Line.setDisplay(display);
 		for (int i = 1; i <= 5; i++) {
 			char _imagepath[256];
@@ -211,12 +212,13 @@ public:
 
 					/*長押し中なら線を表示*/
 					if (input.LongHoldKey(holdkey[j].key) || autoMode) {
-						Line.Draw_LinkLine(
+						double dt = (msec + speed) - music.notes[i].gettime();
+						Line.Draw_LongLine(
 							(int)(music.notes[holdkey[j].noteID].getend_x() * judgePos_x),
 							(int)judgePos_y,
 							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getX(),
-							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getY()
-						);
+							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getY(),
+							speed, dt);
 					}
 					//
 				}
@@ -252,24 +254,24 @@ public:
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
-						music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed);
+						music.notes[i].ToMove(judgePos_x, judgePos_y, speed, dt);
 						
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
 							/*画面上にいる場合*/
 							if (music.notes[i].getflag() >= 0 && music.notes[i].getType() == 4) {
-								Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
+								Line.Draw_LongLine(music.notes[i].getX(), music.notes[i].getY(),
 									music.notes[music.notes[i].getlongNoteID()].getX(),
-									music.notes[music.notes[i].getlongNoteID()].getY()
-								);
+									music.notes[music.notes[i].getlongNoteID()].getY(),
+									speed, dt);
 							}
 						}
 						//フリックの連結がある場合
 						if (music.notes[i].getlinkNoteID() > 0) {
-							Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
+							Line.Draw_FlickLine(music.notes[i].getX(), music.notes[i].getY(),
 								music.notes[music.notes[i].getlinkNoteID()].getX(),
-								music.notes[music.notes[i].getlinkNoteID()].getY()
-							);
+								music.notes[music.notes[i].getlinkNoteID()].getY(),
+								speed, dt);
 						}
 						//同時押しがある場合
 						if (music.notes[i].getsideNoteID() > 0) {
@@ -279,8 +281,8 @@ public:
 								) {
 								Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
 									music.notes[music.notes[i].getsideNoteID()].getX(),
-									music.notes[music.notes[i].getsideNoteID()].getY()
-								);
+									music.notes[music.notes[i].getsideNoteID()].getY(),
+									speed, dt);
 								/*ノーツの描画*/
 								/*noteGraph[music.notes[music.notes[i].getsideNoteID()].getType() - 1]
 									.DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
