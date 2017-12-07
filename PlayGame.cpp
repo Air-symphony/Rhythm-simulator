@@ -498,21 +498,23 @@ public:
 		if (_clear_time <= PERFECTtime / 2.0) {
 			combo++;
 			score += 300;
-			effect.Hit(music.notes[i].getend_x());
-			PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
 			judge_number = 0;
+			effect.Hit(music.notes[i].getend_x(), judge_number);
+			PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
 			return;
 		}
 		else if (_clear_time <= GREATtime / 2.0) {
 			combo++;
 			score += 150;
 			judge_number = 1;
+			effect.Hit(music.notes[i].getend_x(), judge_number);
 			return;
 		}
 		else if (_clear_time <= NICEtime / 2.0) {
 			combo = 0;
 			score += 100;
 			judge_number = 2;
+			effect.Hit(music.notes[i].getend_x(), judge_number);
 			return;
 		}
 		else {
@@ -528,7 +530,7 @@ public:
 		/*中心バーを越えたらすぐ*/
 		if (music.notes[i].gettime() <= msec) {
 			/*フリック音*/
-			effect.Hit(music.notes[i].getend_x());
+			effect.Hit(music.notes[i].getend_x(), 0);
 			if (music.notes[i].getType() == 1 || music.notes[i].getType() == 3) {
 				PlaySoundMem(SE[1], DX_PLAYTYPE_BACK, TRUE);
 			}

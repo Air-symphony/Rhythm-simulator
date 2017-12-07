@@ -131,14 +131,27 @@ public:
 	}
 	/*_time = ŠÔ§ŒÀAdt=¡‚ÌŠÔ
 	if (time < dt) dt = time;
-		double dx = ((double)sizeX / time) * dt;
-		double dy = ((double)sizeY / time) * dt;
-		DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
-			x + dx / 2.0, y + dy / 2.0, graphID, TRUE);*/
-	void DrawHitEffect(int x, int y, double time, double dt) {
+		type == 0 PERFECT *1.2
+		type == 1 GREAT *0.8
+		type == 2 NICE *0.6
+		DrawExtendGraph((int)(x - dx / 2.0), (int)(y - dy / 2.0),
+			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
+	*/
+	void DrawHitEffect(int type, int x, int y, double time, double dt) {
 		if (time < dt) dt = time;
-		double dx = ((double)sizeX / time) * dt;
-		double dy = ((double)sizeY / time) * dt;
+		//type == 0 PERFECT
+		double dx = ((double)(sizeX * 1.2) / time) * dt;
+		double dy = ((double)(sizeY * 1.2) / time) * dt;
+		//GREAT
+		if (type == 1) {
+			dx = ((double)(sizeX * 0.8) / time) * dt;
+			dy = ((double)(sizeY * 0.8) / time) * dt;
+		}
+		//NICE
+		else if (type == 2){
+			dx = ((double)(sizeX * 0.6) / time) * dt;
+			dy = ((double)(sizeY * 0.6) / time) * dt;
+		}
 		DrawExtendGraph((int)(x - dx / 2.0), (int)(y - dy / 2.0),
 			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
 	}
