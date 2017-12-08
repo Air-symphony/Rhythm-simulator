@@ -1,4 +1,4 @@
-#include "DxLib.h"
+#include "UI.cpp"
 
 class TouchID {
 public:
@@ -148,6 +148,15 @@ public:
 				return touch[i].ID;
 		}
 		return NULL;
+	}
+	/*
+	correction　タッチ判定範囲を加算
+	return GetID_RangeBox(ui.x, ui.y, 
+			ui.sizeX + correction * 2, ui.sizeY + correction * 2, 5);
+	*/
+	int GetID_RangeBox(UI ui, int correction = 0) {
+		return GetID_RangeBox(ui.x, ui.y, 
+			ui.sizeX + correction * 2, ui.sizeY + correction * 2, ui.number);
 	}
 	/*描画時の中心点と、円の半径*/
 	int GetID_RangeCircle(int x, int y, int r) {

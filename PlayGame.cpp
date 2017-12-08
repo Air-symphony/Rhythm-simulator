@@ -11,6 +11,7 @@ private:
 	Display display;
 	Music music;
 	Graph ring, Line;
+	UI StopButton;
 	/*0=左, 1=普通, 2=右, 3=ロング, 4=ロング先*/
 	Graph noteGraph[5];
 	HitEffect effect;
@@ -21,9 +22,9 @@ private:
 	double msec = 0;//経過時間(s)
 	double d_msec = 0;//デバッグ用、変化値
 
+	const double StartY = 30;
 	/*判定位置の座標*/
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
-
 	/*画面端からどのくらいのスペースを開けるか*/
 	const double ScreenSideSize = display.GetScreenX() / 4.0;
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
@@ -96,6 +97,8 @@ public:
 		SE[1] = LoadSoundMem("materials\\SE\\フリック SE.wav");
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[0]);
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[1]);
+		
+		Layout();
 
 		for (int i = 0; i < 5; i++) IDList[i] = -1;
 
@@ -106,11 +109,17 @@ public:
 
 		NoteFileReader file;
 		music = file.SelectReadFile(filename, _debugMode);
-		music.SetPos(ScreenSideSize, judgePos_x, 50.0);
+		music.SetPos(ScreenSideSize, judgePos_x, StartY);
 		effect.SetGraph(LoadGraph("materials\\Image\\hit_circle.png"));
 		effect.SetPos(ScreenSideSize, judgePos_x, judgePos_y);
 		msec = 0;
 		Start();
+	}
+	/*UIの位置関係*/
+	void Layout() {
+		StopButton.SetUI(LoadGraph("materials\\Image\\ui\\StopButton.png"),
+			display.GetScreenX() - 10, 20, 3);
+		StopButton.setDisplay(display);
 	}
 
 	void Start() {
@@ -148,6 +157,7 @@ public:
 		int printjudge_number = 0;//表示用
 
 		msec = ((double)GetNowCount() - start_time) / 1000.0;
+		double Startmsec = msec;
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			/*常に表示させるもの*/
@@ -164,7 +174,8 @@ public:
 				}
 			}
 			else {
-				if (GetNowCount() - _waitTime > waitTime && !playMusic) {
+				//if (GetNowCount() - _waitTime > waitTime && !playMusic) {
+				if (msec - Startmsec >= waitTime / 1000.0 && !playMusic) {
 					/*ゲーム開始時間の取得(ms)*/
 					PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, TRUE);
 					playMusic = true;
@@ -174,7 +185,9 @@ public:
 			}
 
 			/*一時停止*//*徐々にノーツが速くなるかも？*/
-			if (stop_time <= 0 && input.PushOneframe_Stop()) {
+			if (stop_time <= 0 && 
+				(input.PushOneframe_Stop() || TapUIOneFrame(StopButton))
+				) {
 				stop_time = (double)GetNowCount();
 				StopSoundMem(music.soundHandle);
 			}
@@ -185,7 +198,9 @@ public:
 				MyStr.Draw_String(display.GetScreenX() / 2, 50, 40, "Pause", 2);
 				
 				if (input.PushOneframe_Decide()) {
-					PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
+					if (playMusic) {
+						PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
+					}
 					double d_time = (double)GetNowCount();
 
 					start_time += (d_time - stop_time);
@@ -256,7 +271,7 @@ public:
 						/*画面内にいる時間の場合*/
 						if (music.notes[i].gettime() <= (msec + speed)) {
 							double dt = (msec + speed) - (music.notes[i].gettime());
-							music.notes[i].ToMove(ScreenSideSize, judgePos_x, judgePos_y, dt, speed);
+							music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed, ScreenSideSize, StartY);
 						}
 					}
 				}
@@ -273,7 +288,7 @@ public:
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
-						music.notes[i].ToMove(ScreenSideSize, judgePos_x, judgePos_y, speed, dt);
+						music.notes[i].ToMove(judgePos_x, judgePos_y, speed, dt, ScreenSideSize, StartY);
 						
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
@@ -447,6 +462,8 @@ public:
 		DrawLine(0, (int)judgePos_y - y, display.GetScreenX(), (int)judgePos_y - y, GetColor(255, 0, 255));
 		DrawLine(0, (int)judgePos_y + y, display.GetScreenX(), (int)judgePos_y + y, GetColor(255, 0, 255));
 
+		StopButton.Draw();
+
 		/*エフェクトの表示*/
 		effect.PrintEffect();
 	}
@@ -498,6 +515,7 @@ public:
 			}
 		}
 	}
+
 	/*タッチ判定の指定、1フレームでの判定*/
 	bool PlayTouchOneFrame(int x) {
 		if (inTouch.touchCount <= 0) return false;
@@ -520,6 +538,14 @@ public:
 		IDList[x - 1] = inTouch.GetID_RangeBox(posX, posY, width, height, 7);
 
 		return (inTouch.GetTime(IDList[x - 1]) == 1);
+	}
+
+	/*タッチ判定の指定、1フレームでの判定*/
+	bool TapUIOneFrame(UI ui) {
+		if (inTouch.touchCount <= 0) return false;
+
+		int id = inTouch.GetID_RangeBox(ui, 10);
+		return (inTouch.GetTime(id) == 1);
 	}
 
 	void Judge(int i) {

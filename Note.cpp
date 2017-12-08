@@ -162,10 +162,10 @@ public:
 		x = (int)((first_x + dx) * (_posX));
 		y = (int)((_posY / _time) * _dt);
 	*/
-	void ToMove(double sideSize, double _posX, double _posY, double _time, double _dt) {
+	void ToMove(double _posX, double _posY, double _time, double _dt, double sideSize,  double startY) {
 		double dx = sqrt(_dt) * (end_x - first_x) / sqrt(_time);
 		x = (int)(sideSize + (first_x - 1 + dx) * _posX);
-		y = (int)(((_posY - 50) / _time) * _dt) + 50;
+		y = (int)(((_posY - startY) / _time) * _dt + startY);
 	}
 };
 

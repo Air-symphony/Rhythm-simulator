@@ -95,6 +95,7 @@
     <ClCompile Include="PlayGame.cpp" />
     <ClCompile Include="NoteFileReader.cpp" />
     <ClCompile Include="HitEffect.cpp" />
+    <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

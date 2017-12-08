@@ -1,3 +1,4 @@
+#pragma once
 #include "DxLib.h"
 #include <Math.h>
 
@@ -36,10 +37,9 @@ int sizeX, sizeY;
 class Graph {
 private:
 	Display display;
-	double ScreenSideSize;
 	int graphID;
-	int sizeX, sizeY;
 public:
+	int sizeX, sizeY;
 	Graph() {
 		graphID = NULL;
 	}
@@ -56,10 +56,6 @@ public:
 	void setDisplay(Display _display) {
 		display = _display;
 	}
-	/*画面横端からの大きさ*/
-	void setScreenSideSize(double size) {
-		ScreenSideSize = size;
-	}
 	/*
 	setGraph(LoadGraph("\\00.png"))
 	*/
@@ -71,7 +67,7 @@ public:
 	x, y = 画像を表示させたい座標
 	number = 特定の位置を中心として表示(テンキー)
 	*/
-	void Draw(int x, int y, int number) {
+	void Draw(int x, int y, int number = 5) {
 		if (number == 1)
 			DrawGraph(x, y, graphID, TRUE);
 		else if (number == 2)
