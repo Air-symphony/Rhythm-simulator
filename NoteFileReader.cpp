@@ -25,9 +25,9 @@ public:
 		offset = notecount = 0;
 		bpm = 0.0f;
 	}
-	void SetPos(double _posX, double _posY) {
+	void SetPos(double sideSize, double _posX, double _posY) {
 		for (int i = 0; i < notecount; i++) {
-			notes[i].setx((int)(notes[i].getfirst_x() * _posX));
+			notes[i].setx((int)(sideSize + (notes[i].getfirst_x() - 1) * _posX));
 			notes[i].setY((int)(_posY));
 		}
 	}

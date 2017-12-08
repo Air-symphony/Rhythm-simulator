@@ -10,7 +10,7 @@ private:
 	double blendTime = finishTime / 5.0;
 	double time[5];
 	int judgeType[5];
-	double posX, posY;
+	double posX, posY, ScreenSideSize;
 public:
 	/*for (int i = 0; i < type; i++) {
 			time[i] = 0.0;
@@ -27,9 +27,10 @@ public:
 		effect.setGraph(graph);
 	}
 	/*ˆÊ’uÝ’è*/
-	void SetPos(double _posX, double _posY) {
+	void SetPos(double sideSize, double _posX, double _posY) {
 		posX = _posX;
 		posY = _posY;
+		ScreenSideSize = sideSize;
 	}
 	/*_posX = 1,2,3,4,5
 	type = 0,1,2 Per,Gre,Ni*/
@@ -60,10 +61,10 @@ public:
 				double limit = GetNowCount() / 1000.0 - time[i];
 				if (finishTime <= limit + blendTime) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.0 * (finishTime - limit) / blendTime));
-					effect.DrawHitEffect(judgeType[i], (int)posX * (i + 1), (int)posY, moveTime, limit);
+					effect.DrawHitEffect(judgeType[i], (int)(ScreenSideSize + posX * i), (int)posY, moveTime, limit);
 					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
-				effect.DrawHitEffect(judgeType[i], (int)posX * (i + 1), (int)posY, moveTime, limit);
+				effect.DrawHitEffect(judgeType[i], (int)(ScreenSideSize + posX * i), (int)posY, moveTime, limit);
 				if (finishTime <= limit) {
 					time[i] = 0.0;
 					judgeType[i] = -1;

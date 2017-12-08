@@ -14,16 +14,18 @@ public:
 
 const int NUM = 5;
 class InputTouch {
-public:
+private:
 	TouchID touch[NUM];
-	int touchCount = -1;
 	TouchID Log[NUM];
+public:
+	int touchCount = -1;
 	int LogCount = 0;
 
 	InputTouch() {
 
 	}
 
+	/*毎フレーム呼び出す*/
 	void SetTouch() {
 		/*現フレームでのタッチ状態の取得*/
 		TouchID newTouch[NUM];
@@ -95,7 +97,34 @@ public:
 		}
 		return NULL;
 	}
-	bool GetRelease(int ID) {
+	/*
+	for (int i = 0; i < touchCount; i++) {
+		if (ID == touch[i].ID) {
+			if (touch[i].time > 0) return true;
+			else return false;
+		}
+	}
+	*/
+	bool GetPressed(int ID) {
+		if (ID == NULL) return NULL;
+
+		for (int i = 0; i < touchCount; i++) {
+			if (ID == touch[i].ID) {
+				if (touch[i].time > 0) return true;
+				else return false;
+			}
+		}
+		return NULL;
+	}
+	/*
+	for (int i = 0; i < LogCount; i++) {
+		if (ID == Log[i].ID) return true;
+	}
+	for (int i = 0; i < touchCount; i++) {
+		if (ID == touch[i].ID) return false;
+	}
+	*/
+	bool GetReleased(int ID) {
 		if (ID == NULL) return NULL;
 
 		for (int i = 0; i < LogCount; i++) {
@@ -117,6 +146,15 @@ public:
 			if (minX <= touch[i].x && touch[i].x <= maxX &&
 				minY <= touch[i].y && touch[i].y <= maxY)
 				return touch[i].ID;
+		}
+		return NULL;
+	}
+	/*描画時の中心点と、円の半径*/
+	int GetID_RangeCircle(int x, int y, int r) {
+		for (int i = 0; i < touchCount; i++) {
+			int dx = (x - touch[i].x) * (x - touch[i].x);
+			int dy = (y - touch[i].y) * (y - touch[i].y);
+			if (dx + dy <= r * r) return touch[i].ID;
 		}
 		return NULL;
 	}
@@ -143,6 +181,7 @@ public:
 				"(%d)ID: %d (%d, %d) %d", i, Log[i].ID, Log[i].x, Log[i].y, Log[i].time);
 		}
 	}
+
 private:
 	void Compression(int i)
 	{

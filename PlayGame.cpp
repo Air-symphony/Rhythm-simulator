@@ -23,8 +23,11 @@ private:
 
 	/*判定位置の座標*/
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
+
+	/*画面端からどのくらいのスペースを開けるか*/
+	const double ScreenSideSize = display.GetScreenX() / 4.0;
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
-	const double judgePos_x = display.GetScreenX() / 6.0;
+	const double judgePos_x = (display.GetScreenX() - ScreenSideSize * 2) / 4.0;
 	/*速度変更上限 0 ~ 9*/
 	int speedCount = 1, Max_speedCount = 9;
 	/*Maxspeed = 0.3, Minspeed = 2.0;*/
@@ -44,6 +47,9 @@ private:
 	int score = 0, combo = 0;
 	char judge_text[5][10] = { "PERFECT","GREAT", "NICE", "BAD", "MISS" };
 	int judge_number = 0;/*判定内容を保存、毎フレームで初期化*/
+
+	/*各エリアでの、タッチIDの保存*/
+	int IDList[5];
 
 	/*ロングノーツの場所を保持*/
 	class HoldKey {
@@ -91,6 +97,8 @@ public:
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[0]);
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[1]);
 
+		for (int i = 0; i < 5; i++) IDList[i] = -1;
+
 		autoMode = _autoMode;
 		debugMode = _debugMode;
 		speedCount = _speed - 1;
@@ -98,9 +106,9 @@ public:
 
 		NoteFileReader file;
 		music = file.SelectReadFile(filename, _debugMode);
-		music.SetPos(judgePos_x, 50.0);
+		music.SetPos(ScreenSideSize, judgePos_x, 50.0);
 		effect.SetGraph(LoadGraph("materials\\Image\\hit_circle.png"));
-		effect.SetPos(judgePos_x, judgePos_y);
+		effect.SetPos(ScreenSideSize, judgePos_x, judgePos_y);
 		msec = 0;
 		Start();
 	}
@@ -143,6 +151,7 @@ public:
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			/*常に表示させるもの*/
+			inTouch.SetTouch();
 			ClearDrawScreen();
 			DrawScreen();
 
@@ -218,10 +227,13 @@ public:
 					if (holdkey[j].key == 0) break;
 
 					/*長押し中なら線を表示*/
-					if (input.LongHoldKey(holdkey[j].key) || autoMode) {
+					if (input.LongHoldKey(holdkey[j].key) ||
+						inTouch.GetPressed(IDList[holdkey[j].key - 1]) || 
+						autoMode
+						) {
 						double dt = (msec + speed) - music.notes[i].gettime();
 						Line.Draw_LongLine(
-							(int)(music.notes[holdkey[j].noteID].getend_x() * judgePos_x),
+							(int)(ScreenSideSize + (music.notes[holdkey[j].noteID].getend_x() - 1) * judgePos_x),
 							(int)judgePos_y,
 							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getX(),
 							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getY(),
@@ -244,7 +256,7 @@ public:
 						/*画面内にいる時間の場合*/
 						if (music.notes[i].gettime() <= (msec + speed)) {
 							double dt = (msec + speed) - (music.notes[i].gettime());
-							music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed);
+							music.notes[i].ToMove(ScreenSideSize, judgePos_x, judgePos_y, dt, speed);
 						}
 					}
 				}
@@ -261,7 +273,7 @@ public:
 					/*画面内の場合は表示*/
 					if (music.notes[i].getY() <= display.GetScreenY()) {
 						double dt = (msec + speed) - music.notes[i].gettime();
-						music.notes[i].ToMove(judgePos_x, judgePos_y, speed, dt);
+						music.notes[i].ToMove(ScreenSideSize, judgePos_x, judgePos_y, speed, dt);
 						
 						//ロングノーツ連結がある場合
 						if (music.notes[i].getlongNoteID() > 0) {
@@ -294,7 +306,7 @@ public:
 						}
 						/*判定内容*/
 						if (autoMode) AutoMode(i);
-						else PlayKey(i);
+						else Playable(i);
 					}
 					/*画面下の場合は処理*/
 					else {
@@ -362,6 +374,9 @@ public:
 				DrawFormatString(display.GetScreenX() - 100, 64, GetColor(255, 255, 255), "ID : %d", end_noteID);
 				DrawFormatString(display.GetScreenX() - 100, 80, GetColor(255, 255, 255), "bar: %d", start_bar_number);
 				DrawFormatString(display.GetScreenX() - 100, 96, GetColor(255, 255, 255), "bar: %d", end_bar_number);
+
+				inTouch.PrintTouch(display.GetScreenX() - 200, display.GetScreenY() - 300);
+				inTouch.PrintLog(display.GetScreenX() - 200, display.GetScreenY() - 150);
 			}
 
 			/*判定を表示する必要性があったとき*/
@@ -437,11 +452,12 @@ public:
 	}
 
 	/*ボタン判定の記述*/
-	void PlayKey(int i) {
+	void Playable(int i) {
 		/*ロングノーツ終端の判定*/
 		for (int j = 0; j < holdKeyCount; j++) {
 			/*長押しを離してしまった時*/
-			if (input.LongHoldKey(holdkey[j].key) == false &&
+			if (inTouch.GetReleased(IDList[holdkey[j].key - 1]) &&
+				//input.LongHoldKey(holdkey[j].key) == false &&
 				music.notes[holdkey[j].noteID].getlongNoteID() == i) {
 				/*範囲内で離していれば*/
 				if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
@@ -464,7 +480,8 @@ public:
 		/*BAD判定内の場合*/
 		if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
 			/*ノーツの判定*/
-			if (input.PushOneframe_PlayGame(music.notes[i].getend_x())) {
+			if (input.PushOneframe_PlayGame(music.notes[i].getend_x()) || 
+				PlayTouchOneFrame(music.notes[i].getend_x())) {
 				Judge(i);
 				music.notes[i].setflag(-1);
 				/*ロングノーツ始点の判定*/
@@ -480,6 +497,29 @@ public:
 				}
 			}
 		}
+	}
+	/*タッチ判定の指定、1フレームでの判定*/
+	bool PlayTouchOneFrame(int x) {
+		if (inTouch.touchCount <= 0) return false;
+
+		int posX, width,
+			posY = (int)(display.GetScreenY() + .5),
+			height = (int)(display.GetScreenY() * 0.8 + .5);
+		if (x == 1) {
+			posX = 0;
+			width = (int)(ScreenSideSize + judgePos_x * 0.5);
+		}
+		else if (x == 5) {
+			posX = (int)(ScreenSideSize + judgePos_x * (x - 1.5));;
+			width = (int)(ScreenSideSize + judgePos_x * 0.5);
+		}
+		else {
+			posX = (int)(ScreenSideSize + judgePos_x * (x - 1.5));
+			width = (int)(judgePos_x);
+		}
+		IDList[x - 1] = inTouch.GetID_RangeBox(posX, posY, width, height, 7);
+
+		return (inTouch.GetTime(IDList[x - 1]) == 1);
 	}
 
 	void Judge(int i) {
@@ -557,5 +597,4 @@ public:
 		if (t < 0) return (-t);
 		return t;
 	}
-
 };

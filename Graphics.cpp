@@ -36,6 +36,7 @@ int sizeX, sizeY;
 class Graph {
 private:
 	Display display;
+	double ScreenSideSize;
 	int graphID;
 	int sizeX, sizeY;
 public:
@@ -54,6 +55,10 @@ public:
 	/*display‚Ì‘å‚«‚³*/
 	void setDisplay(Display _display) {
 		display = _display;
+	}
+	/*‰æ–Ê‰¡’[‚©‚ç‚Ì‘å‚«‚³*/
+	void setScreenSideSize(double size) {
+		ScreenSideSize = size;
 	}
 	/*
 	setGraph(LoadGraph("\\00.png"))

@@ -25,6 +25,8 @@ private:
 	InputKey input;
 	InputTouch inTouch;
 	FileReader file;
+
+	int id;
 public:
 	GameSimulator(Display display) {
 		file.ReadConfig();
@@ -137,17 +139,20 @@ public:
 			}
 			DrawFormatString(20, fontsize * 2, GetColor(255, 255, 255), "Select number : %d", number);
 
+			// タッチパネル テスト
+			/*
 			inTouch.SetTouch();
-			inTouch.PrintTouch(300, 40);
-			inTouch.PrintLog(400, 40);
-			DrawBox(300, 100, 500, 300, GetColor(255, 255, 255), true);
-			int id = inTouch.GetID_RangeBox(300, 100, 200, 200, 1);
+			inTouch.PrintTouch(250, 40);
+			inTouch.PrintLog(520, 40);
+
+			DrawCircle(400, 250, 100, GetColor(255, 255, 255), true);
 			bool release = inTouch.GetRelease(id);
+			id = inTouch.GetID_RangeCircle(400, 250, 100);//inTouch.GetID_RangeBox(300, 150, 200, 200, 1);
 			if (id != NULL) {
-				DrawFormatString(300, 80, GetColor(255, 255, 255), "touchID : %d", id);
+				DrawFormatString(250, 130, GetColor(255, 255, 255), "InsideID : %d", id);
 			}
 			if (release) {
-				DrawFormatString(350, 80, GetColor(255, 255, 255), "Release");
+				DrawFormatString(450, 130, GetColor(255, 255, 255), "Release");
 			}
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 			if (inTouch.LogCount > 0) {
@@ -155,6 +160,8 @@ public:
 					if (input.PushOneframe_ChangeAutoMode())break;
 				}
 			}
+			*/
+			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 		}
 		return 0;
 	}
