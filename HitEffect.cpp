@@ -12,14 +12,19 @@ private:
 	int judgeType[5];
 	double posX, posY;
 public:
-	/*effect.setGraph(LoadGraph("materials\\Image\\hit_circle.png"));
-		for (int i = 0; i < type; i++) time[i] = 0.0;*/
+	/*for (int i = 0; i < type; i++) {
+			time[i] = 0.0;
+			judgeType[i] = -1;
+		}*/
 	HitEffect() {
-		effect.setGraph(LoadGraph("materials\\Image\\hit_circle.png"));
 		for (int i = 0; i < type; i++) {
 			time[i] = 0.0;
 			judgeType[i] = -1;
 		}
+	}
+	/*effect.setGraph(graph);*/
+	void SetGraph(int graph) {
+		effect.setGraph(graph);
 	}
 	/*ˆÊ’uÝ’è*/
 	void SetPos(double _posX, double _posY) {
@@ -34,15 +39,17 @@ public:
 	}
 	/*
 	for (int i = 0; i < type; i++) {
-			if (0.0 < time[i]) {
+			if (0.0 < time[i] && 0 <= judgeType[i]) {
 				double limit = GetNowCount() / 1000.0 - time[i];
 				if (finishTime <= limit + blendTime) {
 					SetDrawBlendMode(DX_BLENDMODE_ALPHA, (int)(255.0 * (finishTime - limit) / blendTime));
+					effect.DrawHitEffect(judgeType[i], (int)posX * (i + 1), (int)posY, moveTime, limit);
+					SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 				}
-				effect.DrawHitEffect((int)posX * (i + 1), (int)posY, moveTime, limit);
-				SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+				effect.DrawHitEffect(judgeType[i], (int)posX * (i + 1), (int)posY, moveTime, limit);
 				if (finishTime <= limit) {
 					time[i] = 0.0;
+					judgeType[i] = -1;
 				}
 			}
 		}

@@ -23,6 +23,7 @@ private:
 	int scenecount = 3;
 	//int musiccount = 3 + 1;
 	InputKey input;
+	InputTouch inTouch;
 	FileReader file;
 public:
 	GameSimulator(Display display) {
@@ -135,7 +136,25 @@ public:
 					DrawString(x, DebugMode_y, file.False, GetColor(255, 255, 255));
 			}
 			DrawFormatString(20, fontsize * 2, GetColor(255, 255, 255), "Select number : %d", number);
+
+			inTouch.SetTouch();
+			inTouch.PrintTouch(300, 40);
+			inTouch.PrintLog(400, 40);
+			DrawBox(300, 100, 500, 300, GetColor(255, 255, 255), true);
+			int id = inTouch.GetID_RangeBox(300, 100, 200, 200, 1);
+			bool release = inTouch.GetRelease(id);
+			if (id != NULL) {
+				DrawFormatString(300, 80, GetColor(255, 255, 255), "touchID : %d", id);
+			}
+			if (release) {
+				DrawFormatString(350, 80, GetColor(255, 255, 255), "Release");
+			}
 			ScreenFlip();// — ‰æ–Ê‚Ì“à—e‚ð•\‰æ–Ê‚É”½‰f‚³‚¹‚é 
+			if (inTouch.LogCount > 0) {
+				while (ProcessMessage() == 0 && input.ForcedTermination()) {
+					if (input.PushOneframe_ChangeAutoMode())break;
+				}
+			}
 		}
 		return 0;
 	}

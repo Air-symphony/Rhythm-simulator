@@ -92,14 +92,14 @@ public:
 	*/
 	void Draw_LinkLine(int x1, int y1, int x2, int y2, double time, double dt) {
 		if (time < dt) dt = time;
-		int dy = (int)(((double)15.0 / sqrt(time)) * sqrt(dt) + 0.5); 
+		int dy = (int)(((double)15.0 / sqrt(time)) * sqrt(dt) + 0.5);
 		DrawExtendGraph(x1, y1 - dy, x2, y2 + dy, graphID, TRUE);
 	}
 	/*
 	DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
 	*/
 	void Draw_LongLine(int x1, int y1, int x2, int y2, double time, double dt) {
-		if (time < dt) dt = time; 
+		if (time < dt) dt = time;
 		int dx = (int)(((double)30.0 / sqrt(time)) * sqrt(dt) + 0.5);
 		for (int i = -(dx / 2); i <= dx / 2; i++)
 			DrawLine(x1 + i, y1, x2 + i, y2, GetColor(255, 255, 255));
@@ -108,7 +108,7 @@ public:
 	DrawLine(x1,y1,x2,y2, GetColor(255,255,255));
 	*/
 	void Draw_FlickLine(int x1, int y1, int x2, int y2, double time, double dt) {
-		if (time < dt) dt = time; 
+		if (time < dt) dt = time;
 		int dy = (int)(((double)30.0 / sqrt(time)) * sqrt(dt) + 0.5);
 		for (int i = -(dy / 2); i <= dy / 2; i++)
 			DrawLine(x1, y1 + i, x2, y2 + i, GetColor(255, 255, 255));
@@ -119,7 +119,7 @@ public:
 	if (time < dt) dt = time;
 	double dx = ((double)sizeX / sqrt(time)) * sqrt(dt);
 	double dy = ((double)sizeY / sqrt(time)) * sqrt(dt);
-	DrawExtendGraph(x - dx / 2.0, y - dy / 2.0, 
+	DrawExtendGraph(x - dx / 2.0, y - dy / 2.0,
 		x + dx / 2.0, y + dy / 2.0, graphID, TRUE);
 	*/
 	void DrawNote(int x, int y, double time, double dt) {
@@ -148,11 +148,49 @@ public:
 			dy = ((double)(sizeY * 0.8) / time) * dt;
 		}
 		//NICE
-		else if (type == 2){
+		else if (type == 2) {
 			dx = ((double)(sizeX * 0.6) / time) * dt;
 			dy = ((double)(sizeY * 0.6) / time) * dt;
 		}
 		DrawExtendGraph((int)(x - dx / 2.0), (int)(y - dy / 2.0),
 			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
+	}
+};
+
+class MyDrawString{
+private:
+	int mainFontSize;
+public:
+	MyDrawString() {
+
+	}
+	/*mainFontSize = size;*/
+	void SetMainFontSize(int size) {
+		mainFontSize = size;
+	}
+	void Draw_String(int x, int y, int fontsize, char str[], int number = 5) {//flip–³‚µ
+		SetFontSize(fontsize);
+		int StrWidth = GetDrawStringWidth(str, strlen(str));
+
+		if (number == 1)
+			DrawString(x, y, str, GetColor(255, 255, 255));
+		else if (number == 2)
+			DrawString(x - StrWidth / 2, y, str, GetColor(255, 255, 255));
+		else if (number == 3)
+			DrawString(x - StrWidth, y, str, GetColor(255, 255, 255));
+		else if (number == 4)
+			DrawString(x, y - fontsize / 2, str, GetColor(255, 255, 255));
+		else if (number == 5)
+			DrawString(x - StrWidth / 2, y - fontsize / 2, str, GetColor(255, 255, 255));
+		else if (number == 6)
+			DrawString(x - StrWidth, y - fontsize / 2, str, GetColor(255, 255, 255));
+		else if (number == 7)
+			DrawString(x, y - fontsize, str, GetColor(255, 255, 255));
+		else if (number == 8)
+			DrawString(x - StrWidth / 2, y - fontsize, str, GetColor(255, 255, 255));
+		else if (number == 9)
+			DrawString(x - StrWidth, y - fontsize, str, GetColor(255, 255, 255));
+
+		SetFontSize(mainFontSize);
 	}
 };

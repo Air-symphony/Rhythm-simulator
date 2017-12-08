@@ -1,5 +1,7 @@
 #include "NoteFileReader.cpp"
 #include "InputKey.cpp"
+#include "InputTouch.cpp"
+
 /*
 game画面
 Display _display, char filename[], bool _debugMode, bool _autoMode
@@ -12,8 +14,10 @@ private:
 	/*0=左, 1=普通, 2=右, 3=ロング, 4=ロング先*/
 	Graph noteGraph[5];
 	HitEffect effect;
+	MyDrawString MyStr;
 	int SE[2];
 	InputKey input;//ボタン入力
+	InputTouch inTouch;
 	double msec = 0;//経過時間(s)
 	double d_msec = 0;//デバッグ用、変化値
 
@@ -59,15 +63,16 @@ private:
 	bool autoMode = false, debugMode = false;
 
 	const double PERFECTtime = 0.066;
-	const double GREATtime = 0.090;
-	const double NICEtime = 0.115;
-	const double BADtime = 0.130;
+	const double GREATtime = 0.110;
+	const double NICEtime = 0.130;
+	const double BADtime = 0.150;
 public:
 	/*
 	filename = 0000.txt
 	*/
 	GameScreen(Display _display, char filename[], int _speed, bool _debugMode, bool _autoMode) {
 		display = _display;
+		MyStr.SetMainFontSize(16);
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
 		ring.setDisplay(display);
 		Line.setGraph(LoadGraph("materials\\Image\\note_cat.png"));
@@ -94,6 +99,7 @@ public:
 		NoteFileReader file;
 		music = file.SelectReadFile(filename, _debugMode);
 		music.SetPos(judgePos_x, 50.0);
+		effect.SetGraph(LoadGraph("materials\\Image\\hit_circle.png"));
 		effect.SetPos(judgePos_x, judgePos_y);
 		msec = 0;
 		Start();
@@ -104,8 +110,8 @@ public:
 
 		ClearDrawScreen();
 		DrawScreen();
-		DrawString(display.GetScreenX() / 2 - 50, display.GetScreenY() / 2,
-			"Push Space", GetColor(255, 255, 255));
+		MyStr.Draw_String(display.GetScreenX() / 2, display.GetScreenY() / 2, 40, "Push Space", 2);
+		
 		ScreenFlip();
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			if (input.PushOneframe_Decide()) {
@@ -136,6 +142,10 @@ public:
 		msec = ((double)GetNowCount() - start_time) / 1000.0;
 		/*ゲーム内容*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
+			/*常に表示させるもの*/
+			ClearDrawScreen();
+			DrawScreen();
+
 			if (debugMode) {
 				if (input.Push_LEFT()) {
 					msec -= 0.030;
@@ -163,7 +173,7 @@ public:
 			/*timestop時*/
 			if (stop_time > 0) {
 				msec = (stop_time - start_time) / 1000.0;
-				DrawFormatString(display.GetScreenX() - 100, 10, GetColor(255, 255, 255), "%s", "停止中");
+				MyStr.Draw_String(display.GetScreenX() / 2, 50, 40, "Pause", 2);
 				
 				if (input.PushOneframe_Decide()) {
 					PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
@@ -185,9 +195,6 @@ public:
 				if (speedCount > Max_speedCount)speedCount = 0;
 			}
 			speed = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
-			/*常に表示させるもの*/
-			ClearDrawScreen();
-			DrawScreen();
 
 			/*判定内容を保存、毎フレームで初期化*/
 			judge_number = -1;
@@ -283,24 +290,8 @@ public:
 									music.notes[music.notes[i].getsideNoteID()].getX(),
 									music.notes[music.notes[i].getsideNoteID()].getY(),
 									speed, dt);
-								/*ノーツの描画*/
-								/*noteGraph[music.notes[music.notes[i].getsideNoteID()].getType() - 1]
-									.DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
-								if (music.notes[music.notes[i].getsideNoteID()].getlongNoteID() > 0 && 
-									music.notes[music.notes[i].getsideNoteID()].getType() == 2) {
-									noteGraph[4].DrawNote(music.notes[music.notes[i].getsideNoteID()].getX(), 
-										music.notes[music.notes[i].getsideNoteID()].getY(), speed, dt);
-								}*/
 							}
 						}
-						/*ノーツの描画*/
-						/*if (music.notes[i].getlongNoteID() > 0 && music.notes[i].getType() == 2) {
-							noteGraph[4].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
-						}
-						else {
-							noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
-						}*/
-
 						/*判定内容*/
 						if (autoMode) AutoMode(i);
 						else PlayKey(i);
@@ -360,7 +351,7 @@ public:
 			/*デバッグ用*/
 			if (debugMode) {
 				int longnote_y = 300;
-				DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKeyCount : %d", holdKeyCount);
+				DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKey : %d", holdKeyCount);
 				for (int j = 0; j < 2; j++) {
 					DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d", holdkey[j].noteID);
 					DrawFormatString(40, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
@@ -381,7 +372,7 @@ public:
 			}
 			/*判定結果の表示(1秒)*/
 			if (printjudge) {
-				DrawFormatString(350, display.GetScreenY() / 2, GetColor(255, 255, 255), "%s", judge_text[printjudge_number]);
+				MyStr.Draw_String(display.GetScreenX() / 2, display.GetScreenY() / 2, 30, judge_text[printjudge_number], 2);
 				printjudge = ((msec - printjudge_time) <= 1.0);
 			}
 
@@ -422,7 +413,7 @@ public:
 			autoMode = !autoMode;
 		}
 		if (autoMode) {
-			DrawString(0, display.GetScreenY() - 20, "AutoMode", GetColor(255, 255, 255));
+			MyStr.Draw_String(0, display.GetScreenY(), 20, "AutoMode", 7);
 		}
 		/*リングの表示*/
 		//ring.Draw(display.GetScreenX() / 2, display.GetScreenY(), 8);
@@ -566,4 +557,5 @@ public:
 		if (t < 0) return (-t);
 		return t;
 	}
+
 };
