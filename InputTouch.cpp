@@ -4,7 +4,7 @@ class TouchID {
 public:
 	int x, y, ID, time;
 	TouchID() {
-		time = 0;
+		time = 0; x = y = -1;
 	}
 	void CopyPos(TouchID t) {
 		x = t.x;
@@ -77,18 +77,18 @@ public:
 	}
 
 	int GetX(int ID) {
-		if (ID == NULL) return NULL;
+		if (ID == NULL) return -1;
 		for (int i = 0; i < touchCount; i++) {
 			if (ID == touch[i].ID) return touch[i].x;
 		}
-		return NULL;
+		return -1;
 	}
 	int GetY(int ID) {
-		if (ID == NULL) return NULL;
+		if (ID == NULL) return -1;
 		for (int i = 0; i < touchCount; i++) {
 			if (ID == touch[i].ID) return touch[i].x;
 		}
-		return NULL;
+		return -1;
 	}
 	int GetTime(int ID) {
 		if (ID == NULL) return NULL;
@@ -117,11 +117,12 @@ public:
 		return NULL;
 	}
 	/*
+	1フレーム前に離されたかを所得
 	for (int i = 0; i < LogCount; i++) {
-		if (ID == Log[i].ID) return true;
+	if (ID == Log[i].ID) return true;
 	}
 	for (int i = 0; i < touchCount; i++) {
-		if (ID == touch[i].ID) return false;
+	if (ID == touch[i].ID) return false;
 	}
 	*/
 	bool GetReleased(int ID) {
@@ -134,6 +135,23 @@ public:
 			if (ID == touch[i].ID) return false;
 		}
 		return NULL;
+	}
+	/*
+	離されていたら
+	bool check = true;
+	for (int i = 0; i < touchCount; i++) {
+		if (ID == touch[i].ID) return false;
+	}
+	return check;
+	*/
+	bool GetRelease(int ID) {
+		if (ID == NULL) return NULL;
+
+		bool check = true;
+		for (int i = 0; i < touchCount; i++) {
+			if (ID == touch[i].ID) return false;
+		}
+		return check;
 	}
 	/*描画時の中心点と、長方形の辺の長さ(全体)*/
 	int GetID_RangeBox(int x, int y, int width, int height, int number = 5) {
