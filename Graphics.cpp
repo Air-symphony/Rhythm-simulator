@@ -156,6 +156,12 @@ public:
 		DrawExtendGraph((int)(x - dx / 2.0), (int)(y - dy / 2.0),
 			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
 	}
+	/*BackGround専用*/
+	void Draw_BackGround() {
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 127);
+		DrawExtendGraph(0, 0, display.GetScreenX(), display.GetScreenY(), graphID, TRUE);
+		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
+	}
 };
 
 class MyDrawString{
@@ -169,28 +175,33 @@ public:
 	void SetMainFontSize(int size) {
 		mainFontSize = size;
 	}
+	/*初期値　GetColor(255,255,255)*/
 	void Draw_String(int x, int y, int fontsize, char str[], int number = 5) {//flip無し
+		Draw_String(x, y, fontsize, GetColor(255,255,255), str, number);
+	}
+	/*色指定追加*/
+	void Draw_String(int x, int y, int fontsize, int _color,  char str[], int number = 5) {//flip無し
 		SetFontSize(fontsize);
 		int StrWidth = GetDrawStringWidth(str, strlen(str));
 
 		if (number == 1)
-			DrawString(x, y, str, GetColor(255, 255, 255));
+			DrawString(x, y, str, _color);
 		else if (number == 2)
-			DrawString(x - StrWidth / 2, y, str, GetColor(255, 255, 255));
+			DrawString(x - StrWidth / 2, y, str, _color);
 		else if (number == 3)
-			DrawString(x - StrWidth, y, str, GetColor(255, 255, 255));
+			DrawString(x - StrWidth, y, str, _color);
 		else if (number == 4)
-			DrawString(x, y - fontsize / 2, str, GetColor(255, 255, 255));
+			DrawString(x, y - fontsize / 2, str, _color);
 		else if (number == 5)
-			DrawString(x - StrWidth / 2, y - fontsize / 2, str, GetColor(255, 255, 255));
+			DrawString(x - StrWidth / 2, y - fontsize / 2, str, _color);
 		else if (number == 6)
-			DrawString(x - StrWidth, y - fontsize / 2, str, GetColor(255, 255, 255));
+			DrawString(x - StrWidth, y - fontsize / 2, str, _color);
 		else if (number == 7)
-			DrawString(x, y - fontsize, str, GetColor(255, 255, 255));
+			DrawString(x, y - fontsize, str, _color);
 		else if (number == 8)
-			DrawString(x - StrWidth / 2, y - fontsize, str, GetColor(255, 255, 255));
+			DrawString(x - StrWidth / 2, y - fontsize, str, _color);
 		else if (number == 9)
-			DrawString(x - StrWidth, y - fontsize, str, GetColor(255, 255, 255));
+			DrawString(x - StrWidth, y - fontsize, str, _color);
 
 		SetFontSize(mainFontSize);
 	}

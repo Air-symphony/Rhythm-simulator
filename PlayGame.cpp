@@ -18,13 +18,14 @@ private:
 	/*判定位置の座標*/
 	const double judgePos_y = display.GetScreenY() - 75.0;//判定位置
 	/*画面端からどのくらいのスペースを開けるか*/
-	const double ScreenSideSize = display.GetScreenX() / 4.0;
+	const double ScreenSideSize = display.GetScreenX() / 7.0;
 	/*五つの判定位置の間隔　judgePos_x * (1,2,3,4,5)*/
 	const double judgePos_x = (display.GetScreenX() - ScreenSideSize * 2) / 4.0;
 	
 	Music music;
-	Graph ring, Line;
+	Graph ring, Line, background;
 	UI StopButton;
+	UI PauseWindow, Continue, Finish;
 	/*0=左, 1=普通, 2=右, 3=ロング, 4=ロング先*/
 	Graph noteGraph[5];
 	HitEffect effect;
@@ -79,14 +80,16 @@ public:
 	filename = 0000.txt
 	*/
 	GameScreen(Display _display, char filename[], int _speed, bool _debugMode, bool _autoMode) {
+		clsDx(); 
 		display = _display;
 		MyStr.SetMainFontSize(16);
 		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
 		ring.setDisplay(display);
 		Line.setGraph(LoadGraph("materials\\Image\\note_cat.png"));
 		Line.setDisplay(display);
+
+		char _imagepath[256];
 		for (int i = 1; i <= 5; i++) {
-			char _imagepath[256];
 			strcpy_s(_imagepath, "materials\\Image\\Note");
 			char _number[256];
 			sprintf_s(_number, 256, "%d.png", i);
@@ -111,6 +114,10 @@ public:
 		NoteFileReader file;
 		music = file.SelectReadFile(filename, _debugMode);
 		music.SetPos(ScreenSideSize, judgePos_x, StartY);
+		strcpy_s(_imagepath, "materials\\Image\\background\\");
+		strcat_s(_imagepath, music.backgroundFile);
+		background.setGraph(LoadGraph(_imagepath));
+		background.setDisplay(display);
 		effect.SetGraph(LoadGraph("materials\\Image\\hit_circle.png"));
 		effect.SetPos(ScreenSideSize, judgePos_x, judgePos_y);
 		msec = 0;
@@ -122,6 +129,17 @@ private:
 		StopButton.SetUI(LoadGraph("materials\\Image\\ui\\StopButton.png"),
 			display.GetScreenX() - 10, 20, 3);
 		StopButton.setDisplay(display);
+		PauseWindow.SetUI(LoadGraph("materials\\Image\\ui\\StopWindow.png"),
+			display.GetScreenX() / 2, display.GetScreenY() / 2, 5);
+		PauseWindow.setDisplay(display);
+		Continue.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
+			display.GetScreenX() / 2 - 100, display.GetScreenY() / 2 + 80, 5);
+		Continue.setDisplay(display);
+		Continue.SetText("再開", GetColor(0, 0, 0));
+		Finish.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
+			display.GetScreenX() / 2 + 100, display.GetScreenY() / 2 + 80, 5);
+		Finish.setDisplay(display);
+		Finish.SetText("リタイア", GetColor(0, 0, 0));
 	}
 
 	void Start() {
@@ -188,7 +206,7 @@ private:
 
 			/*一時停止*//*徐々にノーツが速くなるかも？*/
 			if (stop_time <= 0 && 
-				(input.PushOneframe_Stop() || TapUIOneFrame(StopButton))
+				(input.PushOneframe_Stop() || inTouch.TapBox(StopButton, 10))
 				) {
 				stop_time = (double)GetNowCount();
 				StopSoundMem(music.soundHandle);
@@ -197,9 +215,13 @@ private:
 			/*timestop時*/
 			if (stop_time > 0) {
 				msec = (stop_time - start_time) / 1000.0;
-				MyStr.Draw_String(display.GetScreenX() / 2, 50, 40, "Pause", 2);
-				
-				if (input.PushOneframe_Decide()) {
+				//MyStr.Draw_String(display.GetScreenX() / 2, 50, 40, "Pause", 2);
+				PauseWindow.Draw();
+				Continue.Draw(MyStr, 20, 5);
+				Finish.Draw(MyStr, 20, 5);
+
+				if (input.PushOneframe_Decide() || 
+					inTouch.TapBox(Continue, 10)) {
 					if (playMusic) {
 						PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
 					}
@@ -208,6 +230,9 @@ private:
 					start_time += (d_time - stop_time);
 					msec = ((double)GetNowCount() - start_time) / 1000.0;
 					stop_time = 0.0;
+				}
+				else if (inTouch.TapBox(Finish, 10)){
+					break;
 				}
 			}
 
@@ -431,6 +456,7 @@ private:
 
 	/*常に表示させるもの、スコアなど*/
 	void DrawScreen() {
+		background.Draw_BackGround();
 		DrawFormatString(0, 0, GetColor(255, 255, 255), "Title : %s", music.title);
 		DrawFormatString(display.GetScreenX() - 120, 0, GetColor(255, 255, 255), "SPEED : %d.0", (speedCount + 1));
 		
@@ -473,7 +499,6 @@ private:
 		DrawLine(0, (int)judgePos_y + y, display.GetScreenX(), (int)judgePos_y + y, GetColor(255, 0, 255));
 
 		StopButton.Draw();
-
 		/*エフェクトの表示*/
 		effect.PrintEffect();
 	}
@@ -612,14 +637,6 @@ private:
 		return false;
 	}
 
-	/*タッチ判定の指定、1フレームでの判定*/
-	bool TapUIOneFrame(UI ui) {
-		if (inTouch.touchCount <= 0) return false;
-
-		int id = inTouch.GetID_RangeBox(ui, 10);
-		return (inTouch.GetTime(id) == 1);
-	}
-
 	/*各判定内に存在するIDの取得*/
 	int GetID_RangePlayable(int x) {
 		int posX, width,
@@ -684,16 +701,18 @@ private:
 		/*中心バーを越えたらすぐ*/
 		if (music.notes[i].gettime() <= msec) {
 			/*フリック音*/
-			effect.Hit(music.notes[i].getend_x(), 0);
 			if (music.notes[i].getType() == 1 || music.notes[i].getType() == 3) {
 				PlaySoundMem(SE[1], DX_PLAYTYPE_BACK, TRUE);
 			}
 			else {
 				PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
 			}
+			Judge(i, music.notes[i].getType());
+			/*
+			effect.Hit(music.notes[i].getend_x(), 0);
 			combo++;
 			score += 300;
-			judge_number = 0;
+			judge_number = 0;*/
 			music.notes[i].setflag(-1);
 			/*ロングノーツなら*/
 			if (music.notes[i].getType() == 4) {

@@ -176,6 +176,13 @@ public:
 		return GetID_RangeBox(ui.x, ui.y, 
 			ui.sizeX + correction * 2, ui.sizeY + correction * 2, ui.number);
 	}
+	/*タッチ判定の指定、1フレームでの判定*/
+	bool TapBox(UI ui, int correction = 0) {
+		if (touchCount <= 0) return false;
+
+		int id = GetID_RangeBox(ui, correction);
+		return (GetTime(id) == 1);
+	}
 	/*描画時の中心点と、円の半径*/
 	int GetID_RangeCircle(int x, int y, int r) {
 		for (int i = 0; i < touchCount; i++) {

@@ -14,6 +14,7 @@ Rhythm rhythm;
 class Music {
 public:
 	char title[256];
+	char backgroundFile[256];
 	float bpm;
 	int soundHandle;
 	int offset;//(ms)
@@ -102,9 +103,8 @@ public:
 				sprintf_s(music.title, 256, "%s", next);
 			}
 			else if (strcmp(next, "#BackGround") == 0) {
-				char background_name[256];
 				next = strtok_s(NULL, "", &ctx);
-				sprintf_s(background_name, 256, "%s", next);
+				sprintf_s(music.backgroundFile, 256, "%s", next);
 			}
 			else if (strcmp(next, "#Song") == 0) {
 				char sound_name[256];
