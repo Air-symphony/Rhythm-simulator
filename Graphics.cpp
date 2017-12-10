@@ -157,8 +157,8 @@ public:
 			(int)(x + dx / 2.0), (int)(y + dy / 2.0), graphID, TRUE);
 	}
 	/*BackGroundêÍóp*/
-	void Draw_BackGround() {
-		SetDrawBlendMode(DX_BLENDMODE_ALPHA, 127);
+	void Draw_BackGround(int alphe = 127) {
+		SetDrawBlendMode(DX_BLENDMODE_ALPHA, alphe);
 		DrawExtendGraph(0, 0, display.GetScreenX(), display.GetScreenY(), graphID, TRUE);
 		SetDrawBlendMode(DX_BLENDMODE_NOBLEND, 255);
 	}
@@ -170,6 +170,9 @@ private:
 public:
 	MyDrawString() {
 		mainFontSize = 16;
+	}
+	MyDrawString(int size) {
+		mainFontSize = size;
 	}
 	/*mainFontSize = size;*/
 	void SetMainFontSize(int size) {

@@ -25,11 +25,13 @@ private:
 	InputKey input;
 	InputTouch inTouch;
 	FileReader file;
-
-	int id;
+	/*0: 上, 1: 下, 2: 左, 3: 右, 決定*/
+	UI ArrowKey[4], Button;
+	Graph background;
 public:
 	GameSimulator(Display display) {
 		file.ReadConfig();
+		Layout(display);
 
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			int scene = SelectNumber(1, scenecount);
@@ -40,6 +42,28 @@ public:
 			else if (scene == 0)
 				break;
 		}
+	}
+	void Layout(Display display) {
+		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_6009.jpg"));
+		background.setDisplay(display);
+		char _imagepath[256];
+		for (int i = 0; i < 4; i++) {
+			strcpy_s(_imagepath, "materials\\Image\\ui\\");
+			char _number[256];
+			sprintf_s(_number, 256, "Arrow%d.png", i + 1);
+			strcat_s(_imagepath, _number);
+			ArrowKey[i].setGraph(LoadGraph(_imagepath));
+			ArrowKey[i].SetSE(LoadSoundMem("materials\\SE\\cursor.mp3"));
+		}
+		ArrowKey[0].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 300, 5);
+		ArrowKey[1].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 200, 5);
+		ArrowKey[2].SetPos(display.GetScreenX() - 150, display.GetScreenY() - 250, 5);
+		ArrowKey[3].SetPos(display.GetScreenX() - 50, display.GetScreenY() - 250, 5);
+		Button.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
+			display.GetScreenX() - 100, display.GetScreenY() - 100, 5);
+		Button.SetSE(LoadSoundMem("materials\\SE\\Decision.mp3"));
+		Button.SetText("決定", GetColor(0, 0, 0));
+		Button.SetCorrection(10);
 	}
 
 	void Playgame(Display display) {
@@ -63,18 +87,24 @@ public:
 	int SelectNumber(int _type, int _scene) {
 		int number = 1;
 		FontSize(20);
+		MyDrawString str(20);
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
-			if (input.PushOneframe_DOWN()) {
+			inTouch.Update();
+			if (input.PushOneframe_DOWN() || 
+				inTouch.ReleasedRangeBox(ArrowKey[1])) {
 				number = (number + 1) % _scene;
 			}
-			else if (input.PushOneframe_UP()) {
+			else if (input.PushOneframe_UP() ||
+				inTouch.ReleasedRangeBox(ArrowKey[0])) {
 				number = (number - 1) % _scene;
 				if (number < 0) number += _scene;
 			}
-			if (input.PushOneframe_Decide())
+			if (input.PushOneframe_Decide() ||
+				inTouch.ReleasedRangeBox(Button))
 				return number;
 
 			ClearDrawScreen();
+			background.Draw_BackGround(255);
 			if (_type == 1) {
 				DrawString(0, 0, "Please Select Menu", GetColor(255, 255, 255));
 				DrawString(20, fontsize * 3, "1.Play", GetColor(255, 255, 255));
@@ -105,7 +135,8 @@ public:
 				else if (number == 2)
 					DrawString(20, DebugMode_y, file.DebugMode, GetColor(255, 0, 0));
 
-				if (input.PushOneframe_LEFT()) {
+				if (input.PushOneframe_LEFT() ||
+					inTouch.ReleasedRangeBox(ArrowKey[2])) {
 					if (number == 0) {
 						file.speed -= 1;
 						if (file.speed < 1) file.speed = 10;
@@ -115,7 +146,8 @@ public:
 					else if (number == 2)
 						file.debugMode = !file.debugMode;
 				}
-				else if(input.PushOneframe_RIGHT()){
+				else if(input.PushOneframe_RIGHT() ||
+					inTouch.ReleasedRangeBox(ArrowKey[3])){
 					if (number == 0) {
 						file.speed += 1;
 						if (file.speed > 10) file.speed = 1;
@@ -139,28 +171,14 @@ public:
 			}
 			DrawFormatString(20, fontsize * 2, GetColor(255, 255, 255), "Select number : %d", number);
 
-			// タッチパネル テスト
-			/*
-			inTouch.SetTouch();
-			inTouch.PrintTouch(250, 40);
-			inTouch.PrintLog(520, 40);
-
-			DrawCircle(400, 250, 100, GetColor(255, 255, 255), true);
-			bool release = inTouch.GetRelease(id);
-			id = inTouch.GetID_RangeCircle(400, 250, 100);//inTouch.GetID_RangeBox(300, 150, 200, 200, 1);
-			if (id != NULL) {
-				DrawFormatString(250, 130, GetColor(255, 255, 255), "InsideID : %d", id);
+			Button.SetID(inTouch.GetID_RangeBoxOneFrame(Button));
+			Button.Draw(str, 30);
+			int IconCount = 2;
+			if (_type == 3) IconCount = 4;
+			for (int i = 0; i < IconCount; i++) {
+				ArrowKey[i].SetID(inTouch.GetID_RangeBoxOneFrame(ArrowKey[i]));
+				ArrowKey[i].Draw();
 			}
-			if (release) {
-				DrawFormatString(450, 130, GetColor(255, 255, 255), "Release");
-			}
-			ScreenFlip();// 裏画面の内容を表画面に反映させる 
-			if (inTouch.LogCount > 0) {
-				while (ProcessMessage() == 0 && input.ForcedTermination()) {
-					if (input.PushOneframe_ChangeAutoMode())break;
-				}
-			}
-			*/
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 		}
 		return 0;

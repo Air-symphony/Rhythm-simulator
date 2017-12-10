@@ -5,9 +5,6 @@ private:
 	void SetGraph(int graph) {
 		Graph::setGraph(graph);
 	}
-	void SetPos(int _x, int _y) {
-		x = _x; y = _y;
-	}
 public:
 	/*x, y, テンキー*/
 	int x, y, number;
@@ -18,7 +15,7 @@ public:
 	/*SE*/
 	int sound;
 	/*テキスト関係*/
-	char Text[50] = {""};
+	char Text[50] = "";
 	int color;
 	UI(){
 		x = y = number = ID = -1;
@@ -26,12 +23,19 @@ public:
 	}
 	/*
 	SetGraph(graph);
-	SetPos(_x, _y);
+	x = _x; y = _y;
 	number = _number;
 	*/
 	void SetUI(int graph, int _x, int _y, int _number = 5) {
 		SetGraph(graph);
-		SetPos(_x, _y);
+		SetPos(_x, _y, _number);
+	}
+	/*
+	x = _x; y = _y;
+	number = _number;
+	*/
+	void SetPos(int _x, int _y, int _number = 5) {
+		x = _x; y = _y;
 		number = _number;
 	}
 
