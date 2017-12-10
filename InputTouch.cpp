@@ -216,15 +216,12 @@ public:
 	*/
 	bool ReleasedRangeBox(UI ui) {
 		if (ui.ID == NULL) return false;
-<<<<<<< HEAD
 		if (ui.ID == GetLogID_RangeBox(ui)) {
 			PlaySoundMem(ui.sound, DX_PLAYTYPE_BACK, TRUE);
 			return true;
 		}
 		return false;
-=======
 		return (ui.ID == GetLogID_RangeBox(ui));
->>>>>>> f7a934b4ac19c660b5154db7798081ec4119fd86
 	}
 	/*•`‰æ‚Ì’†S“_‚ÆA‰~‚Ì”¼Œa*/
 	/*int GetID_RangeCircle(int x, int y, int r) {
