@@ -11,14 +11,18 @@ private:
 public:
 	/*x, y, テンキー*/
 	int x, y, number;
-	int correction, sound;
+	/*判定の幅の加算*/
+	int correction;
 	/*タッチID*/
-	int ID = -1;
+	int ID;
+	/*SE*/
+	int sound;
+	/*テキスト関係*/
 	char Text[50] = {""};
-	int color = 0;
+	int color;
 	UI(){
-		x = y = number = -1;
-		correction = 0;
+		x = y = number = ID = -1;
+		correction = sound = color = 0;
 	}
 	/*
 	SetGraph(graph);

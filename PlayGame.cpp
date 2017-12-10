@@ -155,10 +155,13 @@ private:
 		ClearDrawScreen();
 		DrawScreen();
 		MyStr.Draw_String(display.GetScreenX() / 2, display.GetScreenY() / 2, 40, "Push Space", 2);
-		
+		inTouch.Update();
+
 		ScreenFlip();
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
-			if (input.PushOneframe_Decide()) {
+			inTouch.Update();
+			if (input.PushOneframe_Decide() ||
+				inTouch.PressRangeBoxOneFrame(0, 0, display.GetScreenX(), display.GetScreenY(), 1)) {
 				break;
 			}
 		}
@@ -188,7 +191,7 @@ private:
 		/*ÉQÅ[ÉÄì‡óe*/
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			/*èÌÇ…ï\é¶Ç≥ÇπÇÈÇ‡ÇÃ*/
-			inTouch.SetTouch();
+			inTouch.Update();
 			ClearDrawScreen();
 			DrawScreen();
 
@@ -429,7 +432,6 @@ private:
 				DrawFormatString(display.GetScreenX() - 100, 80, GetColor(255, 255, 255), "bar: %d", start_bar_number);
 				DrawFormatString(display.GetScreenX() - 100, 96, GetColor(255, 255, 255), "bar: %d", end_bar_number);
 				*/
-				DrawFormatString(display.GetScreenX() - 250, display.GetScreenY() - 350, GetColor(255, 255, 255), "Stop = %d", StopButton.ID);
 				inTouch.PrintTouch(display.GetScreenX() - 250, display.GetScreenY() - 300);
 				inTouch.PrintLog(display.GetScreenX() - 250, display.GetScreenY() - 200);
 			}

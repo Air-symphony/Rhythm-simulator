@@ -169,7 +169,7 @@ private:
 	int mainFontSize;
 public:
 	MyDrawString() {
-
+		mainFontSize = 16;
 	}
 	/*mainFontSize = size;*/
 	void SetMainFontSize(int size) {

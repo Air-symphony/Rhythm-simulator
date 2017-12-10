@@ -4,7 +4,7 @@ class TouchID {
 public:
 	int x, y, ID, time;
 	TouchID() {
-		time = 0; x = y = -1;
+		time = 0; ID = x = y = -1;
 	}
 	void CopyPos(TouchID t) {
 		x = t.x;
@@ -18,7 +18,7 @@ private:
 	TouchID touch[NUM];
 	TouchID Log[NUM];
 public:
-	int touchCount = -1;
+	int touchCount = 0;
 	int LogCount = 0;
 
 	InputTouch() {
@@ -26,7 +26,7 @@ public:
 	}
 
 	/*毎フレーム呼び出す*/
-	void SetTouch() {
+	void Update() {
 		/*現フレームでのタッチ状態の取得*/
 		TouchID newTouch[NUM];
 		int newTouchCount = (GetTouchInputNum() < NUM) ? GetTouchInputNum() : NUM;;
@@ -75,6 +75,7 @@ public:
 			touch[i].time++;
 		}
 	}
+
 	int GetX(int ID) {
 		if (ID == NULL) return NULL;
 		for (int i = 0; i < touchCount; i++) {
@@ -223,15 +224,18 @@ public:
 		return false;
 		return (ui.ID == GetLogID_RangeBox(ui));
 	}
-	/*描画時の中心点と、円の半径*/
-	/*int GetID_RangeCircle(int x, int y, int r) {
-		for (int i = 0; i < touchCount; i++) {
-			int dx = (x - touch[i].x) * (x - touch[i].x);
-			int dy = (y - touch[i].y) * (y - touch[i].y);
-			if (dx + dy <= r * r) return touch[i].ID;
-		}
-		return NULL;
-	}*/
+	/*
+	return (GetTime(GetID_RangeBox(x, y, width, height, number)) == 1);
+	*/
+	bool PressRangeBoxOneFrame(int x, int y, int width, int height, int number = 5) {
+		return (GetTime(GetID_RangeBox(x, y, width, height, number)) == 1);
+	}
+	/*
+	return (GetTime(GetID_RangeBox(ui)) == 1);
+	*/
+	bool PressRangeBoxOneFrame(UI ui) {
+		return (GetTime(GetID_RangeBox(ui)) == 1);
+	}
 	/*
 	DrawFormatString(x, y, GetColor(255, 255, 255), "Touch = %d", touchCount);
 	for (int i = 0; i < touchCount; i++) {
