@@ -75,20 +75,19 @@ public:
 			touch[i].time++;
 		}
 	}
-
 	int GetX(int ID) {
-		if (ID == NULL) return -1;
+		if (ID == NULL) return NULL;
 		for (int i = 0; i < touchCount; i++) {
 			if (ID == touch[i].ID) return touch[i].x;
 		}
-		return -1;
+		return NULL;
 	}
 	int GetY(int ID) {
-		if (ID == NULL) return -1;
+		if (ID == NULL) return NULL;
 		for (int i = 0; i < touchCount; i++) {
-			if (ID == touch[i].ID) return touch[i].x;
+			if (ID == touch[i].ID) return touch[i].y;
 		}
-		return -1;
+		return NULL;
 	}
 	int GetTime(int ID) {
 		if (ID == NULL) return NULL;
@@ -105,7 +104,7 @@ public:
 		}
 	}
 	*/
-	bool GetPressed(int ID) {
+	bool Press(int ID) {
 		if (ID == NULL) return NULL;
 
 		for (int i = 0; i < touchCount; i++) {
@@ -117,6 +116,21 @@ public:
 		return NULL;
 	}
 	/*
+	離されていたら
+	for (int i = 0; i < touchCount; i++) {
+	if (ID == touch[i].ID) return false;
+	}
+	return true;
+	*/
+	bool Release(int ID) {
+		if (ID == NULL) return NULL;
+
+		for (int i = 0; i < touchCount; i++) {
+			if (ID == touch[i].ID) return false;
+		}
+		return true;
+	}
+	/*
 	1フレーム前に離されたかを所得
 	for (int i = 0; i < LogCount; i++) {
 	if (ID == Log[i].ID) return true;
@@ -125,7 +139,7 @@ public:
 	if (ID == touch[i].ID) return false;
 	}
 	*/
-	bool GetReleased(int ID) {
+	bool Released(int ID) {
 		if (ID == NULL) return NULL;
 
 		for (int i = 0; i < LogCount; i++) {
@@ -136,23 +150,7 @@ public:
 		}
 		return NULL;
 	}
-	/*
-	離されていたら
-	bool check = true;
-	for (int i = 0; i < touchCount; i++) {
-		if (ID == touch[i].ID) return false;
-	}
-	return check;
-	*/
-	bool GetRelease(int ID) {
-		if (ID == NULL) return NULL;
 
-		bool check = true;
-		for (int i = 0; i < touchCount; i++) {
-			if (ID == touch[i].ID) return false;
-		}
-		return check;
-	}
 	/*描画時の中心点と、長方形の辺の長さ(全体)*/
 	int GetID_RangeBox(int x, int y, int width, int height, int number = 5) {
 		int minX = x - (((number - 1) % 3)) * (width / 2);
@@ -168,30 +166,71 @@ public:
 		return NULL;
 	}
 	/*
-	correction　タッチ判定範囲を加算
 	return GetID_RangeBox(ui.x, ui.y, 
 			ui.sizeX + correction * 2, ui.sizeY + correction * 2, 5);
 	*/
-	int GetID_RangeBox(UI ui, int correction = 0) {
-		return GetID_RangeBox(ui.x, ui.y, 
-			ui.sizeX + correction * 2, ui.sizeY + correction * 2, ui.number);
+	int GetID_RangeBox(UI ui) {
+		return GetID_RangeBox(ui.x, ui.y,
+			ui.sizeX + ui.correction * 2, ui.sizeY + ui.correction * 2, ui.number);
 	}
-	/*タッチ判定の指定、1フレームでの判定*/
-	bool TapBox(UI ui, int correction = 0) {
-		if (touchCount <= 0) return false;
+	/*
+	int id = GetID_RangeBox(ui.x, ui.y,
+			ui.sizeX + correction * 2, ui.sizeY + correction * 2, ui.number);
+	if (GetTime(id) == 1) return id;
+	return NULL;
+	*/
+	int GetID_RangeBoxOneFrame(UI ui) {
+		if (ui.ID == NULL || Release(ui.ID)) {
+			int id = GetID_RangeBox(ui);
 
-		int id = GetID_RangeBox(ui, correction);
-		return (GetTime(id) == 1);
+			if (GetTime(id) == 1) return id;
+			return NULL;
+		}
+		return ui.ID;
+	}
+	/*描画時の中心点と、長方形の辺の長さ(全体)*/
+	int GetLogID_RangeBox(int x, int y, int width, int height, int number = 5) {
+		int minX = x - (((number - 1) % 3)) * (width / 2);
+		int maxX = x + (2 - ((number - 1) % 3)) * (width / 2);
+		int minY = y - ((int)((number - 1) / 3)) * (height / 2);
+		int maxY = y + (2 - (int)((number - 1) / 3)) * (height / 2);
+
+		for (int i = 0; i < LogCount; i++) {
+			if (minX <= Log[i].x && Log[i].x <= maxX &&
+				minY <= Log[i].y && Log[i].y <= maxY)
+				return Log[i].ID;
+		}
+		return NULL;
+	}
+	/*
+	return GetLogID_RangeBox(ui.x, ui.y,
+	ui.sizeX + correction * 2, ui.sizeY + correction * 2, 5);
+	*/
+	int GetLogID_RangeBox(UI ui) {
+		return GetLogID_RangeBox(ui.x, ui.y,
+			ui.sizeX + ui.correction * 2, ui.sizeY + ui.correction * 2, ui.number);
+	}
+	/*
+	if (ui.ID == NULL) return false;
+	return (ui.ID == GetLogID_RangeBox(ui));
+	*/
+	bool ReleasedRangeBox(UI ui) {
+		if (ui.ID == NULL) return false;
+		if (ui.ID == GetLogID_RangeBox(ui)) {
+			PlaySoundMem(ui.sound, DX_PLAYTYPE_BACK, TRUE);
+			return true;
+		}
+		return false;
 	}
 	/*描画時の中心点と、円の半径*/
-	int GetID_RangeCircle(int x, int y, int r) {
+	/*int GetID_RangeCircle(int x, int y, int r) {
 		for (int i = 0; i < touchCount; i++) {
 			int dx = (x - touch[i].x) * (x - touch[i].x);
 			int dy = (y - touch[i].y) * (y - touch[i].y);
 			if (dx + dy <= r * r) return touch[i].ID;
 		}
 		return NULL;
-	}
+	}*/
 	/*
 	DrawFormatString(x, y, GetColor(255, 255, 255), "Touch = %d", touchCount);
 	for (int i = 0; i < touchCount; i++) {
