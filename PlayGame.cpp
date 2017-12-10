@@ -129,6 +129,7 @@ private:
 		StopButton.SetUI(LoadGraph("materials\\Image\\ui\\StopButton.png"),
 			display.GetScreenX() - 10, 20, 3);
 		StopButton.setDisplay(display);
+		StopButton.SetCorrection(10);
 		PauseWindow.SetUI(LoadGraph("materials\\Image\\ui\\StopWindow.png"),
 			display.GetScreenX() / 2, display.GetScreenY() / 2, 5);
 		PauseWindow.setDisplay(display);
@@ -136,10 +137,12 @@ private:
 			display.GetScreenX() / 2 - 100, display.GetScreenY() / 2 + 80, 5);
 		Continue.setDisplay(display);
 		Continue.SetText("再開", GetColor(0, 0, 0));
+		Continue.SetCorrection(10);
 		Finish.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
 			display.GetScreenX() / 2 + 100, display.GetScreenY() / 2 + 80, 5);
 		Finish.setDisplay(display);
 		Finish.SetText("リタイア", GetColor(0, 0, 0));
+		Finish.SetCorrection(10);
 	}
 
 	void Start() {
@@ -206,22 +209,18 @@ private:
 
 			/*一時停止*//*徐々にノーツが速くなるかも？*/
 			if (stop_time <= 0 && 
-				(input.PushOneframe_Stop() || inTouch.TapBox(StopButton, 10))
+				(input.PushOneframe_Stop() || inTouch.ReleasedRangeBox(StopButton))
 				) {
 				stop_time = (double)GetNowCount();
 				StopSoundMem(music.soundHandle);
 			}
+			StopButton.SetID(inTouch.GetID_RangeBoxOneFrame(StopButton));
 
 			/*timestop時*/
 			if (stop_time > 0) {
 				msec = (stop_time - start_time) / 1000.0;
-				//MyStr.Draw_String(display.GetScreenX() / 2, 50, 40, "Pause", 2);
-				PauseWindow.Draw();
-				Continue.Draw(MyStr, 20, 5);
-				Finish.Draw(MyStr, 20, 5);
-
 				if (input.PushOneframe_Decide() || 
-					inTouch.TapBox(Continue, 10)) {
+					inTouch.ReleasedRangeBox(Continue)) {
 					if (playMusic) {
 						PlaySoundMem(music.soundHandle, DX_PLAYTYPE_BACK, FALSE);
 					}
@@ -231,9 +230,11 @@ private:
 					msec = ((double)GetNowCount() - start_time) / 1000.0;
 					stop_time = 0.0;
 				}
-				else if (inTouch.TapBox(Finish, 10)){
+				else if (inTouch.ReleasedRangeBox(Finish)){
 					break;
 				}
+				Continue.SetID(inTouch.GetID_RangeBoxOneFrame(Continue));
+				Finish.SetID(inTouch.GetID_RangeBoxOneFrame(Finish));
 			}
 
 			/*速度変更*/
@@ -270,7 +271,7 @@ private:
 
 					/*長押し中なら線を表示*/
 					if (input.LongHoldKey(holdkey[j].key) ||
-						inTouch.GetPressed(IDList[holdkey[j].key - 1]) || 
+						inTouch.Press(IDList[holdkey[j].key - 1]) || 
 						autoMode
 						) {
 						double dt = (msec + speed) - music.notes[i].gettime();
@@ -424,8 +425,9 @@ private:
 				DrawFormatString(display.GetScreenX() - 100, 80, GetColor(255, 255, 255), "bar: %d", start_bar_number);
 				DrawFormatString(display.GetScreenX() - 100, 96, GetColor(255, 255, 255), "bar: %d", end_bar_number);
 				*/
-				inTouch.PrintTouch(display.GetScreenX() - 150, display.GetScreenY() - 300);
-				inTouch.PrintLog(display.GetScreenX() - 150, display.GetScreenY() - 150);
+				DrawFormatString(display.GetScreenX() - 250, display.GetScreenY() - 350, GetColor(255, 255, 255), "Stop = %d", StopButton.ID);
+				inTouch.PrintTouch(display.GetScreenX() - 250, display.GetScreenY() - 300);
+				inTouch.PrintLog(display.GetScreenX() - 250, display.GetScreenY() - 200);
 			}
 
 			/*判定を表示する必要性があったとき*/
@@ -440,6 +442,12 @@ private:
 				printjudge = ((msec - printjudge_time) <= 1.0);
 			}
 
+			/*ポーズ画面出力*/
+			if (stop_time > 0) {
+				PauseWindow.Draw();
+				Continue.Draw(MyStr, 20, 5);
+				Finish.Draw(MyStr, 20, 5);
+			}
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 
 			/*時間経過後、ゲーム画面の強制終了*/
@@ -511,7 +519,7 @@ private:
 			if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
 				if (/*type 2 && 離していれば*/
 					music.notes[i].getType() == 2 &&
-					inTouch.GetRelease(IDList[holdkey[j].key - 1])
+					inTouch.Release(IDList[holdkey[j].key - 1])
 					) {// input.LongHoldKey(holdkey[j].key) == false)
 					if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
 						Judge(i, music.notes[i].getType());
@@ -548,7 +556,7 @@ private:
 							}
 						}
 					}
-					else if (inTouch.GetRelease(IDList[holdkey[j].key - 1])) {
+					else if (inTouch.Release(IDList[holdkey[j].key - 1])) {
 						judge_number = 4;
 						music.notes[i].setflag(-1);
 						holdkey[j].noteID = holdkey[j].key = 0;
@@ -610,7 +618,7 @@ private:
 	bool PlayTouchFlick(int x) {
 		if (inTouch.touchCount <= 0) return false;
 
-		if (Flick_X[x - 1] < 0 || inTouch.GetRelease(IDList[x - 1])) {
+		if (Flick_X[x - 1] < 0 || inTouch.Release(IDList[x - 1])) {
 			IDList[x - 1] = GetID_RangePlayable(x);
 			Flick_X[x - 1] = inTouch.GetX(IDList[x - 1]);
 		}
