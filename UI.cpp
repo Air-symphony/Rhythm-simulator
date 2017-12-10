@@ -11,7 +11,11 @@ private:
 public:
 	/*x, y, テンキー*/
 	int x, y, number;
+<<<<<<< HEAD
 	int correction, sound;
+=======
+	int correction;
+>>>>>>> f7a934b4ac19c660b5154db7798081ec4119fd86
 	/*タッチID*/
 	int ID = -1;
 	char Text[50] = {""};
@@ -38,9 +42,12 @@ public:
 	void SetCorrection(int _correction) {
 		correction = _correction;
 	}
+<<<<<<< HEAD
 	void SetSE(int _sound) {
 		sound = _sound;
 	}
+=======
+>>>>>>> f7a934b4ac19c660b5154db7798081ec4119fd86
 	void SetText(char text[], int _color = GetColor(255, 255, 255)) {
 		strcpy_s(Text, text);
 		color = _color;

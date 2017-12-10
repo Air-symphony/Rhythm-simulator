@@ -131,7 +131,10 @@ private:
 			display.GetScreenX() - 10, 20, 3);
 		StopButton.setDisplay(display);
 		StopButton.SetCorrection(10);
+<<<<<<< HEAD
 		StopButton.SetSE(ButtonSE);
+=======
+>>>>>>> f7a934b4ac19c660b5154db7798081ec4119fd86
 		PauseWindow.SetUI(LoadGraph("materials\\Image\\ui\\StopWindow.png"),
 			display.GetScreenX() / 2, display.GetScreenY() / 2, 5);
 		PauseWindow.setDisplay(display);
@@ -140,13 +143,19 @@ private:
 		Continue.setDisplay(display);
 		Continue.SetText("再開", GetColor(0, 0, 0));
 		Continue.SetCorrection(10);
+<<<<<<< HEAD
 		Continue.SetSE(ButtonSE);
+=======
+>>>>>>> f7a934b4ac19c660b5154db7798081ec4119fd86
 		Finish.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
 			display.GetScreenX() / 2 + 100, display.GetScreenY() / 2 + 80, 5);
 		Finish.setDisplay(display);
 		Finish.SetText("リタイア", GetColor(0, 0, 0));
 		Finish.SetCorrection(10);
+<<<<<<< HEAD
 		Finish.SetSE(ButtonSE);
+=======
+>>>>>>> f7a934b4ac19c660b5154db7798081ec4119fd86
 	}
 
 	void Start() {
