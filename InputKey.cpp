@@ -35,6 +35,14 @@ private:
 		return keyCode;
 	}
 public:
+	InputKey() {
+		for (int i = 0; i < keytype; i++) {
+			keytime[i] = 0;
+		}
+		for (int i = 0; i < gameKey_type; i++) {
+			GameKey[i] = holdGameKey[i] = 0;
+		}
+	}
 	/*number = 1,2,3,4,5*/
 	bool PushOneframe_PlayGame(int number) {
 		int keyCode = getGameKeyCode(number);

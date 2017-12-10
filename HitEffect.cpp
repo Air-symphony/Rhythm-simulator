@@ -12,11 +12,13 @@ private:
 	int judgeType[5];
 	double posX, posY, ScreenSideSize;
 public:
-	/*for (int i = 0; i < type; i++) {
+	/*posX = posY = ScreenSideSize = 0.0;
+	for (int i = 0; i < type; i++) {
 			time[i] = 0.0;
 			judgeType[i] = -1;
 		}*/
 	HitEffect() {
+		posX = posY = ScreenSideSize = 0.0;
 		for (int i = 0; i < type; i++) {
 			time[i] = 0.0;
 			judgeType[i] = -1;

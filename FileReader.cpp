@@ -2,9 +2,9 @@
 
 class FileReader {
 private: 
-	int FileHandle;
+	int FileHandle = 0;
 	char FileListpath[50] = "materials\\NoteFile\\FileList.txt";
-	int ConfigFileHandle;
+	int ConfigFileHandle = 0;
 	char Configpath[25] = "materials\\Config.dll";
 	char *next;
 	char *ctx;//“à•”—˜—p
@@ -16,10 +16,10 @@ public:
 	char True[5] = "true";
 	char False[6] = "false";
 
-	char fileList[10][256];
+	char fileList[10][256] = {""};
 	int fileCount = 0;
-	bool autoMode, debugMode;
-	int speed;
+	bool autoMode = false, debugMode = false;
+	int speed = 1;
 
 	void ReadFileList() {
 		FileHandle = FileRead_open(FileListpath);

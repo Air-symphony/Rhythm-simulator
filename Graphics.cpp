@@ -37,9 +37,9 @@ int sizeX, sizeY;
 class Graph {
 private:
 	Display display;
-	int graphID;
+	int graphID = -1;
 public:
-	int sizeX, sizeY;
+	int sizeX = 0, sizeY = 0;
 	Graph() {
 		graphID = NULL;
 	}

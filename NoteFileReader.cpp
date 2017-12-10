@@ -13,8 +13,8 @@ Rhythm rhythm;
 */
 class Music {
 public:
-	char title[256];
-	char backgroundFile[256];
+	char title[256] = "";
+	char backgroundFile[256] = "";
 	float bpm;
 	int soundHandle;
 	int offset;//(ms)
@@ -23,7 +23,7 @@ public:
 	Rhythm rhythm;
 
 	Music() {
-		offset = notecount = 0;
+		soundHandle = offset = notecount = 0;
 		bpm = 0.0f;
 	}
 	void SetPos(double sideSize, double _posX, double _posY) {
@@ -43,11 +43,11 @@ char *next;
 char *ctx;//“à•”—˜—p
 */
 class NoteFileReader {
-	bool debugMode;
+	bool debugMode = false;
 private:
 	Music music;
 	char filepath[20] = "materials\\";
-	int FileHandle;
+	int FileHandle = 0;
 	int fileSize = 0;
 	char *next;
 	char *ctx;//“à•”—˜—p

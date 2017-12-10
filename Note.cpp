@@ -25,16 +25,16 @@ private:
 	int sideNoteID;
 	double time;
 public:
-	/*id = type = first_x = end_x = bar_number = -1;
-		y = 0;*/
+	/*‘S‚Ä‚Ì‰Šú‰»*/
 	Note() {
 		id = type = channel = first_x = end_x = bar_number = longNoteID = linkNoteID = sideNoteID = -1;
-		x = y = 0; time = 0.0; flag = -1;
+		x = y = rhythm_count = 0; time = 0.0; flag = -1;
 	}
 	/*id = _id;
 		type = first_x = end_x = bar_number = -1;
 		y = 0;*/
 	Note(int _id) {
+		Note();
 		id = _id;
 		type = first_x = end_x = bar_number = -1;
 		x = y = 0; time = 0.0; flag = false;
