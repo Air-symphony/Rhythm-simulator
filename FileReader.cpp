@@ -16,7 +16,7 @@ public:
 	char True[5] = "true";
 	char False[6] = "false";
 
-	char fileList[10][256] = {""};
+	char fileList[10][256];
 	int fileCount = 0;
 	bool autoMode = false, debugMode = false;
 	int speed = 1;
@@ -44,47 +44,57 @@ public:
 		FileRead_close(FileHandle);
 	}
 	void ReadConfig() {
-		ConfigFileHandle = FileRead_open(Configpath);
-		if (ConfigFileHandle == 0) {
-			char error[256];
-			strcpy_s(error, Configpath);
-			strcat_s(error, " is not found.");
-			throw error;
-		}
-		else {
-			ClearDrawScreen();
-			while (FileRead_eof(ConfigFileHandle) == 0) {
-				char string[256];
-				FileRead_gets(string, 256, ConfigFileHandle);
+		try {
+			ConfigFileHandle = FileRead_open(Configpath);
+			if (ConfigFileHandle == 0) {
+				char error[256];
+				strcpy_s(error, Configpath);
+				strcat_s(error, " is not found.");
+				throw error;
+			}
+			else {
+				ClearDrawScreen();
+				while (FileRead_eof(ConfigFileHandle) == 0) {
+					char string[256];
+					FileRead_gets(string, 256, ConfigFileHandle);
 
-				next = strtok_s(string, connectText, &ctx);
-				if (strcmp(next, AutoMode) == 0) {
-					next = strtok_s(NULL, ",", &ctx);
-					if (strcmp(next, "0") == 0 || strcmp(next, False) == 0)
-						autoMode = false;
-					else if (strcmp(next, "1") == 0 || strcmp(next, True) == 0)
-						autoMode = true;
-				}
-				else if (strcmp(next, DebugMode) == 0) {
-					next = strtok_s(NULL, ",", &ctx);
-					if (strcmp(next, "0") == 0 || strcmp(next, False) == 0)
-						debugMode = false;
-					else if (strcmp(next, "1") == 0 || strcmp(next, True) == 0)
-						debugMode = true;
-				}
-				else if (strcmp(next, SPEED) == 0) {
-					next = strtok_s(NULL, ",", &ctx);
-					for (int i = 0; i < 2; i++) {
-						int c = (int)(next[i] - '0');
-						for (int j = 0; j < (1 - i); j++) {
-							c *= 10;
+					next = strtok_s(string, connectText, &ctx);
+					if (strcmp(next, AutoMode) == 0) {
+						next = strtok_s(NULL, ",", &ctx);
+						if (strcmp(next, "0") == 0 || strcmp(next, False) == 0)
+							autoMode = false;
+						else if (strcmp(next, "1") == 0 || strcmp(next, True) == 0)
+							autoMode = true;
+					}
+					else if (strcmp(next, DebugMode) == 0) {
+						next = strtok_s(NULL, ",", &ctx);
+						if (strcmp(next, "0") == 0 || strcmp(next, False) == 0)
+							debugMode = false;
+						else if (strcmp(next, "1") == 0 || strcmp(next, True) == 0)
+							debugMode = true;
+					}
+					else if (strcmp(next, SPEED) == 0) {
+						next = strtok_s(NULL, ",", &ctx);
+						for (int i = 0; i < 2; i++) {
+							int c = (int)(next[i] - '0');
+							for (int j = 0; j < (1 - i); j++) {
+								c *= 10;
+							}
+							speed += c;
 						}
-						speed += c;
 					}
 				}
+				FileRead_close(ConfigFileHandle);
 			}
 		}
-		FileRead_close(ConfigFileHandle);
+		catch (char* text) {
+			ClearDrawScreen();
+			clsDx();
+			printfDx(text);
+			ScreenFlip();
+			WaitKey();
+			clsDx();
+		}
 	}
 
 	bool UpdateConfig() {

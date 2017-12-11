@@ -464,6 +464,7 @@ private:
 		
 		StopSoundMem(music.soundHandle);
 		DeleteSoundMem(music.soundHandle);
+		DeleteSoundMem(ButtonSE);
 		DeleteSoundMem(SE[0]);
 		DeleteSoundMem(SE[1]);
 	}

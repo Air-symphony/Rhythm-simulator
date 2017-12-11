@@ -129,6 +129,7 @@ public:
 					printfDx(text);
 					ScreenFlip();
 					WaitKey();
+					clsDx();
 				}
 			}
 			else if (strcmp(next, "#BPM") == 0) {

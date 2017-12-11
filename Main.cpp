@@ -27,12 +27,12 @@ private:
 	FileReader file;
 	/*0: 上, 1: 下, 2: 左, 3: 右, 決定*/
 	UI ArrowKey[4], Button;
+	int ArrowSE = 0, ButtonSE = 0;
 	Graph background;
 public:
 	GameSimulator(Display display) {
 		file.ReadConfig();
 		Layout(display);
-
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			int scene = SelectNumber(1, scenecount);
 			if (scene == 1)
@@ -47,21 +47,23 @@ public:
 		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_6009.jpg"));
 		background.setDisplay(display);
 		char _imagepath[256];
+		ArrowSE = LoadSoundMem("materials\\SE\\cursor.mp3");
 		for (int i = 0; i < 4; i++) {
 			strcpy_s(_imagepath, "materials\\Image\\ui\\");
 			char _number[256];
 			sprintf_s(_number, 256, "Arrow%d.png", i + 1);
 			strcat_s(_imagepath, _number);
 			ArrowKey[i].setGraph(LoadGraph(_imagepath));
-			ArrowKey[i].SetSE(LoadSoundMem("materials\\SE\\cursor.mp3"));
+			ArrowKey[i].SetSE(ArrowSE);
 		}
 		ArrowKey[0].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 300, 5);
 		ArrowKey[1].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 200, 5);
 		ArrowKey[2].SetPos(display.GetScreenX() - 150, display.GetScreenY() - 250, 5);
 		ArrowKey[3].SetPos(display.GetScreenX() - 50, display.GetScreenY() - 250, 5);
+		ButtonSE = LoadSoundMem("materials\\SE\\Decision.mp3");
 		Button.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
 			display.GetScreenX() - 100, display.GetScreenY() - 100, 5);
-		Button.SetSE(LoadSoundMem("materials\\SE\\Decision.mp3"));
+		Button.SetSE(ButtonSE);
 		Button.SetText("決定", GetColor(0, 0, 0));
 		Button.SetCorrection(10);
 	}
@@ -197,6 +199,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	GameSimulator game(display);
 
+	InitGraph();
+	InitSoundMem();
 	DxLib_End();				// ＤＸライブラリ使用の終了処理
 	return 0;				// ソフトの終了 
 }
