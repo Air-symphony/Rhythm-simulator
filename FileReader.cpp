@@ -82,6 +82,7 @@ public:
 							debugMode = true;
 					}
 					else if (strcmp(next, SPEED) == 0) {
+						speed = 0;
 						next = strtok_s(NULL, ",", &ctx);
 						for (int i = 0; i < 2; i++) {
 							int c = (int)(next[i] - '0');

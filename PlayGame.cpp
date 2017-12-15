@@ -61,10 +61,20 @@ private:
 	class HoldKey {
 	public:
 		int noteID = 0;
-		int key = 0;
-		void Set(int _noteID, int _key) {
+		int pos = 0;
+		int touchID = 0;
+		void Set(int _noteID, int _pos, int _touchID) {
 			noteID = _noteID;
-			key = _key;
+			pos = _pos;
+			touchID = _touchID;
+		}
+		void Receive(HoldKey key) {
+			noteID = key.noteID;
+			pos = key.pos;
+			touchID = key.touchID;
+		}
+		void Reset() {
+			noteID = pos = touchID = 0;
 		}
 	};
 	int holdKeyCount = 0;
@@ -103,8 +113,8 @@ public:
 		SE[0] = LoadSoundMem("materials\\SE\\PERFECT SE.ogg");
 		SE[1] = LoadSoundMem("materials\\SE\\FlickSE.ogg");
 		ButtonSE = LoadSoundMem("materials\\SE\\Decision.ogg");
-		ChangeVolumeSoundMem(255 * 50 / 100, SE[0]);
-		ChangeVolumeSoundMem(255 * 50 / 100, SE[1]);
+		ChangeVolumeSoundMem((int)(255 * 0.5), SE[0]);
+		ChangeVolumeSoundMem((int)(255 * 0.5), SE[1]);
 		
 		Layout();
 
@@ -125,6 +135,7 @@ public:
 		msec = 0;
 		Start();
 	}
+
 private:
 	/*UIの位置関係*/
 	void Layout() {
@@ -271,11 +282,11 @@ private:
 				}
 
 				for (int j = 0; j < holdKeyCount; j++) {
-					if (holdkey[j].key == 0) break;
+					if (holdkey[j].pos == 0) break;
 
 					/*長押し中なら線を表示*/
-					if (input.LongHoldKey(holdkey[j].key) ||
-						inTouch.Press(IDList[holdkey[j].key - 1]) || 
+					if (input.LongHoldKey(holdkey[j].pos) ||
+						inTouch.Press(IDList[holdkey[j].pos - 1]) || 
 						autoMode
 						) {
 						double dt = (msec + speed) - music.notes[id].gettime();
@@ -360,12 +371,11 @@ private:
 						}
 						for (int j = 0; j < holdKeyCount; j++) {
 							if (music.notes[holdkey[j].noteID].getlongNoteID() == id) {
-								holdkey[j].noteID = holdkey[j].key = 0;
+								holdkey[j].Reset();
 								holdKeyCount--;
-								if (j == 0 && holdkey[1].key > 0) {
-									holdkey[0].noteID = holdkey[1].noteID;
-									holdkey[0].key = holdkey[1].key;
-									holdkey[1].noteID = holdkey[1].key = 0;
+								if (j == 0 && holdkey[1].pos > 0) {
+									holdkey[0].Receive(holdkey[1]);
+									holdkey[1].Reset();
 									j--;
 								}
 							}
@@ -409,8 +419,9 @@ private:
 				int longnote_y = 300;
 				DrawFormatString(0, longnote_y, GetColor(255, 255, 255), "holdKey : %d", holdKeyCount);
 				for (int j = 0; j < 2; j++) {
-					DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d", holdkey[j].noteID);
-					DrawFormatString(40, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), ",%d)", holdkey[j].key);
+					DrawFormatString(0, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), "(%d,", holdkey[j].noteID);
+					DrawFormatString(40, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), " %d,", holdkey[j].pos);
+					DrawFormatString(80, longnote_y + (j + 1) * 16, GetColor(255, 255, 255), " %d)", holdkey[j].touchID);
 				}
 				/*IDList とFlick_xの表示*/
 				DrawString(display.GetScreenX() - 300, 30,"IDList", GetColor(255, 255, 255));
@@ -511,60 +522,67 @@ private:
 	}
 
 	/*ボタン判定の記述*/
-	void Playable(int i) {
+	void Playable(int noteID) {
 		/*ロングノーツ終端の判定*/
 		for (int j = 0; j < holdKeyCount; j++) {
 			/*長押しを離してしまった時*/
-			if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
+			if (music.notes[holdkey[j].noteID].getlongNoteID() == noteID) {
 				if (/*type 2 && 離していれば*/
-					music.notes[i].getType() == 2 &&
-					inTouch.Release(IDList[holdkey[j].key - 1])
+					music.notes[noteID].getType() == 2 &&
+					inTouch.Release(holdkey[j].touchID)
 					) {// input.LongHoldKey(holdkey[j].key) == false)
-					if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
-						//不具合あり
-						Judge(i, music.notes[i].getType());
+					if (abs(music.notes[noteID].gettime() - msec) <= BADtime / 2.0) {
+						Judge(noteID, music.notes[noteID].getType());
 					}
 					else {
 						judge_number = 4;
 					}
-					music.notes[i].setflag(-1);
-					holdkey[j].noteID = holdkey[j].key = 0;
+					music.notes[noteID].setflag(-1);
+					holdkey[j].Reset();
 					holdKeyCount--;
-					if (j == 0 && holdkey[1].key > 0) {
-						holdkey[0].noteID = holdkey[1].noteID;
-						holdkey[0].key = holdkey[1].key;
-						holdkey[1].noteID = holdkey[1].key = 0;
+					if (j == 0 && holdkey[1].pos > 0) {
+						holdkey[0].Receive(holdkey[1]);
+						holdkey[1].Reset();
 						j--;
 					}
 				}
 				/*type 1 3 && フリックが実行されていれば*/
-				if ((music.notes[i].getType() == 1 || music.notes[i].getType() == 3)){
-					if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
-						if (PlayTouchFlick(music.notes[i].getend_x()) &&
-							isFlick(music.notes[i].getend_x(), music.notes[i].getType())
+				if ((music.notes[noteID].getType() == 1 || music.notes[noteID].getType() == 3)){
+					if (abs(music.notes[noteID].gettime() - msec) <= BADtime / 2.0) {
+						if (PlayTouchFlick(music.notes[noteID].getend_x()) &&
+							isFlick(music.notes[noteID].getend_x(), music.notes[noteID].getType())
 							) {
-							Judge(i, music.notes[i].getType());
+							Judge(noteID, music.notes[noteID].getType());
 
-							music.notes[i].setflag(-1);
-							holdkey[j].noteID = holdkey[j].key = 0;
+							music.notes[noteID].setflag(-1);
+							holdkey[j].Reset();
 							holdKeyCount--;
-							if (j == 0 && holdkey[1].key > 0) {
-								holdkey[0].noteID = holdkey[1].noteID;
-								holdkey[0].key = holdkey[1].key;
-								holdkey[1].noteID = holdkey[1].key = 0;
+							if (j == 0 && holdkey[1].pos > 0) {
+								holdkey[0].Receive(holdkey[1]);
+								holdkey[1].Reset();
+								j--;
+							}
+						}
+						else if (inTouch.Release(holdkey[j].touchID)) {
+							judge_number = 4;
+							music.notes[noteID].setflag(-1);
+							holdkey[j].Reset();
+							holdKeyCount--;
+							if (j == 0 && holdkey[1].pos > 0) {
+								holdkey[0].Receive(holdkey[1]);
+								holdkey[1].Reset();
 								j--;
 							}
 						}
 					}
-					else if (inTouch.Release(IDList[holdkey[j].key - 1])) {
+					else if (inTouch.Release(holdkey[j].touchID)) {
 						judge_number = 4;
-						music.notes[i].setflag(-1);
-						holdkey[j].noteID = holdkey[j].key = 0;
+						music.notes[noteID].setflag(-1);
+						holdkey[j].Reset();
 						holdKeyCount--;
-						if (j == 0 && holdkey[1].key > 0) {
-							holdkey[0].noteID = holdkey[1].noteID;
-							holdkey[0].key = holdkey[1].key;
-							holdkey[1].noteID = holdkey[1].key = 0;
+						if (j == 0 && holdkey[1].pos > 0) {
+							holdkey[0].Receive(holdkey[1]);
+							holdkey[1].Reset(); 
 							j--;
 						}
 					}
@@ -572,35 +590,35 @@ private:
 			}
 		}
 		/*BAD判定内の場合*/
-		if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
-			int type = music.notes[i].getType();
+		if (abs(music.notes[noteID].gettime() - msec) <= BADtime / 2.0) {
+			int type = music.notes[noteID].getType();
 			if (type == 2 || type == 4) {
-				if (input.PushOneframe_PlayGame(music.notes[i].getend_x()) ||
-					PlayTouchOneFrame(music.notes[i].getend_x())
+				if (input.PushOneframe_PlayGame(music.notes[noteID].getend_x()) ||
+					PlayTouchOneFrame(music.notes[noteID].getend_x())
 					) {
-					Judge(i, type);
-					music.notes[i].setflag(-1);
+					Judge(noteID, type);
+					music.notes[noteID].setflag(-1);
 					/*ロングノーツ始点の判定*/
 					if (type == 4) {
-						double _clear_time = abs(music.notes[i].gettime() - msec);
+						double _clear_time = abs(music.notes[noteID].gettime() - msec);
 						if (_clear_time <= NICEtime / 2.0) {
-							holdkey[holdKeyCount].Set(i, music.notes[i].getend_x());
+							holdkey[holdKeyCount].Set(noteID, music.notes[noteID].getend_x(), GetID_RangePlayable(music.notes[noteID].getend_x()));
 							holdKeyCount++;
 						}
 						else {
-							music.notes[music.notes[i].getlongNoteID()].setflag(-1);
+							music.notes[music.notes[noteID].getlongNoteID()].setflag(-1);
 						}
 					}
 				}
 			}
 			/*フリック判定*/
 			else if (type == 1 || type == 3) {
-				if (input.PushOneframe_PlayGame(music.notes[i].getend_x()) ||
-					(PlayTouchFlick(music.notes[i].getend_x()) &&
-					 isFlick(music.notes[i].getend_x(), type))
+				if (input.PushOneframe_PlayGame(music.notes[noteID].getend_x()) ||
+					(PlayTouchFlick(music.notes[noteID].getend_x()) &&
+					 isFlick(music.notes[noteID].getend_x(), type))
 					) {
-					Judge(i, type);
-					music.notes[i].setflag(-1);
+					Judge(noteID, type);
+					music.notes[noteID].setflag(-1);
 				}
 			}
 		}
@@ -618,7 +636,7 @@ private:
 	bool PlayTouchFlick(int x) {
 		if (inTouch.touchCount <= 0) return false;
 
-		if (Flick_X[x - 1] < 0 || inTouch.Release(IDList[x - 1])) {
+		if (Flick_X[x - 1] <= 0 || inTouch.Release(IDList[x - 1])) {
 			IDList[x - 1] = GetID_RangePlayable(x);
 			Flick_X[x - 1] = inTouch.GetX(IDList[x - 1]);
 		}
@@ -716,25 +734,19 @@ private:
 				PlaySoundMem(SE[0], DX_PLAYTYPE_BACK, TRUE);
 			}
 			Judge(i, music.notes[i].getType());
-			/*
-			effect.Hit(music.notes[i].getend_x(), 0);
-			combo++;
-			score += 300;
-			judge_number = 0;*/
 			music.notes[i].setflag(-1);
 			/*ロングノーツなら*/
 			if (music.notes[i].getType() == 4) {
-				holdkey[holdKeyCount].Set(i, music.notes[i].getend_x());
+				holdkey[holdKeyCount].Set(i, music.notes[i].getend_x(), GetID_RangePlayable(music.notes[i].getend_x()));
 				holdKeyCount++;
 			}
 			for (int j = 0; j < holdKeyCount; j++) {
 				if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
-					holdkey[j].noteID = holdkey[j].key = 0;
+					holdkey[j].Reset();
 					holdKeyCount--;
-					if (j == 0 && holdkey[1].key > 0) {
-						holdkey[0].noteID = holdkey[1].noteID;
-						holdkey[0].key = holdkey[1].key;
-						holdkey[1].noteID = holdkey[1].key = 0;
+					if (j == 0 && holdkey[1].pos > 0) {
+						holdkey[0].Receive(holdkey[1]);
+						holdkey[1].Reset();
 						j--;
 					}
 				}
