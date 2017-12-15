@@ -98,8 +98,8 @@ public:
 			noteGraph[i - 1].setDisplay(display);
 		}
 		SE[0] = LoadSoundMem("materials\\SE\\PERFECT SE.ogg");
-		SE[1] = LoadSoundMem("materials\\SE\\ƒtƒŠƒbƒN SE.wav");
-		ButtonSE = LoadSoundMem("materials\\SE\\Decision.mp3");
+		SE[1] = LoadSoundMem("materials\\SE\\FlickSE.ogg");
+		ButtonSE = LoadSoundMem("materials\\SE\\Decision.ogg");
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[0]);
 		ChangeVolumeSoundMem(255 * 50 / 100, SE[1]);
 		
@@ -115,9 +115,7 @@ public:
 		NoteFileReader file;
 		music = file.SelectReadFile(filename, _debugMode);
 		music.SetPos(ScreenSideSize, judgePos_x, StartY);
-		strcpy_s(_imagepath, "materials\\Image\\background\\");
-		strcat_s(_imagepath, music.backgroundFile);
-		background.setGraph(LoadGraph(_imagepath));
+		background.setGraph(music.backgroundHandle);
 		background.setDisplay(display);
 		effect.SetGraph(LoadGraph("materials\\Image\\hit_circle.png"));
 		effect.SetPos(ScreenSideSize, judgePos_x, judgePos_y);

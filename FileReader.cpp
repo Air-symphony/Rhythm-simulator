@@ -16,6 +16,7 @@ public:
 	char True[5] = "true";
 	char False[6] = "false";
 
+	char PlayMusicList[10][256];
 	char fileList[10][256];
 	int fileCount = 0;
 	bool autoMode = false, debugMode = false;
@@ -36,8 +37,15 @@ public:
 				char string[256];
 				FileRead_gets(string, 256, FileHandle);
 
-				next = strtok_s(string, ",", &ctx);
-				strcpy_s(fileList[fileCount], next);
+				next = strtok_s(string, ":", &ctx);
+				strcpy_s(PlayMusicList[fileCount], next);
+				next = strtok_s(NULL, ",", &ctx);
+				if (next != NULL) {
+					strcpy_s(fileList[fileCount], next);
+				}
+				else {
+					strcpy_s(fileList[fileCount], PlayMusicList[fileCount]);
+				}
 				fileCount++;
 			}
 		}

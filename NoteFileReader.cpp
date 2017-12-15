@@ -14,9 +14,9 @@ Rhythm rhythm;
 class Music {
 public:
 	char title[256] = "";
-	char backgroundFile[256] = "";
 	float bpm;
 	int soundHandle;
+	int backgroundHandle;
 	int offset;//(ms)
 	int notecount;
 	Note notes[1000];
@@ -89,7 +89,9 @@ public:
 	}
 	//環境設定、BPM等
 	void SetConfig() {
-		char string[256];
+		char string[256] = "";
+		char errorMessage[512] = "";
+		bool error = false;
 		while (FileRead_eof(FileHandle) == 0)
 		{
 			DrawLoading();
@@ -103,33 +105,33 @@ public:
 				sprintf_s(music.title, 256, "%s", next);
 			}
 			else if (strcmp(next, "#BackGround") == 0) {
+				char background_name[256];
 				next = strtok_s(NULL, "", &ctx);
-				sprintf_s(music.backgroundFile, 256, "%s", next);
+				sprintf_s(background_name, 256, "%s", next);
+				char _filepath[256];
+				strcpy_s(_filepath, filepath);
+				strcat_s(_filepath, "Image\\background\\");
+				strcat_s(_filepath, background_name);
+				music.backgroundHandle = LoadGraph(_filepath);
+				if (music.backgroundHandle == -1) {
+					error = true;
+					strcat_s(errorMessage, _filepath);
+					strcat_s(errorMessage, " can not find.\n");
+				}
 			}
 			else if (strcmp(next, "#Song") == 0) {
 				char sound_name[256];
 				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(sound_name, 256, "%s", next);
-				try {
-					char _filepath[256];
-					strcpy_s(_filepath, filepath);
-					strcat_s(_filepath, "Music\\");
-					strcat_s(_filepath, sound_name);
-					music.soundHandle = LoadSoundMem(_filepath);
-					if (music.soundHandle == -1) {
-						char error[256];
-						strcpy_s(error, _filepath);
-						strcat_s(error, " is not found.");
-						throw error;
-					}
-				}
-				catch (char* text) {
-					ClearDrawScreen();
-					clsDx();
-					printfDx(text);
-					ScreenFlip();
-					WaitKey();
-					clsDx();
+				char _filepath[256];
+				strcpy_s(_filepath, filepath);
+				strcat_s(_filepath, "Music\\");
+				strcat_s(_filepath, sound_name);
+				music.soundHandle = LoadSoundMem(_filepath);
+				if (music.soundHandle == -1) {
+					error = true;
+					strcat_s(errorMessage, _filepath);
+					strcat_s(errorMessage, " can not find.\n");
 				}
 			}
 			else if (strcmp(next, "#BPM") == 0) {
@@ -160,6 +162,13 @@ public:
 				if (minus) music.offset *= -1;
 			}
 			else if (strcmp(next, "#end") == 0) {
+				if (error) {
+					ClearDrawScreen();
+					printfDx(errorMessage);
+					ScreenFlip();
+					WaitKey();
+					clsDx();
+				}
 				DrawLoading();
 				break;
 			}
@@ -174,6 +183,7 @@ public:
 		
 		DrawLoading();
 		while (FileRead_eof(FileHandle) == 0) {
+			DrawLoading();
 			/*読み込み時の仮保存用*/
 			int _type[SIZE], _timing[SIZE], _first_x[SIZE], _end_x[SIZE];
 			/*何小節目か*/
@@ -270,8 +280,6 @@ public:
 				noteID++;
 			}
 			music.notecount += _notecount;
-
-			DrawLoading();
 			/*デバッグ用*/
 			/*
 			if (debugMode){

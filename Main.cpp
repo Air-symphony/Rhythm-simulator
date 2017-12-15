@@ -47,7 +47,7 @@ public:
 		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_6009.jpg"));
 		background.setDisplay(display);
 		char _imagepath[256];
-		ArrowSE = LoadSoundMem("materials\\SE\\cursor.mp3");
+		ArrowSE = LoadSoundMem("materials\\SE\\cursor.ogg");
 		for (int i = 0; i < 4; i++) {
 			strcpy_s(_imagepath, "materials\\Image\\ui\\");
 			char _number[256];
@@ -60,7 +60,7 @@ public:
 		ArrowKey[1].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 200, 5);
 		ArrowKey[2].SetPos(display.GetScreenX() - 150, display.GetScreenY() - 250, 5);
 		ArrowKey[3].SetPos(display.GetScreenX() - 50, display.GetScreenY() - 250, 5);
-		ButtonSE = LoadSoundMem("materials\\SE\\Decision.mp3");
+		ButtonSE = LoadSoundMem("materials\\SE\\Decision.ogg");
 		Button.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
 			display.GetScreenX() - 100, display.GetScreenY() - 100, 5);
 		Button.SetSE(ButtonSE);
@@ -118,7 +118,7 @@ public:
 				int y = fontsize * 3;
 				for (int i = 0; i < file.fileCount; i++) {
 					DrawFormatString(20, y + fontsize * i, GetColor(255, 255, 255), "%d:", i + 1);
-					DrawString(50, y + fontsize * i, file.fileList[i], GetColor(255, 255, 255));
+					DrawString(50, y + fontsize * i, file.PlayMusicList[i], GetColor(255, 255, 255));
 				}
 				DrawFormatString(20, y + fontsize * file.fileCount, GetColor(255, 255, 255), "%d:", 0);
 				DrawString(50, y + fontsize * file.fileCount, "Cancel", GetColor(255, 255, 255));
