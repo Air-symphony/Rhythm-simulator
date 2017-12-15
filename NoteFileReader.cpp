@@ -319,6 +319,8 @@ public:
 		}
 		FileRead_close(FileHandle);
 
+		QSort(music.notes, 0, music.notecount - 1);
+
 		/*同時押し、ロング、フリック連結*/
 		int bar_number = 0, channel = 0;
 		for (noteID = 0; noteID < music.notecount; noteID++) {
@@ -433,6 +435,7 @@ public:
 		ScreenFlip();
 	}
 
+private:
 	/*ファイル読み込みのload時間表示*/
 	void DrawLoading() {
 		ClearDrawScreen();
@@ -440,5 +443,47 @@ public:
 		DrawFormatString(0, 0, GetColor(255, 255, 255), "%lf", ((double)nowload) * 100.0 / fileSize);
 		DrawString(20 * 6, 0,  "%", GetColor(255, 255, 255));
 		ScreenFlip();
+	}
+
+	/*時間順にソート*/
+	void QSort(Note x[], int left, int right)
+	{
+		int i, j;
+		double pivot;
+
+		i = left;                      /* ソートする配列の一番小さい要素の添字 */
+		j = right;                     /* ソートする配列の一番大きい要素の添字 */
+
+		pivot = x[(left + right) / 2].gettime(); /* 基準値を配列の中央付近にとる */
+
+		while (1) {                    /* 無限ループ */
+
+			while (x[i].gettime() < pivot)       /* pivot より大きい値が */
+				i++;                   /* 出るまで i を増加させる */
+
+			while (pivot < x[j].gettime())       /* pivot より小さい値が */
+				j--;                   /*  出るまで j を減少させる */
+			if (i >= j)                /* i >= j なら */
+				break;                 /* 無限ループから抜ける */
+
+			Swap(x, i, j);             /* x[i] と x[j]を交換 */
+			i++;                       /* 次のデータ */
+			j--;
+		}
+
+		if (left < i - 1)              /* 基準値の左に 2 以上要素があれば */
+			QSort(x, left, i - 1);     /* 左の配列を Q ソートする */
+		if (j + 1 <  right)            /* 基準値の右に 2 以上要素があれば */
+			QSort(x, j + 1, right);    /* 右の配列を Q ソートする */
+	}
+
+	/* 配列の要素を交換する */
+	void Swap(Note x[], int i, int j)
+	{
+		Note temp;
+
+		temp = x[i];
+		x[i] = x[j];
+		x[j] = temp;
 	}
 };

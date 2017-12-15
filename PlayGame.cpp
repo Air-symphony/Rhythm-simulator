@@ -43,8 +43,11 @@ private:
 
 	/*(Minspeed - Maxspeed) / 9.0;*/
 	double d_speed = (Minspeed - Maxspeed) / (double)Max_speedCount;
-	/*何秒かけて判定位置にたどり着くか*/
-	double speed;// = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
+	/*
+	何秒かけて判定位置にたどり着くか
+	Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
+	*/
+	double speed;
 
 	int score = 0, combo = 0;
 	int judge_number = 0;/*判定内容を保存、毎フレームで初期化*/
@@ -173,12 +176,8 @@ private:
 
 		/*曲開始*/
 		bool playMusic = false;
-		/*処理が終わった小節番号の保存*/
-		int start_bar_number = -1, end_bar_number = music.notes[music.notecount - 1].getbar_number();
 		/*処理が終わっていないNoteID*/
-		int start_noteID = 0;
-		/*遠すぎるノーツは処理しない*/
-		int end_noteID = music.notecount;
+		int start_noteID = 0, end_noteID = music.notecount;
 
 		bool printjudge = false;
 		double printjudge_time = 0.0;//表示用
@@ -252,25 +251,25 @@ private:
 				if (speedCount > Max_speedCount)speedCount = 0;
 			}
 			speed = Maxspeed + (double)(Max_speedCount - speedCount) * d_speed;
+			/*判定下から画面外までの移動時間*/
+			double leaveSpeed = speed * ((display.GetScreenY() - judgePos_y) / (judgePos_y - StartY));
 
 			/*判定内容を保存、毎フレームで初期化*/
 			judge_number = -1;
 			int debugcount = 0;
 
 			/*各ノーツの操作*/
-			for (int i = start_noteID; i < music.notecount; i++) {
+			for (int id = start_noteID; id < music.notecount; id++) {
 				/*for文の処理数軽減*/
-				if (music.notes[i].getbar_number() <= (start_bar_number - 1)) {
-					start_noteID = music.notes[i].getID();
-					continue;
+				if (music.notes[id].gettime() + leaveSpeed < msec) {
+					start_noteID = id;
+					//continue;
 				}
-				else if (music.notes[i].getbar_number() == music.notes[music.notecount - 1].getbar_number()) {
-					end_noteID = music.notes[i].getID();
-				}
-				else if ((end_bar_number + 2) < music.notes[i].getbar_number()){
-					end_noteID = music.notes[i].getID();
+				if (music.notes[id].gettime() > msec + speed) {
+					end_noteID = id - 1;
 					break;
 				}
+
 				for (int j = 0; j < holdKeyCount; j++) {
 					if (holdkey[j].key == 0) break;
 
@@ -279,7 +278,7 @@ private:
 						inTouch.Press(IDList[holdkey[j].key - 1]) || 
 						autoMode
 						) {
-						double dt = (msec + speed) - music.notes[i].gettime();
+						double dt = (msec + speed) - music.notes[id].gettime();
 						Line.Draw_LongLine(
 							(int)(ScreenSideSize + (music.notes[holdkey[j].noteID].getend_x() - 1) * judgePos_x),
 							(int)judgePos_y,
@@ -287,83 +286,80 @@ private:
 							music.notes[music.notes[holdkey[j].noteID].getlongNoteID()].getY(),
 							speed, dt);
 					}
-					//
 				}
 				/*処理済みの場合*/
-				if (music.notes[i].getflag() == -1) {
+				if (music.notes[id].getflag() == -1) {
 					/*画面下の場合は、forに含めない*/
-					if (music.notes[i].getY() > display.GetScreenY()) {
-						if (music.notes[i].getType() == 2 &&
-							music.notes[i].getlongNoteID() < 0) {
-							start_bar_number = music.notes[i].getbar_number();
+					if (music.notes[id].getY() > display.GetScreenY()) {
+						if (music.notes[id].getType() == 2 &&
+							music.notes[id].getlongNoteID() < 0) {
 							continue;
 						}
 					}
 					/*画面内及び画面上の場合*/
 					else {
 						/*画面内にいる時間の場合*/
-						if (music.notes[i].gettime() <= (msec + speed)) {
-							double dt = (msec + speed) - (music.notes[i].gettime());
-							music.notes[i].ToMove(judgePos_x, judgePos_y, dt, speed, ScreenSideSize, StartY);
+						if (music.notes[id].gettime() <= (msec + speed)) {
+							double dt = (msec + speed) - (music.notes[id].gettime());
+							music.notes[id].ToMove(judgePos_x, judgePos_y, dt, speed, ScreenSideSize, StartY);
 						}
 					}
 				}
 				/*画面上部で存在*/
-				if (music.notes[i].getflag() == 0) {
+				if (music.notes[id].getflag() == 0) {
 					/*時間がきたら表示*/
-					if (music.notes[i].gettime() <= (msec + speed)) {
-						music.notes[i].setflag(1);
+					if (music.notes[id].gettime() <= (msec + speed)) {
+						music.notes[id].setflag(1);
 					}
 				}
 				/*画面内に表示されている場合*/
-				if (music.notes[i].getflag() == 1) {
-					end_bar_number = music.notes[i].getbar_number();
+				if (music.notes[id].getflag() == 1) {
 					/*画面内の場合は表示*/
-					if (music.notes[i].getY() <= display.GetScreenY()) {
-						double dt = (msec + speed) - music.notes[i].gettime();
-						music.notes[i].ToMove(judgePos_x, judgePos_y, speed, dt, ScreenSideSize, StartY);
+					if (music.notes[id].getY() <= display.GetScreenY()) {
+						double dt = (msec + speed) - music.notes[id].gettime();
+						music.notes[id].ToMove(judgePos_x, judgePos_y, speed, dt, ScreenSideSize, StartY);
 						
 						//ロングノーツ連結がある場合
-						if (music.notes[i].getlongNoteID() > 0) {
+						if (music.notes[id].getlongNoteID() > 0) {
 							/*画面上にいる場合*/
-							if (music.notes[i].getflag() >= 0 && music.notes[i].getType() == 4) {
-								Line.Draw_LongLine(music.notes[i].getX(), music.notes[i].getY(),
-									music.notes[music.notes[i].getlongNoteID()].getX(),
-									music.notes[music.notes[i].getlongNoteID()].getY(),
+							if (music.notes[id].getflag() >= 0 && music.notes[id].getType() == 4) {
+								Line.Draw_LongLine(music.notes[id].getX(), music.notes[id].getY(),
+									music.notes[music.notes[id].getlongNoteID()].getX(),
+									music.notes[music.notes[id].getlongNoteID()].getY(),
 									speed, dt);
 							}
 						}
 						//フリックの連結がある場合
-						if (music.notes[i].getlinkNoteID() > 0) {
-							Line.Draw_FlickLine(music.notes[i].getX(), music.notes[i].getY(),
-								music.notes[music.notes[i].getlinkNoteID()].getX(),
-								music.notes[music.notes[i].getlinkNoteID()].getY(),
+						if (music.notes[id].getlinkNoteID() > 0) {
+							Line.Draw_FlickLine(music.notes[id].getX(), music.notes[id].getY(),
+								music.notes[music.notes[id].getlinkNoteID()].getX(),
+								music.notes[music.notes[id].getlinkNoteID()].getY(),
 								speed, dt);
 						}
 						//同時押しがある場合
-						if (music.notes[i].getsideNoteID() > 0) {
+						if (music.notes[id].getsideNoteID() > 0) {
 							//相方も表示中の場合かつ、相方のidの方が小さい場合(動き終わった状態)
-							if (music.notes[music.notes[i].getsideNoteID()].getflag() == 1 &&
-								i > music.notes[i].getsideNoteID()
+							if (music.notes[music.notes[id].getsideNoteID()].getflag() == 1 &&
+								id > music.notes[id].getsideNoteID()
 								) {
-								Line.Draw_LinkLine(music.notes[i].getX(), music.notes[i].getY(),
-									music.notes[music.notes[i].getsideNoteID()].getX(),
-									music.notes[music.notes[i].getsideNoteID()].getY(),
+								Line.Draw_LinkLine(music.notes[id].getX(), music.notes[id].getY(),
+									music.notes[music.notes[id].getsideNoteID()].getX(),
+									music.notes[music.notes[id].getsideNoteID()].getY(),
 									speed, dt);
 							}
 						}
 						/*判定内容*/
-						if (autoMode) AutoMode(i);
-						else Playable(i);
+						if (autoMode) AutoMode(id);
+						else Playable(id);
 					}
 					/*画面下の場合は処理*/
 					else {
-						music.notes[i].setflag(-1);
-						if (music.notes[i].getType() == 4) {
-							music.notes[music.notes[i].getlongNoteID()].setflag(-1);
+						music.notes[id].setflag(-1);
+						if (music.notes[id].getType() == 4) {
+							music.notes[music.notes[id].getlongNoteID()].setflag(-1);
 						}
 						for (int j = 0; j < holdKeyCount; j++) {
-							if (music.notes[holdkey[j].noteID].getlongNoteID() == i) {
+							if (music.notes[holdkey[j].noteID].getlongNoteID() == id) {
 								holdkey[j].noteID = holdkey[j].key = 0;
 								holdKeyCount--;
 								if (j == 0 && holdkey[1].key > 0) {
@@ -381,30 +377,30 @@ private:
 				/*デバッグ用*/
 				if (debugMode) {
 					DrawFormatString(0, 96, GetColor(255, 255, 255), "ID type pos time (x,y)");
-					if (music.notes[i].gettime() <= (msec + speed) &&
-						music.notes[i].getflag() != -1) {
+					if (music.notes[id].gettime() <= (msec + speed) &&
+						music.notes[id].getflag() != -1) {
 						debugcount++;
 						int y = 96 + debugcount * 16;
-						DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[i].getID());
-						DrawFormatString(30, y, GetColor(255, 255, 255), " %d ", music.notes[i].getType());
-						DrawFormatString(50, y, GetColor(255, 255, 255), " %d ", music.notes[i].getfirst_x());
-						DrawFormatString(70, y, GetColor(255, 255, 255), "-%d ", music.notes[i].getend_x());
-						DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[i].gettime());
-						DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[i].getX());
-						DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[i].getY());
+						DrawFormatString(0, y, GetColor(255, 255, 255), "%d", music.notes[id].getID());
+						DrawFormatString(30, y, GetColor(255, 255, 255), " %d ", music.notes[id].getType());
+						DrawFormatString(50, y, GetColor(255, 255, 255), " %d ", music.notes[id].getfirst_x());
+						DrawFormatString(70, y, GetColor(255, 255, 255), "-%d ", music.notes[id].getend_x());
+						DrawFormatString(90, y, GetColor(255, 255, 255), " %lf ", music.notes[id].gettime());
+						DrawFormatString(180, y, GetColor(255, 255, 255), "(%d", music.notes[id].getX());
+						DrawFormatString(220, y, GetColor(255, 255, 255), ",%d)", music.notes[id].getY());
 					}
 				}
 			}
 			
 			/*ノーツの描画*/
-			for (int i = end_noteID; i >= start_noteID; i--) {
-				if (music.notes[i].getflag() == 1) {
-					double dt = (msec + speed) - music.notes[i].gettime();
-					if (music.notes[i].getlongNoteID() > 0 && music.notes[i].getType() == 2) {
-						noteGraph[4].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
+			for (int id = end_noteID; id >= start_noteID; id--) {
+				if (music.notes[id].getflag() == 1) {
+					double dt = (msec + speed) - music.notes[id].gettime();
+					if (music.notes[id].getlongNoteID() > 0 && music.notes[id].getType() == 2) {
+						noteGraph[4].DrawNote(music.notes[id].getX(), music.notes[id].getY(), speed, dt);
 					}
 					else {
-						noteGraph[music.notes[i].getType() - 1].DrawNote(music.notes[i].getX(), music.notes[i].getY(), speed, dt);
+						noteGraph[music.notes[id].getType() - 1].DrawNote(music.notes[id].getX(), music.notes[id].getY(), speed, dt);
 					}
 				}
 			}
@@ -423,13 +419,11 @@ private:
 					DrawFormatString(display.GetScreenX() - 300 + 40 * i, 70, GetColor(255, 255, 255), "%d, ", Flick_X[i]);
 				}
 				/*for文の回数*/
-				/*
-				DrawFormatString(display.GetScreenX() - 100, 32, GetColor(255, 255, 255), "for: %d", end_noteID - start_noteID);
-				DrawFormatString(display.GetScreenX() - 100, 48, GetColor(255, 255, 255), "ID : %d", start_noteID);
-				DrawFormatString(display.GetScreenX() - 100, 64, GetColor(255, 255, 255), "ID : %d", end_noteID);
-				DrawFormatString(display.GetScreenX() - 100, 80, GetColor(255, 255, 255), "bar: %d", start_bar_number);
-				DrawFormatString(display.GetScreenX() - 100, 96, GetColor(255, 255, 255), "bar: %d", end_bar_number);
-				*/
+				
+				DrawFormatString(display.GetScreenX() - 100, 82, GetColor(255, 255, 255), "for: %d", end_noteID - start_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 98, GetColor(255, 255, 255), "ID : %d", start_noteID);
+				DrawFormatString(display.GetScreenX() - 100, 114, GetColor(255, 255, 255), "ID : %d", end_noteID);
+				
 				inTouch.PrintTouch(display.GetScreenX() - 250, display.GetScreenY() - 300);
 				inTouch.PrintLog(display.GetScreenX() - 250, display.GetScreenY() - 200);
 			}
@@ -527,6 +521,7 @@ private:
 					inTouch.Release(IDList[holdkey[j].key - 1])
 					) {// input.LongHoldKey(holdkey[j].key) == false)
 					if (abs(music.notes[i].gettime() - msec) <= BADtime / 2.0) {
+						//不具合あり
 						Judge(i, music.notes[i].getType());
 					}
 					else {
