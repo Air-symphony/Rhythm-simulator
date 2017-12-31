@@ -46,16 +46,15 @@ public:
 	void Layout(Display display) {
 		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_6009.jpg"));
 		background.setDisplay(display);
-		char _imagepath[256];
+		int arrowGraph[4];
+		LoadDivGraph("materials\\Image\\ui\\Arrow.png", 4, 2, 2,
+			50, 50, arrowGraph);
 		ArrowSE = LoadSoundMem("materials\\SE\\cursor.ogg");
 		for (int i = 0; i < 4; i++) {
-			strcpy_s(_imagepath, "materials\\Image\\ui\\");
-			char _number[256];
-			sprintf_s(_number, 256, "Arrow%d.png", i + 1);
-			strcat_s(_imagepath, _number);
-			ArrowKey[i].setGraph(LoadGraph(_imagepath));
+			ArrowKey[i].setGraph(arrowGraph[i]);
 			ArrowKey[i].SetSE(ArrowSE);
 		}
+		
 		ArrowKey[0].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 300, 5);
 		ArrowKey[1].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 200, 5);
 		ArrowKey[2].SetPos(display.GetScreenX() - 150, display.GetScreenY() - 250, 5);

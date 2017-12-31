@@ -101,14 +101,12 @@ public:
 		Line.setGraph(LoadGraph("materials\\Image\\note_cat.png"));
 		Line.setDisplay(display);
 
-		char _imagepath[256];
-		for (int i = 1; i <= 5; i++) {
-			strcpy_s(_imagepath, "materials\\Image\\Note");
-			char _number[256];
-			sprintf_s(_number, 256, "%d.png", i);
-			strcat_s(_imagepath, _number);
-			noteGraph[i - 1].setGraph(LoadGraph(_imagepath));
-			noteGraph[i - 1].setDisplay(display);
+		int NoteGraph[4];
+		LoadDivGraph("materials\\Image\\RythemNote.png", 4, 2, 2,
+			72, 73, NoteGraph);
+		for (int i = 0; i < 4; i++) {
+			noteGraph[i].setGraph(NoteGraph[i]);
+			noteGraph[i].setDisplay(display);
 		}
 		SE[0] = LoadSoundMem("materials\\SE\\PERFECT SE.ogg");
 		SE[1] = LoadSoundMem("materials\\SE\\FlickSE.ogg");
@@ -408,7 +406,7 @@ private:
 				if (music.notes[index].getflag() == 1) {
 					double dt = (msec + speed) - music.notes[index].gettime();
 					if (music.notes[index].getlongNoteID() > 0 && music.notes[index].getType() == 2) {
-						noteGraph[4].DrawNote(music.notes[index].getX(), music.notes[index].getY(), speed, dt);
+						noteGraph[3].DrawNote(music.notes[index].getX(), music.notes[index].getY(), speed, dt);
 					}
 					else {
 						noteGraph[music.notes[index].getType() - 1].DrawNote(music.notes[index].getX(), music.notes[index].getY(), speed, dt);
@@ -430,7 +428,7 @@ private:
 					DrawFormatString(display.GetScreenX() - 300 + 40 * i, 50, GetColor(255, 255, 255), "%d, ", IDList[i]);
 					DrawFormatString(display.GetScreenX() - 300 + 40 * i, 70, GetColor(255, 255, 255), "%d, ", Flick_X[i]);
 				}
-				DrawFormatString(display.GetScreenX() - 100, 200, GetColor(255, 255, 255), "speed: %lf", speed);
+				//DrawFormatString(display.GetScreenX() - 100, 200, GetColor(255, 255, 255), "speed: %lf", speed);
 
 				/*forï∂ÇÃâÒêî*/
 				
