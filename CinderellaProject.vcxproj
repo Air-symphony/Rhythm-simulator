@@ -84,6 +84,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ButtonUI.cpp" />
     <ClCompile Include="FileReader.cpp" />
     <ClCompile Include="InputTouch.cpp" />
     <ClCompile Include="Main.cpp">

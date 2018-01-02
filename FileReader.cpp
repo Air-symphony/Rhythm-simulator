@@ -3,24 +3,30 @@
 class FileReader {
 private: 
 	int FileHandle = 0;
-	char FileListpath[50] = "materials\\NoteFile\\FileList.txt";
+	char FileListpath[32] = "materials\\NoteFile\\FileList.txt";
+	char imagepath[23] = "materials\\Image\\Label\\";
 	int ConfigFileHandle = 0;
-	char Configpath[25] = "materials\\Config.dll";
+	char Configpath[21] = "materials\\Config.dll";
 	char *next;
 	char *ctx;//内部利用
 public:
-	char AutoMode[15] = "AutoMode";
-	char DebugMode[15] = "DebugMode";
-	char SPEED[15] = "SPEED";
+	char AutoMode[9] = "AutoMode";
+	char DebugMode[10] = "DebugMode";
+	char SPEED[6] = "SPEED";
 	char connectText[2] = ":";
 	char True[5] = "true";
 	char False[6] = "false";
 
-	char PlayMusicList[10][256];
-	char fileList[10][256];
-	int fileCount = 0;
 	bool autoMode = false, debugMode = false;
 	int speed = 1;
+
+	/*画面上に表示させる名前*/
+	char PlayMusicList[10][200];
+	/*読みこむテキストファイル名*/
+	char fileList[10][200];
+	/*曲の画像*/
+	char imageList[10][100];
+	int fileCount = 0;
 
 	void ReadFileList() {
 		FileHandle = FileRead_open(FileListpath);
@@ -37,9 +43,20 @@ public:
 				char string[256];
 				FileRead_gets(string, 256, FileHandle);
 
-				next = strtok_s(string, ":", &ctx);
-				strcpy_s(PlayMusicList[fileCount], next);
-				next = strtok_s(NULL, ",", &ctx);
+				/*#後ろの画像ファイル名が存在するかどうか*/
+				next = strtok_s(string, "#", &ctx);
+				char *imagename = strtok_s(NULL, "", &ctx);
+				if (imagename != NULL) {
+					strcpy_s(imageList[fileCount], imagename);
+				}
+				else {
+					strcpy_s(imageList[fileCount], "NoImage");
+				}
+				/*先頭の曲名を取り出す*/
+				char *musicname = strtok_s(next, ":", &ctx);
+				strcpy_s(PlayMusicList[fileCount], musicname);
+				/*ファイル名が曲名とは別名の場合*/
+				next = strtok_s(NULL, "#", &ctx);
 				if (next != NULL) {
 					strcpy_s(fileList[fileCount], next);
 				}
@@ -51,6 +68,7 @@ public:
 		}
 		FileRead_close(FileHandle);
 	}
+
 	void ReadConfig() {
 		try {
 			ConfigFileHandle = FileRead_open(Configpath);

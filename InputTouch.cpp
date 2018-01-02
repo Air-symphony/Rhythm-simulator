@@ -1,4 +1,5 @@
-#include "UI.cpp"
+#pragma once
+#include "ButtonUI.cpp"
 
 class TouchID {
 public:
@@ -235,6 +236,16 @@ public:
 	*/
 	bool PressRangeBoxOneFrame(UI ui) {
 		return (GetTime(GetID_RangeBox(ui)) == 1);
+	}
+	/*
+	return (GetTime(GetID_RangeBox(ui)) == 1);
+	*/
+	bool PressRangeBox(UI ui) {
+		if (ui.ID == NULL) return false;
+		if (ui.ID == GetID_RangeBox(ui)) {
+			return (GetTime(GetID_RangeBox(ui)) > 0);
+		}
+		return false;
 	}
 	/*
 	DrawFormatString(x, y, GetColor(255, 255, 255), "Touch = %d", touchCount);

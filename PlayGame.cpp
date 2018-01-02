@@ -27,7 +27,7 @@ private:
 	UI StopButton;
 	UI PauseWindow, Continue, Finish;
 	/*0=左, 1=普通, 2=右, 3=ロング, 4=ロング先*/
-	Graph noteGraph[5];
+	Graph noteGraph[4];
 	HitEffect effect;
 	int SE[2], ButtonSE;
 	double msec = 0;//経過時間(s)

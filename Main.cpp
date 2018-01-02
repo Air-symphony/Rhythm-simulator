@@ -21,12 +21,12 @@ InputKey input;
 class GameSimulator {
 private:
 	int scenecount = 3;
-	//int musiccount = 3 + 1;
 	InputKey input;
 	InputTouch inTouch;
 	FileReader file;
 	/*0: è„, 1: â∫, 2: ç∂, 3: âE, åàíË*/
-	UI ArrowKey[4], Button;
+	UI ArrowKey[4];
+	ButtonUI ConfigButton, DicideButton, ExitButton;
 	int ArrowSE = 0, ButtonSE = 0;
 	Graph background;
 public:
@@ -43,6 +43,7 @@ public:
 				break;
 		}
 	}
+
 	void Layout(Display display) {
 		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_6009.jpg"));
 		background.setDisplay(display);
@@ -54,17 +55,33 @@ public:
 			ArrowKey[i].setGraph(arrowGraph[i]);
 			ArrowKey[i].SetSE(ArrowSE);
 		}
-		
 		ArrowKey[0].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 300, 5);
 		ArrowKey[1].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 200, 5);
 		ArrowKey[2].SetPos(display.GetScreenX() - 150, display.GetScreenY() - 250, 5);
 		ArrowKey[3].SetPos(display.GetScreenX() - 50, display.GetScreenY() - 250, 5);
+		
 		ButtonSE = LoadSoundMem("materials\\SE\\Decision.ogg");
-		Button.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
-			display.GetScreenX() - 100, display.GetScreenY() - 100, 5);
-		Button.SetSE(ButtonSE);
-		Button.SetText("åàíË", GetColor(0, 0, 0));
-		Button.SetCorrection(10);
+		int ButtonGraph[3];
+		LoadDivGraph("materials\\Image\\ui\\Buttons.png", 3, 1, 3,
+			124, 50, ButtonGraph);
+		DicideButton.SetUI(ButtonGraph[2], ButtonGraph[0],
+			display.GetScreenX() - 100, display.GetScreenY() - 50, 5);
+		DicideButton.SetSE(ButtonSE);
+		DicideButton.SetText("åàíË", GetColor(0, 0, 0));
+		DicideButton.SetCorrection(10);
+
+		ExitButton.SetUI(ButtonGraph[1], ButtonGraph[0],
+			100, display.GetScreenY() - 50, 5);
+		ExitButton.SetSE(ButtonSE);
+		ExitButton.SetText("èIóπ", GetColor(0, 0, 0));
+		ExitButton.SetCorrection(10);
+
+		int ConfigButtonGraph[2];
+		LoadDivGraph("materials\\Image\\ui\\ConfigButton.png", 2, 1, 2,
+			51, 51, ConfigButtonGraph);
+		ConfigButton.SetUI(ConfigButtonGraph[0], ConfigButtonGraph[1], 
+			display.GetScreenX() - 100, 50, 5);
+		ConfigButton.SetSE(ButtonSE);
 	}
 
 	void Playgame(Display display) {
@@ -101,7 +118,7 @@ public:
 				if (number < 0) number += _scene;
 			}
 			if (input.PushOneframe_Decide() ||
-				inTouch.ReleasedRangeBox(Button))
+				inTouch.ReleasedRangeBox(DicideButton))
 				return number;
 
 			ClearDrawScreen();
@@ -118,6 +135,7 @@ public:
 				for (int i = 0; i < file.fileCount; i++) {
 					DrawFormatString(20, y + fontsize * i, GetColor(255, 255, 255), "%d:", i + 1);
 					DrawString(50, y + fontsize * i, file.PlayMusicList[i], GetColor(255, 255, 255));
+					DrawString(370, y + fontsize * i, file.imageList[i], GetColor(255, 255, 255));
 				}
 				DrawFormatString(20, y + fontsize * file.fileCount, GetColor(255, 255, 255), "%d:", 0);
 				DrawString(50, y + fontsize * file.fileCount, "Cancel", GetColor(255, 255, 255));
@@ -172,8 +190,15 @@ public:
 			}
 			DrawFormatString(20, fontsize * 2, GetColor(255, 255, 255), "Select number : %d", number);
 
-			Button.SetID(inTouch.GetID_RangeBoxOneFrame(Button));
-			Button.Draw(str, 30);
+			DicideButton.SetID(inTouch.GetID_RangeBoxOneFrame(DicideButton));
+			DicideButton.Draw(inTouch.PressRangeBox(DicideButton), str, 30);
+
+			ExitButton.SetID(inTouch.GetID_RangeBoxOneFrame(ExitButton));
+			ExitButton.Draw(inTouch.PressRangeBox(ExitButton), str, 30);
+
+			ConfigButton.SetID(inTouch.GetID_RangeBoxOneFrame(ConfigButton));
+			ConfigButton.Draw(inTouch.PressRangeBox(ConfigButton), str, 30);
+			
 			int IconCount = 2;
 			if (_type == 3) IconCount = 4;
 			for (int i = 0; i < IconCount; i++) {

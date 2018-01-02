@@ -1,3 +1,4 @@
+#pragma once
 #include "Graphics.cpp"
 
 class UI :public Graph{
@@ -18,6 +19,7 @@ public:
 	char Text[50] = "";
 	int color;
 	UI(){
+		Graph();
 		x = y = number = ID = -1;
 		correction = sound = color = 0;
 	}
