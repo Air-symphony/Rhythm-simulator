@@ -50,7 +50,7 @@ public:
 					strcpy_s(imageList[fileCount], imagename);
 				}
 				else {
-					strcpy_s(imageList[fileCount], "NoImage");
+					strcpy_s(imageList[fileCount], "NoImage.png");
 				}
 				/*æ“ª‚Ì‹È–¼‚ğæ‚èo‚·*/
 				char *musicname = strtok_s(next, ":", &ctx);
