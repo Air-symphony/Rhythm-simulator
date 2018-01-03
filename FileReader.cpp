@@ -4,16 +4,18 @@ class FileReader {
 private: 
 	int FileHandle = 0;
 	char FileListpath[32] = "materials\\NoteFile\\FileList.txt";
-	char imagepath[23] = "materials\\Image\\Label\\";
 	int ConfigFileHandle = 0;
 	char Configpath[21] = "materials\\Config.dll";
 	char *next;
 	char *ctx;//内部利用
 public:
+	char imagepath[23] = "materials\\Image\\Label\\";
+
 	char AutoMode[9] = "AutoMode";
 	char DebugMode[10] = "DebugMode";
 	char SPEED[6] = "SPEED";
 	char connectText[2] = ":";
+	char imageText[2] = "#";
 	char True[5] = "true";
 	char False[6] = "false";
 
@@ -44,7 +46,7 @@ public:
 				FileRead_gets(string, 256, FileHandle);
 
 				/*#後ろの画像ファイル名が存在するかどうか*/
-				next = strtok_s(string, "#", &ctx);
+				next = strtok_s(string, imageText, &ctx);
 				char *imagename = strtok_s(NULL, "", &ctx);
 				if (imagename != NULL) {
 					strcpy_s(imageList[fileCount], imagename);
@@ -53,10 +55,10 @@ public:
 					strcpy_s(imageList[fileCount], "NoImage.png");
 				}
 				/*先頭の曲名を取り出す*/
-				char *musicname = strtok_s(next, ":", &ctx);
+				char *musicname = strtok_s(next, connectText, &ctx);
 				strcpy_s(PlayMusicList[fileCount], musicname);
 				/*ファイル名が曲名とは別名の場合*/
-				next = strtok_s(NULL, "#", &ctx);
+				next = strtok_s(NULL, "", &ctx);
 				if (next != NULL) {
 					strcpy_s(fileList[fileCount], next);
 				}

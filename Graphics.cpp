@@ -66,6 +66,7 @@ public:
 	/*
 	x, y = 画像を表示させたい座標
 	number = 特定の位置を中心として表示(テンキー)
+	DrawGraph()
 	*/
 	void Draw(int x, int y, int number = 5) {
 		if (number == 1)
@@ -86,6 +87,32 @@ public:
 			DrawGraph(x - sizeX / 2, y - sizeY, graphID, TRUE);
 		else if (number == 9)
 			DrawGraph(x - sizeX, y - sizeY, graphID, TRUE);
+	}
+	/*
+	x, y = 画像を表示させたい座標
+	sizeX, sizeY = 画像の大きさ
+	number = 特定の位置を中心として表示(テンキー)
+	DrawExtendGraph();
+	*/
+	void DrawExtend(int x, int y, int width, int height, int number = 5) {
+		if (number == 1)
+			DrawExtendGraph(x, y, x + width, y + height, graphID, TRUE);
+		else if (number == 2)
+			DrawExtendGraph(x - width / 2, y, x + width / 2, y + height, graphID, TRUE);
+		else if (number == 3)
+			DrawExtendGraph(x - width, y, x, y + height, graphID, TRUE);
+		else if (number == 4)
+			DrawExtendGraph(x, y - height / 2, x + width, y + height / 2, graphID, TRUE);
+		else if (number == 5)
+			DrawExtendGraph(x - width / 2, y - height / 2, x + width / 2, y + height / 2, graphID, TRUE);
+		else if (number == 6)
+			DrawExtendGraph(x - width, y - height / 2, x, y + height / 2, graphID, TRUE);
+		else if (number == 7)
+			DrawExtendGraph(x, y - height, x + width, y, graphID, TRUE);
+		else if (number == 8)
+			DrawExtendGraph(x - width / 2, y - height, x + width / 2, y, graphID, TRUE);
+		else if (number == 9)
+			DrawExtendGraph(x - width, y - height, x, y, graphID, TRUE);
 	}
 	/*
 	int d = 10;

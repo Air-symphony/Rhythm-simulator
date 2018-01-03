@@ -75,56 +75,75 @@ private:
 		Graph title;
 		title.setDisplay(display);
 		title.setGraph(LoadGraph("materials\\Image\\Text\\Select.png"));
+		Graph musicTitleBar;
+		musicTitleBar.setDisplay(display);
+		musicTitleBar.setGraph(LoadGraph("materials\\Image\\ui\\UnderBar.png"));
 
 		int arrowGraph[4];
-		UI ArrowKey[4];
+		UI ArrowKey[2];
 		LoadDivGraph("materials\\Image\\ui\\Arrow.png", 4, 2, 2,
 			51, 51, arrowGraph);
-		for (int i = 0; i < 4; i++) {
-			ArrowKey[i].setGraph(arrowGraph[i]);
+		for (int i = 0; i < 2; i++) {
+			ArrowKey[i].setGraph(arrowGraph[i + 2]);
 			ArrowKey[i].SetSE(ArrowSE);
 		}
-		ArrowKey[0].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 300, 5);
-		ArrowKey[1].SetPos(display.GetScreenX() - 100, display.GetScreenY() - 200, 5);
-		ArrowKey[2].SetPos(display.GetScreenX() - 150, display.GetScreenY() - 250, 5);
-		ArrowKey[3].SetPos(display.GetScreenX() - 50, display.GetScreenY() - 250, 5);
+		ArrowKey[0].SetPos(70, display.GetScreenY() / 2, 5);
+		ArrowKey[1].SetPos(display.GetScreenX() - 70, display.GetScreenY() / 2, 5);
 
-		int number = 0;
+		int num = 0;
 		int fileCount = file.fileCount;
+		Graph musicImage[10];
+		for (int i = 0; i < fileCount; i++) {
+			char path[100];
+			strcpy_s(path, file.imagepath);
+			strcat_s(path, file.imageList[i]);
+			musicImage[i].setDisplay(display);
+			musicImage[i].setGraph(LoadGraph(path));
+		}
+		Graph musicImageFrame;
+		musicImageFrame.setDisplay(display);
+		musicImageFrame.setGraph(LoadGraph("materials\\Image\\ui\\MusicWindow.png"));
+
 		FontSize(20);
 		MyDrawString str(20);
 		while (ProcessMessage() == 0 && input.ForcedTermination()) {
 			inTouch.Update();
-			if (input.PushOneframe_DOWN() ||
+			if (input.PushOneframe_RIGHT() ||
 				inTouch.ReleasedRangeBox(ArrowKey[1])) {
-				number = (number + 1) % fileCount;
+				num = (num + 1) % fileCount;
 			}
-			else if (input.PushOneframe_UP() ||
+			else if (input.PushOneframe_LEFT() ||
 				inTouch.ReleasedRangeBox(ArrowKey[0])) {
-				number = (number + (fileCount - 1)) % fileCount;
+				num = (num + (fileCount - 1)) % fileCount;
 			}
 			if (input.PushOneframe_Decide() ||
 				inTouch.ReleasedRangeBox(DecideButton))
-				return number;
+				return num;
 
 			/*コンフィグ画面に遷移*/
 			if (inTouch.ReleasedRangeBox(ConfigButton)) Config();
-			/*終了*/
+			/*アプリ終了*/
 			if (inTouch.ReleasedRangeBox(ExitButton)) return -1;
 
 			ClearDrawScreen();
+
 			background.Draw_BackGround(255);
+			menuBar.Draw(10, 20, 1);
+			title.Draw(20, 30, 1);
+			musicTitleBar.DrawExtend(200, display.GetScreenY() - 20, 
+				display.GetScreenX() - 220, 80, 7);
 
-			menuBar.Draw(0, 20, 1);
-			title.Draw(10, 30, 1);
-
-			int y = fontsize * 6;
-			for (int i = 0; i < file.fileCount; i++) {
-				DrawFormatString(20, y + fontsize * i, GetColor(255, 255, 255), "%d:", i);
-				DrawString(50, y + fontsize * i, file.PlayMusicList[i], GetColor(255, 255, 255));
-				DrawString(370, y + fontsize * i, file.imageList[i], GetColor(255, 255, 255));
-			}
-			DrawFormatString(20, fontsize * 4, GetColor(255, 255, 255), "Select number : %d", number);
+			musicImage[(num + (fileCount - 1)) % fileCount].
+				DrawExtend(display.GetScreenX() / 2 - 200, display.GetScreenY() / 2,
+				170, 170, 5);
+			musicImage[(num + 1) % fileCount].
+				DrawExtend(display.GetScreenX() / 2 + 200, display.GetScreenY() / 2,
+				170, 170, 5);
+			musicImage[num].DrawExtend(display.GetScreenX() / 2, display.GetScreenY() / 2,
+				220, 220, 5);
+			musicImageFrame.DrawExtend(display.GetScreenX() / 2, display.GetScreenY() / 2,
+				220, 220, 5);
+			DrawString(230, display.GetScreenY() - 80, file.PlayMusicList[num], GetColor(0, 0, 0));
 
 
 			DecideButton.SetID(inTouch.GetID_RangeBoxOneFrame(DecideButton));
@@ -136,14 +155,13 @@ private:
 			ConfigButton.SetID(inTouch.GetID_RangeBoxOneFrame(ConfigButton));
 			ConfigButton.Draw(inTouch.PressRangeBox(ConfigButton), str, 30);
 
-			int IconCount = 2;
-			for (int i = 0; i < IconCount; i++) {
+			for (int i = 0; i < 2; i++) {
 				ArrowKey[i].SetID(inTouch.GetID_RangeBoxOneFrame(ArrowKey[i]));
 				ArrowKey[i].Draw();
 			}
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 		}
-		return 0;
+		return -1;
 	}
 
 	bool Config() {
@@ -200,8 +218,8 @@ private:
 			ClearDrawScreen();
 			background.Draw_BackGround(255);
 
-			menuBar.Draw(0, 20, 1);
-			title.Draw(10, 30, 1);
+			menuBar.Draw(10, 20, 1);
+			title.Draw(20, 30, 1);
 			for (int i = 0; i < 3; i++) configText[i].Draw();
 
 			if (input.PushOneframe_Decide() ||

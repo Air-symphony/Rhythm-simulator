@@ -24,8 +24,8 @@ private:
 	
 	Music music;
 	Graph ring, Line, background;
-	UI StopButton;
-	UI PauseWindow, Continue, Finish;
+	UI StopButton, PauseWindow;
+	ButtonUI Continue, Finish;
 	/*0=左, 1=普通, 2=右, 3=ロング, 4=ロング先*/
 	Graph noteGraph[4];
 	HitEffect effect;
@@ -145,13 +145,17 @@ private:
 		PauseWindow.SetUI(LoadGraph("materials\\Image\\ui\\StopWindow.png"),
 			display.GetScreenX() / 2, display.GetScreenY() / 2, 5);
 		PauseWindow.setDisplay(display);
-		Continue.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
+		int ButtonGraph[3];
+		LoadDivGraph("materials\\Image\\ui\\Buttons.png", 3, 1, 3,
+			124, 50, ButtonGraph);
+
+		Continue.SetUI(ButtonGraph[2], ButtonGraph[0],
 			display.GetScreenX() / 2 - 100, display.GetScreenY() / 2 + 80, 5);
 		Continue.setDisplay(display);
 		Continue.SetText("再開", GetColor(0, 0, 0));
 		Continue.SetCorrection(10);
 		Continue.SetSE(ButtonSE);
-		Finish.SetUI(LoadGraph("materials\\Image\\ui\\Button.png"),
+		Finish.SetUI(ButtonGraph[1], ButtonGraph[0],
 			display.GetScreenX() / 2 + 100, display.GetScreenY() / 2 + 80, 5);
 		Finish.setDisplay(display);
 		Finish.SetText("リタイア", GetColor(0, 0, 0));
@@ -455,8 +459,8 @@ private:
 			/*ポーズ画面出力*/
 			if (stop_time > 0) {
 				PauseWindow.Draw();
-				Continue.Draw(MyStr, 20, 5);
-				Finish.Draw(MyStr, 20, 5);
+				Continue.Draw(inTouch.PressRangeBox(Continue), MyStr, 20);
+				Finish.Draw(inTouch.PressRangeBox(Finish), MyStr, 20);
 			}
 			ScreenFlip();// 裏画面の内容を表画面に反映させる 
 
