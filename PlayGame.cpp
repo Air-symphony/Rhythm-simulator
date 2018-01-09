@@ -333,6 +333,7 @@ private:
 						double dt = (msec + speed) - music.notes[index].gettime();
 						music.notes[index].ToMove(judgePos_x, judgePos_y, speed, dt, ScreenSideSize, StartY);
 						
+						//変化する前に連結先につなげるため、ずれている
 						//ロングノーツ連結がある場合
 						if (music.notes[index].getlongNoteID() > 0) {
 							/*画面上にいる場合*/
@@ -409,9 +410,11 @@ private:
 			for (int index = endIndex; index >= startIndex; index--) {
 				if (music.notes[index].getflag() == 1) {
 					double dt = (msec + speed) - music.notes[index].gettime();
+					//ロングノーツ
 					if (music.notes[index].getlongNoteID() > 0 && music.notes[index].getType() == 2) {
 						noteGraph[3].DrawNote(music.notes[index].getX(), music.notes[index].getY(), speed, dt);
 					}
+					//それ以外
 					else {
 						noteGraph[music.notes[index].getType() - 1].DrawNote(music.notes[index].getX(), music.notes[index].getY(), speed, dt);
 					}
