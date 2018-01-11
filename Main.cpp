@@ -39,10 +39,10 @@ public:
 
 private:
 	void ButtonLayout() {
-		ButtonSE = LoadSoundMem("materials\\SE\\Decision.ogg");
-		ArrowSE = LoadSoundMem("materials\\SE\\cursor.ogg");
+		ButtonSE = LoadSoundMem(filepath.GetSEPath("Decision.ogg"));
+		ArrowSE = LoadSoundMem(filepath.GetSEPath("cursor.ogg"));
 		int ButtonGraph[3];
-		LoadDivGraph("materials\\Image\\ui\\Buttons.png", 3, 1, 3,
+		LoadDivGraph(filepath.GetUIPath("Buttons.png"), 3, 1, 3,
 			124, 50, ButtonGraph);
 		DecideButton.SetUI(ButtonGraph[2], ButtonGraph[0],
 			display.GetScreenX() - 100, display.GetScreenY() - 50, 5);
@@ -57,7 +57,7 @@ private:
 		ExitButton.SetCorrection(10);
 
 		int ConfigButtonGraph[2];
-		LoadDivGraph("materials\\Image\\ui\\ConfigButton.png", 2, 1, 2,
+		LoadDivGraph(filepath.GetUIPath("ConfigButton.png"), 2, 1, 2,
 			51, 51, ConfigButtonGraph);
 		ConfigButton.SetUI(ConfigButtonGraph[0], ConfigButtonGraph[1],
 			display.GetScreenX() - 100, 50, 5);
@@ -66,22 +66,22 @@ private:
 
 	int SelectMusic() {
 		Graph background;
-		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_6009.jpg"));
+		background.setGraph(LoadGraph(filepath.GetbackgroundPath("Bg_6009.jpg")));
 		background.setDisplay(display);
 
 		Graph menuBar;
 		menuBar.setDisplay(display);
-		menuBar.setGraph(LoadGraph("materials\\Image\\ui\\MenuBar.png"));
+		menuBar.setGraph(LoadGraph(filepath.GetUIPath("MenuBar.png")));
 		Graph title;
 		title.setDisplay(display);
-		title.setGraph(LoadGraph("materials\\Image\\Text\\Select.png"));
+		title.setGraph(LoadGraph(filepath.GetTextPath("Select.png")));
 		Graph musicTitleBar;
 		musicTitleBar.setDisplay(display);
-		musicTitleBar.setGraph(LoadGraph("materials\\Image\\ui\\UnderBar.png"));
+		musicTitleBar.setGraph(LoadGraph(filepath.GetUIPath("UnderBar.png")));
 
 		int arrowGraph[4];
 		UI ArrowKey[2];
-		LoadDivGraph("materials\\Image\\ui\\Arrow.png", 4, 2, 2,
+		LoadDivGraph(filepath.GetUIPath("Arrow.png"), 4, 2, 2,
 			51, 51, arrowGraph);
 		for (int i = 0; i < 2; i++) {
 			ArrowKey[i].setGraph(arrowGraph[i + 2]);
@@ -94,15 +94,12 @@ private:
 		int fileCount = file.fileCount;
 		Graph musicImage[10];
 		for (int i = 0; i < fileCount; i++) {
-			char path[100];
-			strcpy_s(path, file.imagepath);
-			strcat_s(path, file.imageList[i]);
 			musicImage[i].setDisplay(display);
-			musicImage[i].setGraph(LoadGraph(path));
+			musicImage[i].setGraph(LoadGraph(filepath.GetLabelPath(file.imageList[i])));
 		}
 		Graph musicImageFrame;
 		musicImageFrame.setDisplay(display);
-		musicImageFrame.setGraph(LoadGraph("materials\\Image\\ui\\MusicWindow.png"));
+		musicImageFrame.setGraph(LoadGraph(filepath.GetUIPath("MusicWindow.png")));
 
 		FontSize(20);
 		MyDrawString str(20);
@@ -167,26 +164,26 @@ private:
 	bool Config() {
 		Graph background;
 		background.setDisplay(display);
-		background.setGraph(LoadGraph("materials\\Image\\background\\Bg_2004.dds.png"));
+		background.setGraph(LoadGraph(filepath.GetbackgroundPath("Bg_2004.dds.png")));
 
 		Graph menuBar;
 		menuBar.setDisplay(display);
-		menuBar.setGraph(LoadGraph("materials\\Image\\ui\\MenuBar.png"));
+		menuBar.setGraph(LoadGraph(filepath.GetUIPath("MenuBar.png")));
 		Graph title;
 		title.setDisplay(display);
-		title.setGraph(LoadGraph("materials\\Image\\Text\\Config.png"));
+		title.setGraph(LoadGraph(filepath.GetTextPath("Config.png")));
 		UI configText[3];
 		for (int i = 0; i < 3; i++) {
 			configText[i].setDisplay(display);
 			configText[i].SetPos(200, 150 + i * 50, 5);
 		}
-		configText[0].setGraph(LoadGraph("materials\\Image\\Text\\SPEED.png"));
-		configText[1].setGraph(LoadGraph("materials\\Image\\Text\\AutoMode.png"));
-		configText[2].setGraph(LoadGraph("materials\\Image\\Text\\DebugMode.png"));
+		configText[0].setGraph(LoadGraph(filepath.GetTextPath("SPEED.png")));
+		configText[1].setGraph(LoadGraph(filepath.GetTextPath("AutoMode.png")));
+		configText[2].setGraph(LoadGraph(filepath.GetTextPath("DebugMode.png")));
 
 		/*¶‰E‚¾‚¯Žæ“¾*/
 		int arrowGraph[4];
-		LoadDivGraph("materials\\Image\\ui\\Arrow.png", 4, 2, 2,
+		LoadDivGraph(filepath.GetUIPath("Arrow.png"), 4, 2, 2,
 			51, 51, arrowGraph);
 		UI configArrowKey[3][2];
 		for (int i = 0; i < 3; i++) {
@@ -199,7 +196,7 @@ private:
 
 		/*”Žš‚Ì‰æ‘œŽæ“¾*/
 		int NumberGraph[10];
-		LoadDivGraph("materials\\Image\\Text\\ConfigNumber.png", 10, 10, 1,
+		LoadDivGraph(filepath.GetTextPath("ConfigNumber.png"), 10, 10, 1,
 			15, 30, NumberGraph);
 		Graph num[10];
 		for (int i = 0; i < 10; i++) {

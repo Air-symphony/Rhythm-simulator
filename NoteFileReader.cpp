@@ -1,3 +1,4 @@
+#include "FilePath.cpp"
 #include "HitEffect.cpp"
 #include "Note.cpp"
 
@@ -37,16 +38,14 @@ public:
 /*楽曲データリスト
 idに対応する.txtを読み込み、譜面や楽曲データを返却する
 Music music;
-char filepath[256] = "materials\\";
 int FileHandle;
+int fileSize;
 char *next;
 char *ctx;//内部利用
 */
 class NoteFileReader {
-	bool debugMode = false;
 private:
 	Music music;
-	char filepath[20] = "materials\\";
 	int FileHandle = 0;
 	int fileSize = 0;
 	char *next;
@@ -56,14 +55,11 @@ public:
 
 	}
 	/*NoteFileの読み込み、Noteの準備*/
-	Music SelectReadFile(char filename[], bool _debugMode) {
-		debugMode = _debugMode;
+	Music SelectReadFile(char filename[], bool debug) {
 		try {
 			char _filepath[256];
-			strcpy_s(_filepath, filepath);
-			strcat_s(_filepath, "NoteFile\\");
-			strcat_s(_filepath, filename);
-			strcat_s(_filepath, ".txt");
+			strcpy_s(_filepath, filepath.GetNoteFilePath(filename));
+			strcat_s(_filepath, ".txt");//notefileの拡張子
 			fileSize = (int)FileRead_size(_filepath);
 			FileHandle = FileRead_open(_filepath);
 			if (FileHandle == 0) {
@@ -75,7 +71,7 @@ public:
 			else {
 				DrawLoading();
 				SetConfig();
-				SetNote();
+				SetNote(debug);
 			}
 		}
 		catch (char* text) {
@@ -109,9 +105,7 @@ public:
 				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(background_name, 256, "%s", next);
 				char _filepath[256];
-				strcpy_s(_filepath, filepath);
-				strcat_s(_filepath, "Image\\background\\");
-				strcat_s(_filepath, background_name);
+				strcpy_s(_filepath, filepath.GetbackgroundPath(background_name));
 				music.backgroundHandle = LoadGraph(_filepath);
 				if (music.backgroundHandle == -1) {
 					error = true;
@@ -124,9 +118,7 @@ public:
 				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(sound_name, 256, "%s", next);
 				char _filepath[256];
-				strcpy_s(_filepath, filepath);
-				strcat_s(_filepath, "Music\\");
-				strcat_s(_filepath, sound_name);
+				strcpy_s(_filepath, filepath.GetMusicPath(sound_name));
 				music.soundHandle = LoadSoundMem(_filepath);
 				if (music.soundHandle == -1) {
 					error = true;
@@ -175,7 +167,7 @@ public:
 		}
 	}
 
-	void SetNote() {
+	void SetNote(bool debug = false) {
 		const int SIZE = 64;
 		int noteID = 0;//ノーツに番号を割り振る
 		/*デバッグ用*/
@@ -390,7 +382,7 @@ public:
 		}
 
 		/*デバッグ用*/
-		if (debugMode){
+		if (debug){
 			int t = 0, mass = 15, fontsize = 20;
 			SetFontSize(fontsize);
 			while (ProcessMessage() == 0

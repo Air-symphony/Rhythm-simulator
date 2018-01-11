@@ -1,16 +1,13 @@
+#include "FilePath.cpp"
 #include "Dxlib.h"
 
 class FileReader {
 private: 
 	int FileHandle = 0;
-	char FileListpath[32] = "materials\\NoteFile\\FileList.txt";
 	int ConfigFileHandle = 0;
-	char Configpath[21] = "materials\\Config.dll";
 	char *next;
 	char *ctx;//“à•”—˜—p
 public:
-	char imagepath[23] = "materials\\Image\\Label\\";
-
 	char AutoMode[9] = "AutoMode";
 	char DebugMode[10] = "DebugMode";
 	char SPEED[6] = "SPEED";
@@ -31,10 +28,10 @@ public:
 	int fileCount = 0;
 
 	void ReadFileList() {
-		FileHandle = FileRead_open(FileListpath);
+		FileHandle = FileRead_open(filepath.GetFileList());
 		if (FileHandle == 0) {
 			char error[256];
-			strcpy_s(error, FileListpath);
+			strcpy_s(error, filepath.GetFileList());
 			strcat_s(error, " is not found.");
 			throw error;
 		}
@@ -73,10 +70,11 @@ public:
 
 	void ReadConfig() {
 		try {
-			ConfigFileHandle = FileRead_open(Configpath);
+			//ConfigFileHandle = FileRead_open(Configpath);
+			ConfigFileHandle = FileRead_open(filepath.GetConfigFile());
 			if (ConfigFileHandle == 0) {
 				char error[256];
-				strcpy_s(error, Configpath);
+				strcpy_s(error, filepath.GetConfigFile());
 				strcat_s(error, " is not found.");
 				throw error;
 			}
@@ -128,7 +126,7 @@ public:
 
 	bool UpdateConfig() {
 		FILE *fp;
-		int err_no = fopen_s(&fp, Configpath, "w");
+		int err_no = fopen_s(&fp, filepath.GetConfigFile(), "w");
 		if (err_no != 0) return false;
 
 		ClearDrawScreen();

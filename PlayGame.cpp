@@ -96,21 +96,21 @@ public:
 		clsDx(); 
 		display = _display;
 		MyStr.SetMainFontSize(16);
-		ring.setGraph(LoadGraph("materials\\Image\\ring.png"));
+		ring.setGraph(LoadGraph(filepath.GetImagePath("ring.png")));
 		ring.setDisplay(display);
-		Line.setGraph(LoadGraph("materials\\Image\\note_cat.png"));
+		Line.setGraph(LoadGraph(filepath.GetImagePath("note_cat.png")));
 		Line.setDisplay(display);
 
 		int NoteGraph[4];
-		LoadDivGraph("materials\\Image\\RythemNote.png", 4, 2, 2,
+		LoadDivGraph(filepath.GetImagePath("RythemNote.png"), 4, 2, 2,
 			72, 73, NoteGraph);
 		for (int i = 0; i < 4; i++) {
 			noteGraph[i].setGraph(NoteGraph[i]);
 			noteGraph[i].setDisplay(display);
 		}
-		SE[0] = LoadSoundMem("materials\\SE\\PERFECT SE.ogg");
-		SE[1] = LoadSoundMem("materials\\SE\\FlickSE.ogg");
-		ButtonSE = LoadSoundMem("materials\\SE\\Decision.ogg");
+		SE[0] = LoadSoundMem(filepath.GetSEPath("PERFECT SE.ogg"));
+		SE[1] = LoadSoundMem(filepath.GetSEPath("FlickSE.ogg"));
+		ButtonSE = LoadSoundMem(filepath.GetSEPath("Decision.ogg"));
 		ChangeVolumeSoundMem((int)(255 * 0.5), SE[0]);
 		ChangeVolumeSoundMem((int)(255 * 0.5), SE[1]);
 		
@@ -128,7 +128,7 @@ public:
 		music.SetPos(ScreenSideSize, judgePos_x, StartY);
 		background.setGraph(music.backgroundHandle);
 		background.setDisplay(display);
-		effect.SetGraph(LoadGraph("materials\\Image\\hit_circle.png"));
+		effect.SetGraph(LoadGraph(filepath.GetImagePath("hit_circle.png")));
 		effect.SetPos(ScreenSideSize, judgePos_x, judgePos_y);
 		msec = 0;
 		Start();
@@ -137,16 +137,16 @@ public:
 private:
 	/*UI‚ÌˆÊ’uŠÖŒW*/
 	void Layout() {
-		StopButton.SetUI(LoadGraph("materials\\Image\\ui\\StopButton.png"),
+		StopButton.SetUI(LoadGraph(filepath.GetUIPath("StopButton.png")),
 			display.GetScreenX() - 10, 20, 3);
 		StopButton.setDisplay(display);
 		StopButton.SetCorrection(10);
 		StopButton.SetSE(ButtonSE);
-		PauseWindow.SetUI(LoadGraph("materials\\Image\\ui\\StopWindow.png"),
+		PauseWindow.SetUI(LoadGraph(filepath.GetUIPath("StopWindow.png")),
 			display.GetScreenX() / 2, display.GetScreenY() / 2, 5);
 		PauseWindow.setDisplay(display);
 		int ButtonGraph[3];
-		LoadDivGraph("materials\\Image\\ui\\Buttons.png", 3, 1, 3,
+		LoadDivGraph(filepath.GetUIPath("Buttons.png"), 3, 1, 3,
 			124, 50, ButtonGraph);
 
 		Continue.SetUI(ButtonGraph[2], ButtonGraph[0],
