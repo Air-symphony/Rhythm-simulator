@@ -333,36 +333,6 @@ private:
 						double dt = (msec + speed) - music.notes[index].gettime();
 						music.notes[index].ToMove(judgePos_x, judgePos_y, speed, dt, ScreenSideSize, StartY);
 						
-						//変化する前に連結先につなげるため、ずれている
-						//ロングノーツ連結がある場合
-						if (music.notes[index].getlongNoteID() > 0) {
-							/*画面上にいる場合*/
-							if (music.notes[index].getflag() >= 0 && music.notes[index].getType() == 4) {
-								Line.Draw_LongLine(music.notes[index].getX(), music.notes[index].getY(),
-									music.notes[music.notes[index].getlongNoteID()].getX(),
-									music.notes[music.notes[index].getlongNoteID()].getY(),
-									speed, dt);
-							}
-						}
-						//フリックの連結がある場合
-						if (music.notes[index].getlinkNoteID() > 0) {
-							Line.Draw_FlickLine(music.notes[index].getX(), music.notes[index].getY(),
-								music.notes[music.notes[index].getlinkNoteID()].getX(),
-								music.notes[music.notes[index].getlinkNoteID()].getY(),
-								speed, dt);
-						}
-						//同時押しがある場合
-						if (music.notes[index].getsideNoteID() > 0) {
-							//相方も表示中の場合かつ、相方のidの方が小さい場合(動き終わった状態)
-							if (music.notes[music.notes[index].getsideNoteID()].getflag() == 1 &&
-								index > music.notes[index].getsideNoteID()
-								) {
-								Line.Draw_LinkLine(music.notes[index].getX(), music.notes[index].getY(),
-									music.notes[music.notes[index].getsideNoteID()].getX(),
-									music.notes[music.notes[index].getsideNoteID()].getY(),
-									speed, dt);
-							}
-						}
 						/*判定内容*/
 						if (autoMode) AutoMode(index);
 						else Playable(index);
@@ -410,6 +380,47 @@ private:
 			for (int index = endIndex; index >= startIndex; index--) {
 				if (music.notes[index].getflag() == 1) {
 					double dt = (msec + speed) - music.notes[index].gettime();
+					//変化する前に連結先につなげるため、ずれている
+					//ロングノーツ連結がある場合
+					if (music.notes[index].getlongNoteID() > 0) {
+						/*画面上にいる場合*/
+						if (music.notes[index].getflag() >= 0 && music.notes[index].getType() == 4) {
+							int longID = music.notes[index].getlongNoteID();
+							Line.Draw_LongLine(music.notes[index].getX(), music.notes[index].getY(),
+								music.notes[longID].getX(), music.notes[longID].getY(),
+								speed, dt);
+							double longdt = (msec + speed) - music.notes[longID].gettime();
+							//ロングノーツ
+							if (music.notes[longID].getlongNoteID() > 0 && music.notes[longID].getType() == 2) {
+								noteGraph[3].DrawNote(music.notes[longID].getX(), music.notes[longID].getY(), speed, longdt);
+							}
+							//それ以外
+							else {
+								noteGraph[music.notes[longID].getType() - 1].DrawNote(music.notes[longID].getX(), music.notes[longID].getY(), speed, longdt);
+							}
+						}
+					}
+					//フリックの連結がある場合
+					if (music.notes[index].getlinkNoteID() > 0) {
+						int flicID = music.notes[index].getlinkNoteID();
+						Line.Draw_FlickLine(music.notes[index].getX(), music.notes[index].getY(),
+							music.notes[flicID].getX(), music.notes[flicID].getY(),
+							speed, dt);
+						double flicdt = (msec + speed) - music.notes[flicID].gettime();
+						noteGraph[music.notes[flicID].getType() - 1].DrawNote(music.notes[flicID].getX(), music.notes[flicID].getY(), speed, flicdt);
+					}
+					//同時押しがある場合
+					if (music.notes[index].getsideNoteID() > 0) {
+						//相方も表示中の場合かつ、相方のidの方が小さい場合(動き終わった状態)
+						if (music.notes[music.notes[index].getsideNoteID()].getflag() == 1 &&
+							index > music.notes[index].getsideNoteID()
+							) {
+							Line.Draw_LinkLine(music.notes[index].getX(), music.notes[index].getY(),
+								music.notes[music.notes[index].getsideNoteID()].getX(),
+								music.notes[music.notes[index].getsideNoteID()].getY(),
+								speed, dt);
+						}
+					}
 					//ロングノーツ
 					if (music.notes[index].getlongNoteID() > 0 && music.notes[index].getType() == 2) {
 						noteGraph[3].DrawNote(music.notes[index].getX(), music.notes[index].getY(), speed, dt);

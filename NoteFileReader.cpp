@@ -104,12 +104,10 @@ public:
 				char background_name[256];
 				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(background_name, 256, "%s", next);
-				char _filepath[256];
-				strcpy_s(_filepath, filepath.GetbackgroundPath(background_name));
-				music.backgroundHandle = LoadGraph(_filepath);
+				music.backgroundHandle = LoadGraph(filepath.GetbackgroundPath(background_name));
 				if (music.backgroundHandle == -1) {
 					error = true;
-					strcat_s(errorMessage, _filepath);
+					strcat_s(errorMessage, filepath.GetbackgroundPath(background_name));
 					strcat_s(errorMessage, " can not find.\n");
 				}
 			}
@@ -117,12 +115,9 @@ public:
 				char sound_name[256];
 				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(sound_name, 256, "%s", next);
-				char _filepath[256];
-				strcpy_s(_filepath, filepath.GetMusicPath(sound_name));
-				music.soundHandle = LoadSoundMem(_filepath);
 				if (music.soundHandle == -1) {
 					error = true;
-					strcat_s(errorMessage, _filepath);
+					strcat_s(errorMessage, filepath.GetMusicPath(sound_name));
 					strcat_s(errorMessage, " can not find.\n");
 				}
 			}
