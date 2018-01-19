@@ -115,6 +115,7 @@ public:
 				char sound_name[256];
 				next = strtok_s(NULL, "", &ctx);
 				sprintf_s(sound_name, 256, "%s", next);
+				music.soundHandle = LoadSoundMem(filepath.GetMusicPath(sound_name));
 				if (music.soundHandle == -1) {
 					error = true;
 					strcat_s(errorMessage, filepath.GetMusicPath(sound_name));
